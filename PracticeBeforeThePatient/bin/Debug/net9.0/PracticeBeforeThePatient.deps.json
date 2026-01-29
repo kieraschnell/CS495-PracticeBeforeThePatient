@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "PracticeBeforeThePatient/1.0.0": {
+        "runtime": {
+          "PracticeBeforeThePatient.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "PracticeBeforeThePatient/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
