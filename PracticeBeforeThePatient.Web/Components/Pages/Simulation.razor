@@ -1,19 +1,207 @@
-@page "/simulation"
+﻿@page "/simulation"
 @rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Clinical Simulation</PageTitle>
 
-<h1>Counter</h1>
+<div class="simulation-container">
+    
+    <div class="simulation-header">
+        <div class="scenario-badge">Active Scenario</div>
+        <h2 class="scenario-title">Knee Pain After Landing</h2>
+        <p class="scenario-brief">Athlete reports knee pain following a jump landing during volleyball practice</p>
+    </div>
 
-<p role="status">Current count: @currentCount</p>
+    <div class="simulation-content">
+        
+        <!-- Left Panel - Patient Info & Actions -->
+        <div class="simulation-sidebar">
+            <div class="patient-card">
+                <h3>Patient Information</h3>
+                <div class="patient-details">
+                    <div class="detail-row">
+                        <span class="label">Age:</span>
+                        <span class="value">19</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Sport:</span>
+                        <span class="value">Volleyball</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Position:</span>
+                        <span class="value">Outside Hitter</span>
+                    </div>
+                </div>
+            </div>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+            <div class="actions-card">
+                <h3>Physical Exam Actions</h3>
+                <div class="action-buttons">
+                    <button class="action-btn" @onclick='() => PerformAction("Lachman Test")'>
+                        <span class="action-icon">🦴</span>
+                        <span>Lachman Test</span>
+                    </button>
+                    <button class="action-btn" @onclick='() => PerformAction("McMurray Test")'>
+                        <span class="action-icon">🔍</span>
+                        <span>McMurray Test</span>
+                    </button>
+                    <button class="action-btn" @onclick='() => PerformAction("Palpation")'>
+                        <span class="action-icon">👆</span>
+                        <span>Palpation</span>
+                    </button>
+                    <button class="action-btn" @onclick='() => PerformAction("Range of Motion")'>
+                        <span class="action-icon">↔️</span>
+                        <span>Range of Motion</span>
+                    </button>
+                    <button class="action-btn" @onclick='() => PerformAction("Valgus/Varus Stress")'>
+                        <span class="action-icon">⚡</span>
+                        <span>Valgus/Varus</span>
+                    </button>
+                    <button class="action-btn" @onclick='() => PerformAction("Drawer Test")'>
+                        <span class="action-icon">🔬</span>
+                        <span>Drawer Test</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="progress-card">
+                <h3>Progress</h3>
+                <div class="progress-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Questions Asked</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">Exams Performed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Chat Interface -->
+        <div class="simulation-main">
+            <div class="chat-container">
+                <div class="chat-messages" @ref="chatMessagesRef">
+                    
+                    <!-- Initial Patient Message -->
+                    <div class="message patient-message">
+                        <div class="message-avatar">👤</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">Patient</span>
+                                <span class="message-time">10:23 AM</span>
+                            </div>
+                            <div class="message-text">
+                                Hi, I'm here because my knee has been hurting since yesterday. I landed funny during practice.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Example Student Question -->
+                    <div class="message student-message">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">You</span>
+                                <span class="message-time">10:24 AM</span>
+                            </div>
+                            <div class="message-text">
+                                Can you describe exactly how the injury happened?
+                            </div>
+                        </div>
+                        <div class="message-avatar">🎓</div>
+                    </div>
+
+                    <!-- Example Patient Response -->
+                    <div class="message patient-message">
+                        <div class="message-avatar">👤</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">Patient</span>
+                                <span class="message-time">10:24 AM</span>
+                            </div>
+                            <div class="message-text">
+                                I was going up for a spike and when I came down, my knee twisted inward. I heard a pop sound.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Example Feedback -->
+                    <div class="message feedback-message">
+                        <div class="message-avatar">💡</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">Feedback</span>
+                                <span class="message-time">10:25 AM</span>
+                            </div>
+                            <div class="message-text">
+                                <strong>Good question!</strong> You're gathering important mechanism of injury details. The "pop" and twisting motion are key clinical indicators.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Example Action Result -->
+                    <div class="message action-message">
+                        <div class="message-avatar">🔬</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">Exam Result</span>
+                                <span class="message-time">10:26 AM</span>
+                            </div>
+                            <div class="message-text">
+                                <strong>Lachman Test:</strong> Positive with increased anterior tibial translation and soft endpoint. Suggests ACL injury.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="chat-input-area">
+                    <div class="input-wrapper">
+                        <textarea 
+                            @bind="messageInput" 
+                            @bind:event="oninput"
+                            @onkeydown="HandleKeyDown"
+                            placeholder="Ask a question about history, symptoms, or request additional information..."
+                            rows="3"></textarea>
+                        <button class="send-button" @onclick="SendMessage" disabled="@string.IsNullOrWhiteSpace(messageInput)">
+                            <span class="send-icon">📤</span>
+                            Send
+                        </button>
+                    </div>
+                    <div class="input-hints">
+                        <span class="hint">💡 Try asking about: mechanism, pain level, swelling, prior injuries, or current symptoms</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 
 @code {
-    private int currentCount = 0;
+    private ElementReference chatMessagesRef;
+    private string messageInput = "";
 
-    private void IncrementCount()
+    private void SendMessage()
     {
-        currentCount++;
+        if (!string.IsNullOrWhiteSpace(messageInput))
+        {
+            // TODO: Process message with simulation service
+            messageInput = "";
+        }
+    }
+
+    private void PerformAction(string actionName)
+    {
+        // TODO: Process exam action with simulation service
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await Task.Delay(1); // Allow binding to update
+            SendMessage();
+        }
     }
 }
