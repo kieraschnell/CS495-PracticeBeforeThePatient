@@ -3,205 +3,116 @@
 
 <PageTitle>Clinical Simulation</PageTitle>
 
-<div class="simulation-container">
-    
-    <div class="simulation-header">
-        <div class="scenario-badge">Active Scenario</div>
-        <h2 class="scenario-title">Knee Pain After Landing</h2>
-        <p class="scenario-brief">Athlete reports knee pain following a jump landing during volleyball practice</p>
+<div class="simShell">
+
+    <div class="simHeader">
+        <div class="simBadge">Active Scenario</div>
+        <div class="simTitle">@CaseTitle</div>
+        <div class="simSubtitle">@CaseSubtitle</div>
     </div>
 
-    <div class="simulation-content">
-        
-        <!-- Left Panel - Patient Info & Actions -->
-        <div class="simulation-sidebar">
-            <div class="patient-card">
-                <h3>Patient Information</h3>
-                <div class="patient-details">
-                    <div class="detail-row">
-                        <span class="label">Age:</span>
-                        <span class="value">19</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Sport:</span>
-                        <span class="value">Volleyball</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Position:</span>
-                        <span class="value">Outside Hitter</span>
-                    </div>
-                </div>
-            </div>
+    <div class="simGridSingle">
 
-            <div class="actions-card">
-                <h3>Physical Exam Actions</h3>
-                <div class="action-buttons">
-                    <button class="action-btn" @onclick='() => PerformAction("Lachman Test")'>
-                        <span class="action-icon">🦴</span>
-                        <span>Lachman Test</span>
-                    </button>
-                    <button class="action-btn" @onclick='() => PerformAction("McMurray Test")'>
-                        <span class="action-icon">🔍</span>
-                        <span>McMurray Test</span>
-                    </button>
-                    <button class="action-btn" @onclick='() => PerformAction("Palpation")'>
-                        <span class="action-icon">👆</span>
-                        <span>Palpation</span>
-                    </button>
-                    <button class="action-btn" @onclick='() => PerformAction("Range of Motion")'>
-                        <span class="action-icon">↔️</span>
-                        <span>Range of Motion</span>
-                    </button>
-                    <button class="action-btn" @onclick='() => PerformAction("Valgus/Varus Stress")'>
-                        <span class="action-icon">⚡</span>
-                        <span>Valgus/Varus</span>
-                    </button>
-                    <button class="action-btn" @onclick='() => PerformAction("Drawer Test")'>
-                        <span class="action-icon">🔬</span>
-                        <span>Drawer Test</span>
-                    </button>
-                </div>
-            </div>
+        <div class="card">
 
-            <div class="progress-card">
-                <h3>Progress</h3>
-                <div class="progress-stats">
-                    <div class="stat-item">
-                        <div class="stat-number">3</div>
-                        <div class="stat-label">Questions Asked</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">1</div>
-                        <div class="stat-label">Exams Performed</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <div class="sectionTitle">Patient</div>
 
-        <!-- Right Panel - Chat Interface -->
-        <div class="simulation-main">
-            <div class="chat-container">
-                <div class="chat-messages" @ref="chatMessagesRef">
-                    
-                    <!-- Initial Patient Message -->
-                    <div class="message patient-message">
-                        <div class="message-avatar">👤</div>
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-sender">Patient</span>
-                                <span class="message-time">10:23 AM</span>
-                            </div>
-                            <div class="message-text">
-                                Hi, I'm here because my knee has been hurting since yesterday. I landed funny during practice.
-                            </div>
-                        </div>
-                    </div>
+            @foreach (var line in CurrentNarration)
+            {
+                <div class="narrLine">@line</div>
+            }
 
-                    <!-- Example Student Question -->
-                    <div class="message student-message">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-sender">You</span>
-                                <span class="message-time">10:24 AM</span>
-                            </div>
-                            <div class="message-text">
-                                Can you describe exactly how the injury happened?
-                            </div>
-                        </div>
-                        <div class="message-avatar">🎓</div>
-                    </div>
+            <div class="divider"></div>
 
-                    <!-- Example Patient Response -->
-                    <div class="message patient-message">
-                        <div class="message-avatar">👤</div>
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-sender">Patient</span>
-                                <span class="message-time">10:24 AM</span>
-                            </div>
-                            <div class="message-text">
-                                I was going up for a spike and when I came down, my knee twisted inward. I heard a pop sound.
-                            </div>
-                        </div>
-                    </div>
+            @if (!IsComplete)
+            {
+                <div class="sectionTitle">@CurrentDecision.Title</div>
+                <div class="prompt">@CurrentDecision.Prompt</div>
 
-                    <!-- Example Feedback -->
-                    <div class="message feedback-message">
-                        <div class="message-avatar">💡</div>
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-sender">Feedback</span>
-                                <span class="message-time">10:25 AM</span>
-                            </div>
-                            <div class="message-text">
-                                <strong>Good question!</strong> You're gathering important mechanism of injury details. The "pop" and twisting motion are key clinical indicators.
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Example Action Result -->
-                    <div class="message action-message">
-                        <div class="message-avatar">🔬</div>
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-sender">Exam Result</span>
-                                <span class="message-time">10:26 AM</span>
-                            </div>
-                            <div class="message-text">
-                                <strong>Lachman Test:</strong> Positive with increased anterior tibial translation and soft endpoint. Suggests ACL injury.
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="chat-input-area">
-                    <div class="input-wrapper">
-                        <textarea 
-                            @bind="messageInput" 
-                            @bind:event="oninput"
-                            @onkeydown="HandleKeyDown"
-                            placeholder="Ask a question about history, symptoms, or request additional information..."
-                            rows="3"></textarea>
-                        <button class="send-button" @onclick="SendMessage" disabled="@string.IsNullOrWhiteSpace(messageInput)">
-                            <span class="send-icon">📤</span>
-                            Send
+                <div class="options">
+                    @foreach (var opt in CurrentDecision.Options)
+                    {
+                        <button class="optionCard @(SelectedOptionId == opt.Id ? "selected" : "")"
+                                @onclick="() => SelectOption(opt.Id)"
+                                disabled="@HasSubmittedThisStep">
+                            <div class="optionKey">@opt.Key</div>
+                            <div class="optionText">@opt.Text</div>
                         </button>
-                    </div>
-                    <div class="input-hints">
-                        <span class="hint">💡 Try asking about: mechanism, pain level, swelling, prior injuries, or current symptoms</span>
-                    </div>
+                    }
                 </div>
-            </div>
+
+                <div class="reasoning">
+                    <div class="reasoningLabel">Why are you choosing this next step</div>
+                    <textarea rows="4"
+                              @bind="ReasoningText"
+                              @bind:event="oninput"
+                              placeholder="Explain what you are concerned about and what you expect to learn or change.">
+                    </textarea>
+                </div>
+
+                <div class="actions">
+                    <button class="primaryBtn"
+                            @onclick="SubmitStep"
+                            disabled="@(!CanSubmit)">
+                        Submit
+                    </button>
+
+                    <button class="secondaryBtn"
+                            @onclick="Continue"
+                            disabled="@(!CanContinue)">
+                        Continue
+                    </button>
+                </div>
+
+                @if (HasSubmittedThisStep)
+                {
+                    <div class="softFeedback">
+                        <div class="softTitle">Patient response</div>
+                        <div class="softText">@LastResponseText</div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="sectionTitle">Visit Summary</div>
+
+                <div class="summaryBlock">
+                    <div class="summaryLabel">What happened</div>
+                    <div class="summaryText">@EndSummary</div>
+                </div>
+
+                <div class="summaryBlock">
+                    <div class="summaryLabel">Comparison</div>
+
+                    @foreach (var row in ComparisonRows)
+                    {
+                        <div class="compareCard">
+                            <div class="compareTitle">@row.StepTitle</div>
+
+                            <div class="compareGrid">
+                                <div class="compareCol">
+                                    <div class="compareLabel">What you did</div>
+                                    <div class="compareText">@row.StudentChoice</div>
+                                    <div class="compareSmall">@row.StudentReasoning</div>
+                                </div>
+
+                                <div class="compareCol">
+                                    <div class="compareLabel">What you should have done</div>
+                                    <div class="compareText">@row.OptimalChoice</div>
+                                    <div class="compareSmall">@row.WhyOptimal</div>
+                                </div>
+                            </div>
+
+                            <div class="compareFooter">
+                                <div class="compareLabel">In this case</div>
+                                <div class="compareText">@row.CaseConsequence</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
         </div>
 
     </div>
 </div>
-
-@code {
-    private ElementReference chatMessagesRef;
-    private string messageInput = "";
-
-    private void SendMessage()
-    {
-        if (!string.IsNullOrWhiteSpace(messageInput))
-        {
-            // TODO: Process message with simulation service
-            messageInput = "";
-        }
-    }
-
-    private void PerformAction(string actionName)
-    {
-        // TODO: Process exam action with simulation service
-    }
-
-    private async Task HandleKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter" && !e.ShiftKey)
-        {
-            await Task.Delay(1); // Allow binding to update
-            SendMessage();
-        }
-    }
-}
