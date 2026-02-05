@@ -1,5 +1,6 @@
 ﻿@page "/simulation"
 @rendermode InteractiveServer
+@using System.Text.Json
 
 <PageTitle>Clinical Simulation</PageTitle>
 
@@ -7,112 +8,30 @@
 
     <div class="simHeader">
         <div class="simBadge">Active Scenario</div>
-        <div class="simTitle">@CaseTitle</div>
-        <div class="simSubtitle">@CaseSubtitle</div>
+        <div class="simTitle">Scenario JSON Display</div>
     </div>
 
     <div class="simGridSingle">
-
         <div class="card">
-
-            <div class="sectionTitle">Patient</div>
-
-            @foreach (var line in CurrentNarration)
+            @if (_isLoading)
             {
-                <div class="narrLine">@line</div>
+                <div class="sectionTitle">Loading...</div>
             }
-
-            <div class="divider"></div>
-
-            @if (!IsComplete)
+            else if (_errorMessage != null)
             {
-                <div class="sectionTitle">@CurrentDecision.Title</div>
-                <div class="prompt">@CurrentDecision.Prompt</div>
-
-                <div class="options">
-                    @foreach (var opt in CurrentDecision.Options)
-                    {
-                        <button class="optionCard @(SelectedOptionId == opt.Id ? "selected" : "")"
-                                @onclick="() => SelectOption(opt.Id)"
-                                disabled="@HasSubmittedThisStep">
-                            <div class="optionKey">@opt.Key</div>
-                            <div class="optionText">@opt.Text</div>
-                        </button>
-                    }
-                </div>
-
-                <div class="reasoning">
-                    <div class="reasoningLabel">Why are you choosing this next step</div>
-                    <textarea rows="4"
-                              @bind="ReasoningText"
-                              @bind:event="oninput"
-                              placeholder="Explain what you are concerned about and what you expect to learn or change.">
-                    </textarea>
-                </div>
-
-                <div class="actions">
-                    <button class="primaryBtn"
-                            @onclick="SubmitStep"
-                            disabled="@(!CanSubmit)">
-                        Submit
-                    </button>
-
-                    <button class="secondaryBtn"
-                            @onclick="Continue"
-                            disabled="@(!CanContinue)">
-                        Continue
-                    </button>
-                </div>
-
-                @if (HasSubmittedThisStep)
-                {
-                    <div class="softFeedback">
-                        <div class="softTitle">Patient response</div>
-                        <div class="softText">@LastResponseText</div>
-                    </div>
-                }
+                <div class="sectionTitle">Error</div>
+                <div style="color: red; white-space: pre-wrap;">@_errorMessage</div>
+            }
+            else if (_scenario != null)
+            {
+                <div class="sectionTitle">Scenario JSON</div>
+                <pre style="background: #f5f5f5; padding: 20px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;">@JsonSerializer.Serialize(_scenario, new JsonSerializerOptions { WriteIndented = true })</pre>
             }
             else
             {
-                <div class="sectionTitle">Visit Summary</div>
-
-                <div class="summaryBlock">
-                    <div class="summaryLabel">What happened</div>
-                    <div class="summaryText">@EndSummary</div>
-                </div>
-
-                <div class="summaryBlock">
-                    <div class="summaryLabel">Comparison</div>
-
-                    @foreach (var row in ComparisonRows)
-                    {
-                        <div class="compareCard">
-                            <div class="compareTitle">@row.StepTitle</div>
-
-                            <div class="compareGrid">
-                                <div class="compareCol">
-                                    <div class="compareLabel">What you did</div>
-                                    <div class="compareText">@row.StudentChoice</div>
-                                    <div class="compareSmall">@row.StudentReasoning</div>
-                                </div>
-
-                                <div class="compareCol">
-                                    <div class="compareLabel">What you should have done</div>
-                                    <div class="compareText">@row.OptimalChoice</div>
-                                    <div class="compareSmall">@row.WhyOptimal</div>
-                                </div>
-                            </div>
-
-                            <div class="compareFooter">
-                                <div class="compareLabel">In this case</div>
-                                <div class="compareText">@row.CaseConsequence</div>
-                            </div>
-                        </div>
-                    }
-                </div>
+                <div class="sectionTitle">No Data</div>
+                <div>No scenario data available.</div>
             }
-
         </div>
-
     </div>
 </div>

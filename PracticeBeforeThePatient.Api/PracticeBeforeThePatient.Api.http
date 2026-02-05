@@ -1,0 +1,6 @@
+@PracticeBeforeThePatient.Api_HostAddress = http://localhost:5186
+
+GET {{PracticeBeforeThePatient.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
