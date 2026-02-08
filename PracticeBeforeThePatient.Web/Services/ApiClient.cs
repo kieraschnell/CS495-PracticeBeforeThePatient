@@ -12,7 +12,7 @@ public class ApiClient
         _httpClient = httpClient;
     }
 
-    public async Task<Scenario?> GetScenarioAsync(string scenarioId)
+    public async Task<Scenario?> GetScenarioAsync(int scenarioId)
     {
         try
         {
