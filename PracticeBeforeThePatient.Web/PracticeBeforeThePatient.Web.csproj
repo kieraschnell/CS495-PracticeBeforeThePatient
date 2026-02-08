@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PracticeBeforeThePatient.Core\PracticeBeforeThePatient.Core.csproj" />
   </ItemGroup>
 
