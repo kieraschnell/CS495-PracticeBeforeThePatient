@@ -16,7 +16,7 @@ public partial class Simulation : ComponentBase
     {
         try
         {
-            _scenario = await ApiClient.GetScenarioAsync(1);
+            _scenario = await ApiClient.GetScenarioAsync("testScenario");
 
             if (_scenario == null)
             {

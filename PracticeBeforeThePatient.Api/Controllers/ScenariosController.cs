@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PracticeBeforeThePatient.Api.Data;
 using PracticeBeforeThePatient.Core.Models;
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace PracticeBeforeThePatient.Api.Controllers;
 
@@ -9,28 +8,30 @@ namespace PracticeBeforeThePatient.Api.Controllers;
 [Route("api/[controller]")]
 public class ScenariosController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly string _dataPath;
 
-    public ScenariosController(ApplicationDbContext context)
+    public ScenariosController(IWebHostEnvironment env)
     {
-        _context = context;
+        _dataPath = Path.Combine(env.ContentRootPath, "Data", "scenarios");
     }
 
     [HttpGet("{scenarioId}")]
-    public async Task<ActionResult<Scenario>> GetScenario(int scenarioId)
+    public async Task<ActionResult<Scenario>> GetScenario(string scenarioId)
     {
         try
         {
-            var scenario = await _context.Scenarios
-                .Include(s => s.Root)
-                    .ThenInclude(n => n.Choices)
-                        .ThenInclude(c => c.Next)
-                .FirstOrDefaultAsync(s => s.Id == scenarioId);
+            var filePath = Path.Combine(_dataPath, $"{scenarioId}.json");
 
-            if (scenario == null)
+            if (!System.IO.File.Exists(filePath))
             {
                 return NotFound($"Scenario '{scenarioId}' not found.");
             }
+
+            var json = await System.IO.File.ReadAllTextAsync(filePath);
+            var scenario = JsonSerializer.Deserialize<Scenario>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
             return Ok(scenario);
         }
@@ -41,31 +42,24 @@ public class ScenariosController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Scenario>>> GetAvailableScenarios()
+    public ActionResult<List<string>> GetAvailableScenarios()
     {
         try
         {
-            var scenarios = await _context.Scenarios.ToListAsync();
+            if (!Directory.Exists(_dataPath))
+            {
+                return Ok(new List<string>());
+            }
+
+            var scenarios = Directory.GetFiles(_dataPath, "*.json")
+                .Select(Path.GetFileNameWithoutExtension)
+                .ToList();
+
             return Ok(scenarios);
         }
         catch (Exception ex)
         {
             return StatusCode(500, $"Error retrieving scenarios: {ex.Message}");
-        }
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<Scenario>> CreateScenario(Scenario scenario)
-    {
-        try
-        {
-            _context.Scenarios.Add(scenario);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetScenario), new { scenarioId = scenario.Id }, scenario);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Error creating scenario: {ex.Message}");
         }
     }
 }
