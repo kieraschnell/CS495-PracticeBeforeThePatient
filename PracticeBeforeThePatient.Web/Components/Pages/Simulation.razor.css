@@ -1,199 +1,331 @@
 .simShell {
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 18px;
-  }
-  
-  .simHeader {
-    margin-bottom: 16px;
-  }
-  
-  .simBadge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: rgba(0,0,0,.06);
-    font-weight: 600;
-    font-size: 12px;
-  }
-  
-  .simTitle {
-    font-size: 26px;
-    font-weight: 800;
-    margin-top: 10px;
-  }
-  
-  .simSubtitle {
-    opacity: .7;
-    margin-top: 6px;
-  }
-  
-  .simGridSingle {
-    display: grid;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.simHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.simHeaderText {
+  flex: 1;
+}
+
+.simBadge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.06);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.simTitle {
+  font-size: 26px;
+  font-weight: 800;
+  margin-top: 10px;
+}
+
+.simSubtitle {
+  opacity: .7;
+  margin-top: 6px;
+}
+
+/* Scenario picker */
+
+.scenarioBar {
+  position: relative;
+}
+
+.scenarioPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: rgba(0,0,0,.03);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.scenarioPill:hover {
+  background: rgba(0,0,0,.06);
+}
+
+.scenarioPillLabel {
+  opacity: .6;
+}
+
+.scenarioPillChevron {
+  opacity: .6;
+  font-size: 12px;
+}
+
+.scenarioMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 220px;
+  padding: 10px;
+  background: white;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.12);
+  box-shadow: 0 12px 28px rgba(0,0,0,.12);
+  z-index: 10;
+}
+
+.scenarioSelect {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.12);
+  font-weight: 600;
+}
+
+/* Rest of your existing styles remain unchanged */
+
+
+/* ---------- Header ---------- */
+
+.simHeader {
+  margin-bottom: 10px;
+}
+
+.simBadge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.06);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.simTitle {
+  font-size: 26px;
+  font-weight: 800;
+  margin-top: 10px;
+}
+
+.simSubtitle {
+  opacity: .7;
+  margin-top: 6px;
+}
+
+/* ---------- Layout ---------- */
+
+.simGridSingle {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.06);
+}
+
+/* ---------- Narrative ---------- */
+
+.sectionTitle {
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.narrLine {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+.divider {
+  height: 1px;
+  background: rgba(0,0,0,.08);
+  margin: 16px 0;
+}
+
+/* ---------- Decisions ---------- */
+
+.prompt {
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.options {
+  display: grid;
+  gap: 10px;
+}
+
+.optionCard {
+  text-align: left;
+  border-radius: 16px;
+  padding: 12px;
+  border: 1px solid rgba(0,0,0,.10);
+  cursor: pointer;
+  background: rgba(0,0,0,.02);
+}
+
+.optionCard:hover {
+  background: rgba(0,0,0,.04);
+}
+
+.optionCard.selected {
+  outline: 3px solid rgba(0,0,0,.22);
+}
+
+/* ---------- Reasoning ---------- */
+
+.reasoning {
+  margin-top: 14px;
+}
+
+.reasoningLabel {
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+textarea {
+  width: 100%;
+  border-radius: 14px;
+  padding: 12px;
+  border: 1px solid rgba(0,0,0,.12);
+  resize: vertical;
+}
+
+/* ---------- Actions ---------- */
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: white;
+  font-weight: 700;
+}
+
+.primaryBtn:disabled,
+.secondaryBtn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* ---------- Feedback ---------- */
+
+.softFeedback {
+  margin-top: 14px;
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(0,0,0,.03);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+.softTitle {
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+/* ---------- Summary ---------- */
+
+.summaryBlock {
+  margin-top: 14px;
+}
+
+.summaryLabel {
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.noteLine {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+/* ---------- Comparison ---------- */
+
+.compareCard {
+  margin-top: 14px;
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(0,0,0,.02);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+.compareTitle {
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.compareGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.compareCol {
+  border-radius: 14px;
+  padding: 12px;
+  background: white;
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+.compareLabel {
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.compareText {
+  opacity: .9;
+}
+
+.compareSmall {
+  margin-top: 8px;
+  opacity: .7;
+  font-size: 13px;
+}
+
+.compareFooter {
+  margin-top: 12px;
+  border-radius: 14px;
+  padding: 12px;
+  background: white;
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+.scenarioInlineSelect {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: rgba(0,0,0,.03);
+  font-size: 13px;
+  font-weight: 800;
+  outline: none;
+  cursor: pointer;
+}
+
+.scenarioInlineSelect:focus {
+  box-shadow: 0 0 0 4px rgba(0,0,0,.12);
+  border-color: rgba(0,0,0,.22);
+}
+
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 900px) {
+  .compareGrid {
     grid-template-columns: 1fr;
   }
-  
-  .card {
-    background: white;
-    border-radius: 18px;
-    padding: 18px;
-    box-shadow: 0 10px 24px rgba(0,0,0,.06);
-  }
-  
-  .sectionTitle {
-    font-weight: 900;
-    margin-bottom: 10px;
-  }
-  
-  .narrLine {
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(0,0,0,.06);
-  }
-  
-  .divider {
-    height: 1px;
-    background: rgba(0,0,0,.08);
-    margin: 16px 0;
-  }
-  
-  .prompt {
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-  
-  .options {
-    display: grid;
-    gap: 10px;
-  }
-  
-  .optionCard {
-    text-align: left;
-    border-radius: 16px;
-    padding: 12px;
-    border: 1px solid rgba(0,0,0,.1);
-    cursor: pointer;
-    background: rgba(0,0,0,.02);
-  }
-  
-  .optionCard.selected {
-    outline: 3px solid rgba(0,0,0,.22);
-  }
-  
-  .reasoning {
-    margin-top: 14px;
-  }
-  
-  .reasoningLabel {
-    font-weight: 800;
-    margin-bottom: 8px;
-  }
-  
-  textarea {
-    width: 100%;
-    border-radius: 14px;
-    padding: 12px;
-    border: 1px solid rgba(0,0,0,.12);
-    resize: vertical;
-  }
-  
-  .actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 12px;
-  }
-  
-  .primaryBtn,
-  .secondaryBtn {
-    padding: 10px 14px;
-    border-radius: 999px;
-    border: 1px solid rgba(0,0,0,.12);
-  }
-  
-  .primaryBtn:disabled,
-  .secondaryBtn:disabled {
-    opacity: .5;
-    cursor: not-allowed;
-  }
-  
-  .softFeedback {
-    margin-top: 14px;
-    border-radius: 16px;
-    padding: 12px;
-    background: rgba(0,0,0,.03);
-    border: 1px solid rgba(0,0,0,.06);
-  }
-  
-  .softTitle {
-    font-weight: 900;
-    margin-bottom: 6px;
-  }
-  
-  .summaryBlock {
-    margin-top: 14px;
-  }
-  
-  .summaryLabel {
-    font-weight: 900;
-    margin-bottom: 6px;
-  }
-  
-  .noteLine {
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(0,0,0,.06);
-  }
-  
-  .compareCard {
-    margin-top: 14px;
-    border-radius: 16px;
-    padding: 14px;
-    background: rgba(0,0,0,.02);
-    border: 1px solid rgba(0,0,0,.06);
-  }
-  
-  .compareTitle {
-    font-weight: 900;
-    margin-bottom: 10px;
-  }
-  
-  .compareGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  
-  .compareCol {
-    border-radius: 14px;
-    padding: 12px;
-    background: white;
-    border: 1px solid rgba(0,0,0,.06);
-  }
-  
-  .compareLabel {
-    font-weight: 900;
-    margin-bottom: 6px;
-  }
-  
-  .compareText {
-    opacity: .9;
-  }
-  
-  .compareSmall {
-    margin-top: 8px;
-    opacity: .7;
-    font-size: 13px;
-  }
-  
-  .compareFooter {
-    margin-top: 12px;
-    border-radius: 14px;
-    padding: 12px;
-    background: white;
-    border: 1px solid rgba(0,0,0,.06);
-  }
-  
-  @media (max-width: 900px) {
-    .compareGrid {
-      grid-template-columns: 1fr;
-    }
-  }
-  
+}

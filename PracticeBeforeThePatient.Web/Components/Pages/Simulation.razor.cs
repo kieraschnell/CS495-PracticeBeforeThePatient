@@ -8,93 +8,100 @@ public partial class Simulation : ComponentBase
 {
     [Inject] private ApiClient ApiClient { get; set; } = default!;
 
-    private Scenario? _scenario;
-    private bool _isLoading = true;
-    private string? _errorMessage;
+    protected Scenario? _scenario;
+    protected bool _isLoading = true;
+    protected bool _isLoadingScenario;
+    protected string? _errorMessage;
+
+    protected List<string> AvailableScenarioIds { get; set; } = new();
+    protected string SelectedScenarioId { get; set; } = "";
+
+    protected bool IsScenarioMenuOpen { get; set; }
 
     protected Node? CurrentDecisionNode { get; set; }
 
     protected string SelectedOptionLabel { get; set; } = "";
     protected string ReasoningText { get; set; } = "";
-    protected bool HasSubmittedThisStep { get; set; }
+    protected bool HasSubmittedThisStep;
     protected string LastResponseText { get; set; } = "";
 
     protected List<string> CurrentNarration { get; set; } = new();
+    protected bool IsComplete;
 
-    protected bool IsComplete { get; set; }
-
-    protected string EndSummary { get; set; } =
-        "You completed the encounter. Review how your decisions compared to the recommended sequence.";
+    protected string EndSummary { get; set; } = "";
 
     protected List<ComparisonRow> ComparisonRows { get; set; } = new();
 
     private readonly List<StudentStepRecord> _studentHistory = new();
-
     private Choice? _selectedChoice;
     private Node? _pendingNode;
     private int _decisionCount;
+    private ElementReference _scenarioSelectRef;
+    private bool _openSelectAfterRender;
 
     protected string CurrentStepTitle => $"Step {_decisionCount + 1}";
-
     protected string CurrentPrompt => CurrentDecisionNode?.Prompt ?? "";
-
     protected IReadOnlyList<Choice> CurrentChoices =>
         CurrentDecisionNode?.Choices ?? new List<Choice>();
-
 
     protected bool CanSubmit =>
         !IsComplete &&
         !HasSubmittedThisStep &&
         !string.IsNullOrWhiteSpace(SelectedOptionLabel) &&
-        !string.IsNullOrWhiteSpace(ReasoningText) &&
-        CurrentChoices.Count > 0;
+        !string.IsNullOrWhiteSpace(ReasoningText);
 
-    protected bool CanContinue =>
-        HasSubmittedThisStep && !IsComplete;
+    protected bool CanContinue => HasSubmittedThisStep && !IsComplete;
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        AvailableScenarioIds = await ApiClient.GetAvailableScenariosAsync();
+
+        SelectedScenarioId = AvailableScenarioIds.FirstOrDefault() ?? "";
+        await LoadScenarioAsync(SelectedScenarioId);
+
+        _isLoading = false;
+    }
+
+    protected async Task OnScenarioChanged()
+    {
+        IsScenarioMenuOpen = false;
+        await LoadScenarioAsync(SelectedScenarioId);
+    }
+
+    protected void ToggleScenarioMenu()
+    {
+        IsScenarioMenuOpen = !IsScenarioMenuOpen;
+    }
+
+    private async Task LoadScenarioAsync(string scenarioId)
+    {
+        if (string.IsNullOrWhiteSpace(scenarioId)) return;
+
+        _isLoadingScenario = true;
+
+        _scenario = await ApiClient.GetScenarioAsync(scenarioId);
+
+        ResetScenarioState();
+
+        _isLoadingScenario = false;
+    }
+
+    private void ResetScenarioState()
+    {
+        CurrentNarration.Clear();
+        ComparisonRows.Clear();
+        _studentHistory.Clear();
+
+        _decisionCount = 0;
+        IsComplete = false;
+        HasSubmittedThisStep = false;
+        SelectedOptionLabel = "";
+        ReasoningText = "";
+
+        if (_scenario?.Root != null)
         {
-            _scenario = await ApiClient.GetScenarioAsync("sixStepTest");
-
-            if (_scenario == null)
-            {
-                _errorMessage = "Scenario not found or returned null.";
-                return;
-            }
-
-            if (_scenario.Root == null)
-            {
-                _errorMessage = "Scenario root node was null.";
-                return;
-            }
-
-            CurrentNarration = new List<string>();
             AddNarrationFromNode(_scenario.Root);
-
-            var firstDecision = FindNextDecisionNode(_scenario.Root);
-            if (firstDecision == null)
-            {
-                IsComplete = true;
-                EndSummary = "This scenario has no decision steps.";
-                return;
-            }
-
-            CurrentDecisionNode = firstDecision;
-            IsComplete = false;
-        }
-        catch (HttpRequestException httpEx)
-        {
-            _errorMessage = $"HTTP Error: {httpEx.Message}\n\nMake sure the API is running on the correct port.";
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Error loading scenario: {ex.Message}";
-        }
-        finally
-        {
-            _isLoading = false;
+            CurrentDecisionNode = _scenario.Root;
         }
     }
 
@@ -106,61 +113,39 @@ public partial class Simulation : ComponentBase
 
     protected void SubmitStep()
     {
-        if (!CanSubmit || CurrentDecisionNode == null) return;
+        if (CurrentDecisionNode == null) return;
 
-        var choice = CurrentChoices.FirstOrDefault(c => c.Label == SelectedOptionLabel);
-        if (choice == null) return;
-
-        _selectedChoice = choice;
-        _pendingNode = choice.Next;
+        _selectedChoice = CurrentChoices.First(c => c.Label == SelectedOptionLabel);
+        _pendingNode = _selectedChoice.Next;
 
         _studentHistory.Add(new StudentStepRecord
         {
             StepTitle = CurrentStepTitle,
-            DecisionNode = CurrentDecisionNode!,
-            ChosenChoice = choice,
+            DecisionNode = CurrentDecisionNode,
+            ChosenChoice = _selectedChoice,
             Reasoning = ReasoningText
         });
 
-
-        LastResponseText = _pendingNode?.Prompt ?? "The patient waits for your next action.";
+        LastResponseText = _pendingNode?.Prompt ?? "";
         HasSubmittedThisStep = true;
     }
 
     protected void Continue()
     {
-        if (!HasSubmittedThisStep) return;
+        if (_pendingNode == null || _pendingNode.End)
+        {
+            FinishScenario("Encounter complete.");
+            return;
+        }
+
+        CurrentDecisionNode = _pendingNode;
+        _pendingNode = null;
+
+        AddNarrationFromNode(CurrentDecisionNode);
 
         SelectedOptionLabel = "";
         ReasoningText = "";
         HasSubmittedThisStep = false;
-
-        if (_pendingNode == null)
-        {
-            FinishScenario("The scenario ended unexpectedly because the next node was missing.");
-            return;
-        }
-
-        var node = _pendingNode;
-        _pendingNode = null;
-
-        AddNarrationFromNode(node);
-
-        if (node.End)
-        {
-            FinishScenario("Encounter complete. The patient is transitioned to definitive care.");
-            return;
-        }
-
-        var nextDecision = FindNextDecisionNode(node);
-        if (nextDecision == null)
-        {
-            FinishScenario("Encounter complete. No further decision steps were provided.");
-            return;
-        }
-
-        CurrentDecisionNode = nextDecision;
-        LastResponseText = "";
         _decisionCount++;
     }
 
@@ -171,72 +156,54 @@ public partial class Simulation : ComponentBase
         BuildComparison();
     }
 
-    private static Node? FindNextDecisionNode(Node start)
-    {
-        var current = start;
-
-        while (true)
-        {
-            if (current.Choices != null && current.Choices.Count > 0)
-            {
-                return current;
-            }
-
-            if (current.End)
-            {
-                return null;
-            }
-
-            return null;
-        }
-    }
-
     private void AddNarrationFromNode(Node node)
     {
-        if (node.Info == null) return;
-
-        if (node.Info.TryGetValue("narration", out var obj) && obj != null)
+        if (node.Info?.TryGetValue("narration", out var value) == true)
         {
-            var text = obj.ToString();
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                CurrentNarration.Add(text);
-            }
+            CurrentNarration.Add(value.ToString()!);
         }
     }
 
     private void BuildComparison()
     {
-        ComparisonRows = new List<ComparisonRow>();
-
         foreach (var record in _studentHistory)
         {
-            var correctChoice = record.DecisionNode.Choices?
-                .FirstOrDefault(c => c.IsCorrect);
+            var correct = record.DecisionNode.Choices?.FirstOrDefault(c => c.IsCorrect);
 
             ComparisonRows.Add(new ComparisonRow
             {
                 StepTitle = record.StepTitle,
                 StudentChoice = $"{record.ChosenChoice.Label}. {record.ChosenChoice.Text}",
                 StudentReasoning = record.Reasoning,
-                RecommendedChoice = correctChoice != null
-                    ? $"{correctChoice.Label}. {correctChoice.Text}"
+                RecommendedChoice = correct != null
+                    ? $"{correct.Label}. {correct.Text}"
                     : "No correct option defined for this step.",
-                RecommendedWhy = correctChoice?.Feedback ?? "",
+                RecommendedWhy = correct?.Feedback ?? "",
                 Result = record.ChosenChoice.Feedback ?? ""
             });
         }
-
     }
 
-    private sealed class StudentStepRecord
+
+    protected void OpenScenarioMenu()
+    {
+        IsScenarioMenuOpen = true;
+        _openSelectAfterRender = true;
+    }
+
+    protected void CloseScenarioMenu()
+    {
+        IsScenarioMenuOpen = false;
+    }
+
+
+    protected sealed class StudentStepRecord
     {
         public string StepTitle { get; set; } = "";
         public Node DecisionNode { get; set; } = default!;
         public Choice ChosenChoice { get; set; } = default!;
         public string Reasoning { get; set; } = "";
     }
-
 
     protected sealed class ComparisonRow
     {

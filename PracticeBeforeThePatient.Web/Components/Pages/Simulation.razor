@@ -19,19 +19,46 @@
             <div class="narrLine">@_errorMessage</div>
         </div>
     }
-    else if (_scenario == null)
+    else if (_scenario != null)
     {
-        <div class="card">
-            <div class="sectionTitle">No scenario</div>
-            <div class="narrLine">Scenario not found.</div>
+        <div class="simHeaderRow">
+
+            <div class="simHeaderText">
+                <div class="simBadge">Active Scenario</div>
+                <div class="simTitle">@_scenario.Title</div>
+                <div class="simSubtitle">Make the next best decision at each step</div>
+            </div>
+
+        <div class="scenarioBar">
+            @if (!IsScenarioMenuOpen)
+            {
+                <button type="button"
+                        class="scenarioPill"
+                        @onclick="OpenScenarioMenu"
+                        disabled="@_isLoadingScenario">
+                    <span class="scenarioPillLabel">Scenario</span>
+                    <span class="scenarioPillValue">@SelectedScenarioId</span>
+                    <span class="scenarioPillChevron">▾</span>
+                </button>
+            }
+            else
+            {
+                <select class="scenarioInlineSelect"
+                        @ref="_scenarioSelectRef"
+                        @bind="SelectedScenarioId"
+                        @bind:after="OnScenarioChanged"
+                        @onblur="CloseScenarioMenu"
+                        disabled="@_isLoadingScenario">
+                    @foreach (var id in AvailableScenarioIds)
+                    {
+                        <option value="@id">@id</option>
+                    }
+                </select>
+            }
         </div>
-    }
-    else
-    {
-        <div class="simHeader">
-            <div class="simBadge">Active Scenario</div>
-            <div class="simTitle">@_scenario.Title</div>
-            <div class="simSubtitle">Make the next best decision at each step</div>
+
+
+
         </div>
 
         <div class="simGridSingle">
