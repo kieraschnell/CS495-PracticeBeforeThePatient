@@ -1,37 +1,141 @@
 ﻿@page "/simulation"
 @rendermode InteractiveServer
-@using System.Text.Json
 
 <PageTitle>Clinical Simulation</PageTitle>
 
 <div class="simShell">
 
-    <div class="simHeader">
-        <div class="simBadge">Active Scenario</div>
-        <div class="simTitle">Scenario JSON Display</div>
-    </div>
-
-    <div class="simGridSingle">
+    @if (_isLoading)
+    {
         <div class="card">
-            @if (_isLoading)
-            {
-                <div class="sectionTitle">Loading...</div>
-            }
-            else if (_errorMessage != null)
-            {
-                <div class="sectionTitle">Error</div>
-                <div style="color: red; white-space: pre-wrap;">@_errorMessage</div>
-            }
-            else if (_scenario != null)
-            {
-                <div class="sectionTitle">Scenario JSON</div>
-                <pre style="background: #f5f5f5; padding: 20px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;">@JsonSerializer.Serialize(_scenario, new JsonSerializerOptions { WriteIndented = true })</pre>
-            }
-            else
-            {
-                <div class="sectionTitle">No Data</div>
-                <div>No scenario data available.</div>
-            }
+            <div class="sectionTitle">Loading</div>
+            <div class="narrLine">Fetching scenario from the API.</div>
         </div>
-    </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="card">
+            <div class="sectionTitle">Error</div>
+            <div class="narrLine">@_errorMessage</div>
+        </div>
+    }
+    else if (_scenario == null)
+    {
+        <div class="card">
+            <div class="sectionTitle">No scenario</div>
+            <div class="narrLine">Scenario not found.</div>
+        </div>
+    }
+    else
+    {
+        <div class="simHeader">
+            <div class="simBadge">Active Scenario</div>
+            <div class="simTitle">@_scenario.Title</div>
+            <div class="simSubtitle">Make the next best decision at each step</div>
+        </div>
+
+        <div class="simGridSingle">
+            <div class="card">
+
+                <div class="sectionTitle">Patient</div>
+
+                @foreach (var line in CurrentNarration)
+                {
+                    <div class="narrLine">@line</div>
+                }
+
+                <div class="divider"></div>
+
+                @if (!IsComplete)
+                {
+                    <div class="sectionTitle">@CurrentStepTitle</div>
+                    <div class="prompt">@CurrentPrompt</div>
+
+                    <div class="options">
+                        @foreach (var opt in CurrentChoices)
+                        {
+                            <button class="optionCard @(SelectedOptionLabel == opt.Label ? "selected" : "")"
+                                    @onclick="() => SelectOption(opt.Label)"
+                                    disabled="@HasSubmittedThisStep">
+                                <div class="optionKey">@opt.Label</div>
+                                <div class="optionText">@opt.Text</div>
+                            </button>
+                        }
+                    </div>
+
+                    <div class="reasoning">
+                        <div class="reasoningLabel">Why are you choosing this next step</div>
+                        <textarea rows="4"
+                                  @bind="ReasoningText"
+                                  @bind:event="oninput"
+                                  placeholder="Explain what you are concerned about and what you expect to learn or change.">
+                        </textarea>
+                    </div>
+
+                    <div class="actions">
+                        <button class="primaryBtn"
+                                @onclick="SubmitStep"
+                                disabled="@(!CanSubmit)">
+                            Submit
+                        </button>
+
+                        <button class="secondaryBtn"
+                                @onclick="Continue"
+                                disabled="@(!CanContinue)">
+                            Continue
+                        </button>
+                    </div>
+
+                    @if (HasSubmittedThisStep)
+                    {
+                        <div class="softFeedback">
+                            <div class="softTitle">Patient response</div>
+                            <div class="softText">@LastResponseText</div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="sectionTitle">Visit Summary</div>
+
+                    <div class="summaryBlock">
+                        <div class="summaryLabel">What happened</div>
+                        <div class="summaryText">@EndSummary</div>
+                    </div>
+
+                    <div class="summaryBlock">
+                        <div class="summaryLabel">Comparison</div>
+
+                        @foreach (var row in ComparisonRows)
+                        {
+                            <div class="compareCard">
+                                <div class="compareTitle">@row.StepTitle</div>
+
+                                <div class="compareGrid">
+                                    <div class="compareCol">
+                                        <div class="compareLabel">What you did</div>
+                                        <div class="compareText">@row.StudentChoice</div>
+                                        <div class="compareSmall">@row.StudentReasoning</div>
+                                    </div>
+
+                                    <div class="compareCol">
+                                        <div class="compareLabel">Recommended</div>
+                                        <div class="compareText">@row.RecommendedChoice</div>
+                                        <div class="compareSmall">@row.RecommendedWhy</div>
+                                    </div>
+                                </div>
+
+                                <div class="compareFooter">
+                                    <div class="compareLabel">Result</div>
+                                    <div class="compareText">@row.Result</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+            </div>
+        </div>
+    }
+
 </div>
