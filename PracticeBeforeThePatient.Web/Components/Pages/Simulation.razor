@@ -30,34 +30,16 @@
             </div>
 
         <div class="scenarioBar">
-            @if (!IsScenarioMenuOpen)
-            {
-                <button type="button"
-                        class="scenarioPill"
-                        @onclick="OpenScenarioMenu"
-                        disabled="@_isLoadingScenario">
-                    <span class="scenarioPillLabel">Scenario</span>
-                    <span class="scenarioPillValue">@SelectedScenarioId</span>
-                    <span class="scenarioPillChevron">▾</span>
-                </button>
-            }
-            else
-            {
-                <select class="scenarioInlineSelect"
-                        @ref="_scenarioSelectRef"
-                        @bind="SelectedScenarioId"
-                        @bind:after="OnScenarioChanged"
-                        @onblur="CloseScenarioMenu"
-                        disabled="@_isLoadingScenario">
-                    @foreach (var id in AvailableScenarioIds)
-                    {
-                        <option value="@id">@id</option>
-                    }
-                </select>
-            }
+            <select class="scenarioInlineSelect"
+                    @bind="SelectedScenarioId"
+                    @bind:after="OnScenarioChanged"
+                    disabled="@_isLoadingScenario">
+                @foreach (var id in AvailableScenarioIds)
+                {
+                    <option value="@id">@id</option>
+                }
+            </select>
         </div>
-
-
 
         </div>
 
