@@ -56,7 +56,7 @@ public partial class Simulation : ComponentBase
     {
         try
         {
-            _scenario = await ApiClient.GetScenarioAsync("testScenario");
+            _scenario = await ApiClient.GetScenarioAsync("sixStepTest");
 
             if (_scenario == null)
             {
@@ -117,12 +117,11 @@ public partial class Simulation : ComponentBase
         _studentHistory.Add(new StudentStepRecord
         {
             StepTitle = CurrentStepTitle,
-            ChosenLabel = choice.Label,
-            ChosenText = $"{choice.Label}. {choice.Text}",
-            Reasoning = ReasoningText,
-            IsCorrect = choice.IsCorrect,
-            Feedback = choice.Feedback ?? ""
+            DecisionNode = CurrentDecisionNode!,
+            ChosenChoice = choice,
+            Reasoning = ReasoningText
         });
+
 
         LastResponseText = _pendingNode?.Prompt ?? "The patient waits for your next action.";
         HasSubmittedThisStep = true;
@@ -212,30 +211,32 @@ public partial class Simulation : ComponentBase
 
         foreach (var record in _studentHistory)
         {
-            var recommended = record.IsCorrect ? record.ChosenText : "Correct option not provided by API for this step.";
-            var recommendedWhy = record.IsCorrect ? record.Feedback : "Add a node level explanation or a dedicated rationale on the correct choice to power this column.";
+            var correctChoice = record.DecisionNode.Choices?
+                .FirstOrDefault(c => c.IsCorrect);
 
             ComparisonRows.Add(new ComparisonRow
             {
                 StepTitle = record.StepTitle,
-                StudentChoice = record.ChosenText,
+                StudentChoice = $"{record.ChosenChoice.Label}. {record.ChosenChoice.Text}",
                 StudentReasoning = record.Reasoning,
-                RecommendedChoice = recommended,
-                RecommendedWhy = recommendedWhy,
-                Result = record.Feedback
+                RecommendedChoice = correctChoice != null
+                    ? $"{correctChoice.Label}. {correctChoice.Text}"
+                    : "No correct option defined for this step.",
+                RecommendedWhy = correctChoice?.Feedback ?? "",
+                Result = record.ChosenChoice.Feedback ?? ""
             });
         }
+
     }
 
     private sealed class StudentStepRecord
     {
         public string StepTitle { get; set; } = "";
-        public string ChosenLabel { get; set; } = "";
-        public string ChosenText { get; set; } = "";
+        public Node DecisionNode { get; set; } = default!;
+        public Choice ChosenChoice { get; set; } = default!;
         public string Reasoning { get; set; } = "";
-        public bool IsCorrect { get; set; }
-        public string Feedback { get; set; } = "";
     }
+
 
     protected sealed class ComparisonRow
     {

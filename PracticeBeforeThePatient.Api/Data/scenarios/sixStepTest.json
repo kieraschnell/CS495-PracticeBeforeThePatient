@@ -1,0 +1,1838 @@
+{
+    "Title": "Choose Your Adventure Branching Demo",
+    "Root": {
+      "Type": "mcq",
+      "Prompt": "Step 1 of 6. Pick a path so you can clearly see branching. Which door do you open",
+      "Info": {
+        "narration": "You arrive in a hallway with two clearly labeled doors."
+      },
+      "Choices": [
+        {
+          "Label": "A",
+          "Text": "Open the Blue door",
+          "IsCorrect": true,
+          "Feedback": "Recommended for the demo. This should lead to the BLUE branch.",
+          "Next": {
+            "Type": "mcq",
+            "Prompt": "Step 2 of 6. Blue path. You are now in a room with a BLUE banner. What do you do",
+            "Info": {
+              "narration": "Branch confirmed. You see BLUE everywhere in this room."
+            },
+            "Choices": [
+              {
+                "Label": "A",
+                "Text": "Pick up the BLUE key",
+                "IsCorrect": true,
+                "Feedback": "Recommended for the demo. Next step should mention BLUE KEY.",
+                "Next": {
+                  "Type": "mcq",
+                  "Prompt": "Step 3 of 6. Blue key branch. You are holding the BLUE KEY. Choose what to unlock",
+                  "Info": {
+                    "narration": "Branch confirmed. Your BLUE KEY glows."
+                  },
+                  "Choices": [
+                    {
+                      "Label": "A",
+                      "Text": "Unlock the BLUE chest",
+                      "IsCorrect": true,
+                      "Feedback": "Recommended for the demo. Next step will unify but narration will mention BLUE CHEST.",
+                      "Next": {
+                        "Type": "mcq",
+                        "Prompt": "Step 4 of 6. Unified step. No matter what earlier branch you took, you now face a map table. Which map do you choose",
+                        "Info": {
+                          "narration": "You arrive at the map table after opening the BLUE CHEST."
+                        },
+                        "Choices": [
+                          {
+                            "Label": "A",
+                            "Text": "Choose the Forest map",
+                            "IsCorrect": true,
+                            "Feedback": "Recommended for the demo. Step 5 should mention FOREST.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Forest branch. You are in the FOREST. What do you follow",
+                              "Info": {
+                                "narration": "Branch confirmed. You are surrounded by FOREST trees."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Follow the lantern lights",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for the demo. Next step should be the FOREST LANTERN finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Forest lantern finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached FOREST LANTERN finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Lantern ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for the demo. You should end at FOREST LANTERN.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST LANTERN ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Hidden trail ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at FOREST HIDDEN TRAIL.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST HIDDEN TRAIL ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Follow the river sound",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the FOREST RIVER finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Forest river finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached FOREST RIVER finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Riverbank ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at FOREST RIVERBANK.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST RIVERBANK ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Waterfall ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at FOREST WATERFALL.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST WATERFALL ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          },
+                          {
+                            "Label": "B",
+                            "Text": "Choose the City map",
+                            "IsCorrect": false,
+                            "Feedback": "Alternate map. Step 5 should mention CITY.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. City branch. You are in the CITY. What do you enter",
+                              "Info": {
+                                "narration": "Branch confirmed. You see CITY lights and signs."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Enter the museum",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for this branch. Next step should be the CITY MUSEUM finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. City museum finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached CITY MUSEUM finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Exhibit ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at CITY EXHIBIT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY EXHIBIT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Basement vault ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at CITY BASEMENT VAULT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY BASEMENT VAULT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Enter the train station",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate location. Next step should be the CITY TRAIN finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. City train finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached CITY TRAIN finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Departure ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at CITY DEPARTURE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY DEPARTURE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Lost luggage ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at CITY LOST LUGGAGE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY LOST LUGGAGE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          }
+                        ],
+                        "End": false
+                      }
+                    },
+                    {
+                      "Label": "B",
+                      "Text": "Unlock the BLUE door with a keyhole",
+                      "IsCorrect": false,
+                      "Feedback": "Alternate unlock. Next step will unify but narration will mention BLUE KEYHOLE.",
+                      "Next": {
+                        "Type": "mcq",
+                        "Prompt": "Step 4 of 6. Unified step. No matter what earlier branch you took, you now face a map table. Which map do you choose",
+                        "Info": {
+                          "narration": "You arrive at the map table after opening the BLUE KEYHOLE door."
+                        },
+                        "Choices": [
+                          {
+                            "Label": "A",
+                            "Text": "Choose the Forest map",
+                            "IsCorrect": true,
+                            "Feedback": "Recommended for the demo. Step 5 should mention FOREST.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Forest branch. You are in the FOREST. What do you follow",
+                              "Info": {
+                                "narration": "Branch confirmed. You are surrounded by FOREST trees."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Follow the lantern lights",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for the demo. Next step should be the FOREST LANTERN finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Forest lantern finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached FOREST LANTERN finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Lantern ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for the demo. You should end at FOREST LANTERN.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST LANTERN ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Hidden trail ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at FOREST HIDDEN TRAIL.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST HIDDEN TRAIL ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Follow the river sound",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the FOREST RIVER finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Forest river finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached FOREST RIVER finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Riverbank ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at FOREST RIVERBANK.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST RIVERBANK ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Waterfall ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at FOREST WATERFALL.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST WATERFALL ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          },
+                          {
+                            "Label": "B",
+                            "Text": "Choose the City map",
+                            "IsCorrect": false,
+                            "Feedback": "Alternate map. Step 5 should mention CITY.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. City branch. You are in the CITY. What do you enter",
+                              "Info": {
+                                "narration": "Branch confirmed. You see CITY lights and signs."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Enter the museum",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for this branch. Next step should be the CITY MUSEUM finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. City museum finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached CITY MUSEUM finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Exhibit ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at CITY EXHIBIT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY EXHIBIT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Basement vault ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at CITY BASEMENT VAULT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY BASEMENT VAULT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Enter the train station",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate location. Next step should be the CITY TRAIN finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. City train finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached CITY TRAIN finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Departure ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at CITY DEPARTURE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY DEPARTURE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Lost luggage ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at CITY LOST LUGGAGE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY LOST LUGGAGE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          }
+                        ],
+                        "End": false
+                      }
+                    }
+                  ],
+                  "End": false
+                }
+              },
+              {
+                "Label": "B",
+                "Text": "Read the BLUE note",
+                "IsCorrect": false,
+                "Feedback": "Alternate action. Next step should mention BLUE NOTE.",
+                "Next": {
+                  "Type": "mcq",
+                  "Prompt": "Step 3 of 6. Blue note branch. The BLUE NOTE says choose a symbol. Which symbol do you pick",
+                  "Info": {
+                    "narration": "Branch confirmed. The BLUE NOTE is in your hand."
+                  },
+                  "Choices": [
+                    {
+                      "Label": "A",
+                      "Text": "Pick the STAR symbol",
+                      "IsCorrect": true,
+                      "Feedback": "Recommended for this branch. Next step will unify and mention BLUE NOTE STAR.",
+                      "Next": {
+                        "Type": "mcq",
+                        "Prompt": "Step 4 of 6. Unified step. No matter what earlier branch you took, you now face a map table. Which map do you choose",
+                        "Info": {
+                          "narration": "You arrive at the map table after choosing BLUE NOTE STAR."
+                        },
+                        "Choices": [
+                          {
+                            "Label": "A",
+                            "Text": "Choose the Forest map",
+                            "IsCorrect": true,
+                            "Feedback": "Recommended for the demo. Step 5 should mention FOREST.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Forest branch. You are in the FOREST. What do you follow",
+                              "Info": {
+                                "narration": "Branch confirmed. You are surrounded by FOREST trees."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Follow the lantern lights",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for the demo. Next step should be the FOREST LANTERN finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Forest lantern finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached FOREST LANTERN finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Lantern ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for the demo. You should end at FOREST LANTERN.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST LANTERN ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Hidden trail ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at FOREST HIDDEN TRAIL.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST HIDDEN TRAIL ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Follow the river sound",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the FOREST RIVER finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Forest river finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached FOREST RIVER finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Riverbank ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at FOREST RIVERBANK.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST RIVERBANK ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Waterfall ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at FOREST WATERFALL.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST WATERFALL ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          },
+                          {
+                            "Label": "B",
+                            "Text": "Choose the City map",
+                            "IsCorrect": false,
+                            "Feedback": "Alternate map. Step 5 should mention CITY.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. City branch. You are in the CITY. What do you enter",
+                              "Info": {
+                                "narration": "Branch confirmed. You see CITY lights and signs."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Enter the museum",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for this branch. Next step should be the CITY MUSEUM finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. City museum finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached CITY MUSEUM finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Exhibit ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at CITY EXHIBIT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY EXHIBIT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Basement vault ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at CITY BASEMENT VAULT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY BASEMENT VAULT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Enter the train station",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate location. Next step should be the CITY TRAIN finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. City train finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached CITY TRAIN finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Departure ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at CITY DEPARTURE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY DEPARTURE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Lost luggage ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at CITY LOST LUGGAGE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY LOST LUGGAGE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          }
+                        ],
+                        "End": false
+                      }
+                    },
+                    {
+                      "Label": "B",
+                      "Text": "Pick the CIRCLE symbol",
+                      "IsCorrect": false,
+                      "Feedback": "Alternate symbol. Next step will unify and mention BLUE NOTE CIRCLE.",
+                      "Next": {
+                        "Type": "mcq",
+                        "Prompt": "Step 4 of 6. Unified step. No matter what earlier branch you took, you now face a map table. Which map do you choose",
+                        "Info": {
+                          "narration": "You arrive at the map table after choosing BLUE NOTE CIRCLE."
+                        },
+                        "Choices": [
+                          {
+                            "Label": "A",
+                            "Text": "Choose the Forest map",
+                            "IsCorrect": true,
+                            "Feedback": "Recommended for the demo. Step 5 should mention FOREST.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Forest branch. You are in the FOREST. What do you follow",
+                              "Info": {
+                                "narration": "Branch confirmed. You are surrounded by FOREST trees."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Follow the lantern lights",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for the demo. Next step should be the FOREST LANTERN finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Forest lantern finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached FOREST LANTERN finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Lantern ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for the demo. You should end at FOREST LANTERN.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST LANTERN ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Hidden trail ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at FOREST HIDDEN TRAIL.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST HIDDEN TRAIL ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Follow the river sound",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the FOREST RIVER finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Forest river finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached FOREST RIVER finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Riverbank ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at FOREST RIVERBANK.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST RIVERBANK ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Waterfall ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at FOREST WATERFALL.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the FOREST WATERFALL ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          },
+                          {
+                            "Label": "B",
+                            "Text": "Choose the City map",
+                            "IsCorrect": false,
+                            "Feedback": "Alternate map. Step 5 should mention CITY.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. City branch. You are in the CITY. What do you enter",
+                              "Info": {
+                                "narration": "Branch confirmed. You see CITY lights and signs."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Enter the museum",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for this branch. Next step should be the CITY MUSEUM finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. City museum finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached CITY MUSEUM finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Exhibit ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at CITY EXHIBIT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY EXHIBIT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Basement vault ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at CITY BASEMENT VAULT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY BASEMENT VAULT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Enter the train station",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate location. Next step should be the CITY TRAIN finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. City train finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached CITY TRAIN finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Departure ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at CITY DEPARTURE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY DEPARTURE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Lost luggage ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at CITY LOST LUGGAGE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the CITY LOST LUGGAGE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          }
+                        ],
+                        "End": false
+                      }
+                    }
+                  ],
+                  "End": false
+                }
+              }
+            ],
+            "End": false
+          }
+        },
+        {
+          "Label": "B",
+          "Text": "Open the Red door",
+          "IsCorrect": false,
+          "Feedback": "Alternate for the demo. This should lead to the RED branch.",
+          "Next": {
+            "Type": "mcq",
+            "Prompt": "Step 2 of 6. Red path. You are now in a room with a RED banner. What do you do",
+            "Info": {
+              "narration": "Branch confirmed. You see RED everywhere in this room."
+            },
+            "Choices": [
+              {
+                "Label": "A",
+                "Text": "Pick up the RED key",
+                "IsCorrect": true,
+                "Feedback": "Recommended for the red branch. Next step should mention RED KEY.",
+                "Next": {
+                  "Type": "mcq",
+                  "Prompt": "Step 3 of 6. Red key branch. You are holding the RED KEY. Choose what to unlock",
+                  "Info": {
+                    "narration": "Branch confirmed. Your RED KEY glows."
+                  },
+                  "Choices": [
+                    {
+                      "Label": "A",
+                      "Text": "Unlock the RED chest",
+                      "IsCorrect": true,
+                      "Feedback": "Recommended for the red branch. Next step will unify but narration will mention RED CHEST.",
+                      "Next": {
+                        "Type": "mcq",
+                        "Prompt": "Step 4 of 6. Unified step. No matter what earlier branch you took, you now face a map table. Which map do you choose",
+                        "Info": {
+                          "narration": "You arrive at the map table after opening the RED CHEST."
+                        },
+                        "Choices": [
+                          {
+                            "Label": "A",
+                            "Text": "Choose the Mountain map",
+                            "IsCorrect": true,
+                            "Feedback": "Recommended for the red path. Step 5 should mention MOUNTAIN.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Mountain branch. You are on the MOUNTAIN. What do you climb",
+                              "Info": {
+                                "narration": "Branch confirmed. You feel MOUNTAIN wind."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Climb the ridge",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for the red path. Next step should be the MOUNTAIN RIDGE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Mountain ridge finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached MOUNTAIN RIDGE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Ridge summit ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at MOUNTAIN RIDGE SUMMIT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN RIDGE SUMMIT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Ridge cave ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at MOUNTAIN RIDGE CAVE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN RIDGE CAVE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Climb the stairs",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the MOUNTAIN STAIRS finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Mountain stairs finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached MOUNTAIN STAIRS finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Stair lookout ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at MOUNTAIN STAIR LOOKOUT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN STAIR LOOKOUT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Stair lodge ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at MOUNTAIN STAIR LODGE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN STAIR LODGE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          },
+                          {
+                            "Label": "B",
+                            "Text": "Choose the Beach map",
+                            "IsCorrect": false,
+                            "Feedback": "Alternate map. Step 5 should mention BEACH.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Beach branch. You are on the BEACH. What do you approach",
+                              "Info": {
+                                "narration": "Branch confirmed. You hear BEACH waves."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Approach the lighthouse",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for this branch. Next step should be the BEACH LIGHTHOUSE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Beach lighthouse finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached BEACH LIGHTHOUSE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Light beacon ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at BEACH LIGHT BEACON.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH LIGHT BEACON ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Light keeper ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at BEACH LIGHT KEEPER.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH LIGHT KEEPER ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Approach the sandcastle",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the BEACH SANDCASTLE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Beach sandcastle finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached BEACH SANDCASTLE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Sand treasure ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at BEACH SAND TREASURE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH SAND TREASURE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Sand crab ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at BEACH SAND CRAB.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH SAND CRAB ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          }
+                        ],
+                        "End": false
+                      }
+                    },
+                    {
+                      "Label": "B",
+                      "Text": "Unlock the RED door with a keyhole",
+                      "IsCorrect": false,
+                      "Feedback": "Alternate unlock. Next step will unify but narration will mention RED KEYHOLE.",
+                      "Next": {
+                        "Type": "mcq",
+                        "Prompt": "Step 4 of 6. Unified step. No matter what earlier branch you took, you now face a map table. Which map do you choose",
+                        "Info": {
+                          "narration": "You arrive at the map table after opening the RED KEYHOLE door."
+                        },
+                        "Choices": [
+                          {
+                            "Label": "A",
+                            "Text": "Choose the Mountain map",
+                            "IsCorrect": true,
+                            "Feedback": "Recommended for the red path. Step 5 should mention MOUNTAIN.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Mountain branch. You are on the MOUNTAIN. What do you climb",
+                              "Info": {
+                                "narration": "Branch confirmed. You feel MOUNTAIN wind."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Climb the ridge",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for the red path. Next step should be the MOUNTAIN RIDGE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Mountain ridge finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached MOUNTAIN RIDGE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Ridge summit ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at MOUNTAIN RIDGE SUMMIT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN RIDGE SUMMIT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Ridge cave ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at MOUNTAIN RIDGE CAVE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN RIDGE CAVE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Climb the stairs",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the MOUNTAIN STAIRS finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Mountain stairs finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached MOUNTAIN STAIRS finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Stair lookout ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at MOUNTAIN STAIR LOOKOUT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN STAIR LOOKOUT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Stair lodge ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at MOUNTAIN STAIR LODGE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN STAIR LODGE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          },
+                          {
+                            "Label": "B",
+                            "Text": "Choose the Beach map",
+                            "IsCorrect": false,
+                            "Feedback": "Alternate map. Step 5 should mention BEACH.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Beach branch. You are on the BEACH. What do you approach",
+                              "Info": {
+                                "narration": "Branch confirmed. You hear BEACH waves."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Approach the lighthouse",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for this branch. Next step should be the BEACH LIGHTHOUSE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Beach lighthouse finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached BEACH LIGHTHOUSE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Light beacon ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at BEACH LIGHT BEACON.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH LIGHT BEACON ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Light keeper ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at BEACH LIGHT KEEPER.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH LIGHT KEEPER ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Approach the sandcastle",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the BEACH SANDCASTLE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Beach sandcastle finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached BEACH SANDCASTLE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Sand treasure ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at BEACH SAND TREASURE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH SAND TREASURE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Sand crab ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at BEACH SAND CRAB.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH SAND CRAB ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          }
+                        ],
+                        "End": false
+                      }
+                    }
+                  ],
+                  "End": false
+                }
+              },
+              {
+                "Label": "B",
+                "Text": "Read the RED note",
+                "IsCorrect": false,
+                "Feedback": "Alternate action. Next step should mention RED NOTE.",
+                "Next": {
+                  "Type": "mcq",
+                  "Prompt": "Step 3 of 6. Red note branch. The RED NOTE says choose a symbol. Which symbol do you pick",
+                  "Info": {
+                    "narration": "Branch confirmed. The RED NOTE is in your hand."
+                  },
+                  "Choices": [
+                    {
+                      "Label": "A",
+                      "Text": "Pick the TRIANGLE symbol",
+                      "IsCorrect": true,
+                      "Feedback": "Recommended for this branch. Next step will unify and mention RED NOTE TRIANGLE.",
+                      "Next": {
+                        "Type": "mcq",
+                        "Prompt": "Step 4 of 6. Unified step. No matter what earlier branch you took, you now face a map table. Which map do you choose",
+                        "Info": {
+                          "narration": "You arrive at the map table after choosing RED NOTE TRIANGLE."
+                        },
+                        "Choices": [
+                          {
+                            "Label": "A",
+                            "Text": "Choose the Mountain map",
+                            "IsCorrect": true,
+                            "Feedback": "Recommended for the red path. Step 5 should mention MOUNTAIN.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Mountain branch. You are on the MOUNTAIN. What do you climb",
+                              "Info": {
+                                "narration": "Branch confirmed. You feel MOUNTAIN wind."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Climb the ridge",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for the red path. Next step should be the MOUNTAIN RIDGE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Mountain ridge finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached MOUNTAIN RIDGE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Ridge summit ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at MOUNTAIN RIDGE SUMMIT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN RIDGE SUMMIT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Ridge cave ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at MOUNTAIN RIDGE CAVE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN RIDGE CAVE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Climb the stairs",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the MOUNTAIN STAIRS finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Mountain stairs finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached MOUNTAIN STAIRS finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Stair lookout ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at MOUNTAIN STAIR LOOKOUT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN STAIR LOOKOUT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Stair lodge ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at MOUNTAIN STAIR LODGE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN STAIR LODGE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          },
+                          {
+                            "Label": "B",
+                            "Text": "Choose the Beach map",
+                            "IsCorrect": false,
+                            "Feedback": "Alternate map. Step 5 should mention BEACH.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Beach branch. You are on the BEACH. What do you approach",
+                              "Info": {
+                                "narration": "Branch confirmed. You hear BEACH waves."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Approach the lighthouse",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for this branch. Next step should be the BEACH LIGHTHOUSE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Beach lighthouse finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached BEACH LIGHTHOUSE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Light beacon ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at BEACH LIGHT BEACON.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH LIGHT BEACON ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Light keeper ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at BEACH LIGHT KEEPER.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH LIGHT KEEPER ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Approach the sandcastle",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the BEACH SANDCASTLE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Beach sandcastle finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached BEACH SANDCASTLE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Sand treasure ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at BEACH SAND TREASURE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH SAND TREASURE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Sand crab ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at BEACH SAND CRAB.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH SAND CRAB ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          }
+                        ],
+                        "End": false
+                      }
+                    },
+                    {
+                      "Label": "B",
+                      "Text": "Pick the SQUARE symbol",
+                      "IsCorrect": false,
+                      "Feedback": "Alternate symbol. Next step will unify and mention RED NOTE SQUARE.",
+                      "Next": {
+                        "Type": "mcq",
+                        "Prompt": "Step 4 of 6. Unified step. No matter what earlier branch you took, you now face a map table. Which map do you choose",
+                        "Info": {
+                          "narration": "You arrive at the map table after choosing RED NOTE SQUARE."
+                        },
+                        "Choices": [
+                          {
+                            "Label": "A",
+                            "Text": "Choose the Mountain map",
+                            "IsCorrect": true,
+                            "Feedback": "Recommended for the red path. Step 5 should mention MOUNTAIN.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Mountain branch. You are on the MOUNTAIN. What do you climb",
+                              "Info": {
+                                "narration": "Branch confirmed. You feel MOUNTAIN wind."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Climb the ridge",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for the red path. Next step should be the MOUNTAIN RIDGE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Mountain ridge finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached MOUNTAIN RIDGE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Ridge summit ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at MOUNTAIN RIDGE SUMMIT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN RIDGE SUMMIT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Ridge cave ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at MOUNTAIN RIDGE CAVE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN RIDGE CAVE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Climb the stairs",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the MOUNTAIN STAIRS finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Mountain stairs finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached MOUNTAIN STAIRS finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Stair lookout ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at MOUNTAIN STAIR LOOKOUT.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN STAIR LOOKOUT ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Stair lodge ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at MOUNTAIN STAIR LODGE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the MOUNTAIN STAIR LODGE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          },
+                          {
+                            "Label": "B",
+                            "Text": "Choose the Beach map",
+                            "IsCorrect": false,
+                            "Feedback": "Alternate map. Step 5 should mention BEACH.",
+                            "Next": {
+                              "Type": "mcq",
+                              "Prompt": "Step 5 of 6. Beach branch. You are on the BEACH. What do you approach",
+                              "Info": {
+                                "narration": "Branch confirmed. You hear BEACH waves."
+                              },
+                              "Choices": [
+                                {
+                                  "Label": "A",
+                                  "Text": "Approach the lighthouse",
+                                  "IsCorrect": true,
+                                  "Feedback": "Recommended for this branch. Next step should be the BEACH LIGHTHOUSE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Beach lighthouse finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached BEACH LIGHTHOUSE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Light beacon ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at BEACH LIGHT BEACON.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH LIGHT BEACON ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Light keeper ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at BEACH LIGHT KEEPER.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH LIGHT KEEPER ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                },
+                                {
+                                  "Label": "B",
+                                  "Text": "Approach the sandcastle",
+                                  "IsCorrect": false,
+                                  "Feedback": "Alternate path. Next step should be the BEACH SANDCASTLE finale.",
+                                  "Next": {
+                                    "Type": "mcq",
+                                    "Prompt": "Step 6 of 6. Beach sandcastle finale. Choose your ending so it is obvious you reached the correct branch",
+                                    "Info": {
+                                      "narration": "Branch confirmed. You reached BEACH SANDCASTLE finale."
+                                    },
+                                    "Choices": [
+                                      {
+                                        "Label": "A",
+                                        "Text": "Take the Sand treasure ending",
+                                        "IsCorrect": true,
+                                        "Feedback": "Recommended for this path. You should end at BEACH SAND TREASURE.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH SAND TREASURE ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      },
+                                      {
+                                        "Label": "B",
+                                        "Text": "Take the Sand crab ending",
+                                        "IsCorrect": false,
+                                        "Feedback": "Alternate ending. You should end at BEACH SAND CRAB.",
+                                        "Next": {
+                                          "Type": "outcome",
+                                          "Prompt": "Outcome. You reached the BEACH SAND CRAB ending. This proves the branch followed correctly.",
+                                          "Info": null,
+                                          "Choices": null,
+                                          "End": true
+                                        }
+                                      }
+                                    ],
+                                    "End": false
+                                  }
+                                }
+                              ],
+                              "End": false
+                            }
+                          }
+                        ],
+                        "End": false
+                      }
+                    }
+                  ],
+                  "End": false
+                }
+              }
+            ],
+            "End": false
+          }
+        }
+      ],
+      "End": false
+    }
+  }
+  
