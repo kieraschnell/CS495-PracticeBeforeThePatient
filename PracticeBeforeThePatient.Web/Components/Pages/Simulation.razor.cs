@@ -132,7 +132,7 @@ public partial class Simulation : ComponentBase
 
     protected void Continue()
     {
-        if (_pendingNode == null || _pendingNode.End)
+        if (_pendingNode == null || _pendingNode.Type == "outcome")
         {
             FinishScenario("Encounter complete.");
             return;

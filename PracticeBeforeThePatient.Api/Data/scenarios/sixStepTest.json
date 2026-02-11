@@ -76,8 +76,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST LANTERN ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -89,12 +88,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST HIDDEN TRAIL ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -118,8 +115,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST RIVERBANK ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -131,16 +127,13 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST WATERFALL ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           },
                           {
@@ -176,8 +169,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY EXHIBIT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -189,12 +181,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY BASEMENT VAULT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -218,8 +208,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY DEPARTURE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -231,20 +220,16 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY LOST LUGGAGE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           }
-                        ],
-                        "End": false
+                        ]
                       }
                     },
                     {
@@ -292,8 +277,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST LANTERN ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -305,12 +289,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST HIDDEN TRAIL ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -334,8 +316,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST RIVERBANK ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -347,16 +328,13 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST WATERFALL ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           },
                           {
@@ -392,8 +370,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY EXHIBIT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -405,12 +382,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY BASEMENT VAULT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -434,8 +409,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY DEPARTURE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -447,24 +421,19 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY LOST LUGGAGE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           }
-                        ],
-                        "End": false
+                        ]
                       }
                     }
-                  ],
-                  "End": false
+                  ]
                 }
               },
               {
@@ -524,8 +493,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST LANTERN ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -537,12 +505,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST HIDDEN TRAIL ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -566,8 +532,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST RIVERBANK ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -579,16 +544,13 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST WATERFALL ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           },
                           {
@@ -624,8 +586,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY EXHIBIT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -637,12 +598,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY BASEMENT VAULT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -666,8 +625,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY DEPARTURE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -679,20 +637,16 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY LOST LUGGAGE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           }
-                        ],
-                        "End": false
+                        ]
                       }
                     },
                     {
@@ -740,8 +694,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST LANTERN ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -753,12 +706,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST HIDDEN TRAIL ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -782,8 +733,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST RIVERBANK ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -795,16 +745,13 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the FOREST WATERFALL ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           },
                           {
@@ -840,8 +787,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY EXHIBIT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -853,12 +799,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY BASEMENT VAULT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -882,8 +826,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY DEPARTURE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -895,28 +838,22 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the CITY LOST LUGGAGE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           }
-                        ],
-                        "End": false
+                        ]
                       }
                     }
-                  ],
-                  "End": false
+                  ]
                 }
               }
-            ],
-            "End": false
+            ]
           }
         },
         {
@@ -988,8 +925,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN RIDGE SUMMIT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1001,12 +937,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN RIDGE CAVE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -1030,8 +964,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN STAIR LOOKOUT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1043,16 +976,13 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN STAIR LODGE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           },
                           {
@@ -1088,8 +1018,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH LIGHT BEACON ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1101,12 +1030,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH LIGHT KEEPER ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -1130,8 +1057,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH SAND TREASURE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1143,20 +1069,16 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH SAND CRAB ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           }
-                        ],
-                        "End": false
+                        ]
                       }
                     },
                     {
@@ -1204,8 +1126,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN RIDGE SUMMIT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1217,12 +1138,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN RIDGE CAVE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -1246,8 +1165,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN STAIR LOOKOUT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1259,16 +1177,13 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN STAIR LODGE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           },
                           {
@@ -1304,8 +1219,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH LIGHT BEACON ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1317,12 +1231,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH LIGHT KEEPER ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -1346,8 +1258,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH SAND TREASURE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1359,24 +1270,19 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH SAND CRAB ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           }
-                        ],
-                        "End": false
+                        ]
                       }
                     }
-                  ],
-                  "End": false
+                  ]
                 }
               },
               {
@@ -1436,8 +1342,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN RIDGE SUMMIT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1449,12 +1354,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN RIDGE CAVE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -1478,8 +1381,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN STAIR LOOKOUT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1491,16 +1393,13 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN STAIR LODGE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           },
                           {
@@ -1536,8 +1435,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH LIGHT BEACON ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1549,12 +1447,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH LIGHT KEEPER ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -1578,8 +1474,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH SAND TREASURE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1591,20 +1486,16 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH SAND CRAB ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           }
-                        ],
-                        "End": false
+                        ]
                       }
                     },
                     {
@@ -1652,8 +1543,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN RIDGE SUMMIT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1665,12 +1555,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN RIDGE CAVE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -1694,8 +1582,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN STAIR LOOKOUT ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1707,16 +1594,13 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the MOUNTAIN STAIR LODGE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           },
                           {
@@ -1752,8 +1636,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH LIGHT BEACON ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1765,12 +1648,10 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH LIGHT KEEPER ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 },
                                 {
@@ -1794,8 +1675,7 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH SAND TREASURE ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       },
                                       {
@@ -1807,32 +1687,25 @@
                                           "Type": "outcome",
                                           "Prompt": "Outcome. You reached the BEACH SAND CRAB ending. This proves the branch followed correctly.",
                                           "Info": null,
-                                          "Choices": null,
-                                          "End": true
+                                          "Choices": null
                                         }
                                       }
-                                    ],
-                                    "End": false
+                                    ]
                                   }
                                 }
-                              ],
-                              "End": false
+                              ]
                             }
                           }
-                        ],
-                        "End": false
+                        ]
                       }
                     }
-                  ],
-                  "End": false
+                  ]
                 }
               }
-            ],
-            "End": false
+            ]
           }
         }
-      ],
-      "End": false
+      ]
     }
   }
   

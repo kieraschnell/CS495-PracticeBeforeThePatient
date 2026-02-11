@@ -10,12 +10,11 @@
         "isCorrect": false,
         "feedback": "You learn the likely trigger, but you have not yet assessed how unstable the patient is right now.",
         "next": {
-          "type": "outcome",
+          "type": "mcq",
           "prompt": "Patient response: I ate a protein bar a few minutes ago. My throat feels tight and I feel lightheaded.",
           "info": {
             "narration": "You notice hives on their skin and their breathing is rapid."
           },
-          "end": false,
           "choices": [
             {
               "label": "A",
@@ -24,8 +23,7 @@
               "feedback": "Skin symptoms may improve, but airway swelling and low blood pressure are not treated.",
               "next": {
                 "type": "outcome",
-                "prompt": "Patient says: I feel worse. My throat feels tighter and I am more dizzy.",
-                "end": true
+                "prompt": "Patient says: I feel worse. My throat feels tighter and I am more dizzy."
               }
             },
             {
@@ -35,8 +33,7 @@
               "feedback": "The most time sensitive treatment is given and you trigger definitive care.",
               "next": {
                 "type": "outcome",
-                "prompt": "Patient says: After the injection, it feels a little easier to breathe. I am still scared. EMS arrives and transports the patient.",
-                "end": true
+                "prompt": "Patient says: After the injection, it feels a little easier to breathe. I am still scared. EMS arrives and transports the patient."
               }
             }
           ]
@@ -48,12 +45,11 @@
         "isCorrect": true,
         "feedback": "You immediately focus on the time sensitive threat and can escalate quickly if needed.",
         "next": {
-          "type": "outcome",
+          "type": "mcq",
           "prompt": "Patient response: I am breathing fast and I feel like my throat is closing. I feel dizzy.",
           "info": {
             "narration": "You notice hives on their skin and their breathing is rapid. The patient looks worse."
           },
-          "end": false,
           "choices": [
             {
               "label": "A",
@@ -62,8 +58,7 @@
               "feedback": "Skin symptoms may improve, but airway swelling and low blood pressure are not treated.",
               "next": {
                 "type": "outcome",
-                "prompt": "Patient says: I feel worse. My throat feels tighter and I am more dizzy.",
-                "end": true
+                "prompt": "Patient says: I feel worse. My throat feels tighter and I am more dizzy."
               }
             },
             {
@@ -72,12 +67,11 @@
               "isCorrect": true,
               "feedback": "IM epinephrine is first line when you suspect anaphylaxis with airway symptoms or hypotension.",
               "next": {
-                "type": "outcome",
+                "type": "mcq",
                 "prompt": "Patient says: After the injection, it feels a little easier to breathe. I am still scared.",
                 "info": {
                   "narration": "Several minutes later, symptoms return. They look fatigued."
                 },
-                "end": false,
                 "choices": [
                   {
                     "label": "A",
@@ -86,8 +80,7 @@
                     "feedback": "Waiting can allow airway edema and hypotension to worsen again.",
                     "next": {
                       "type": "outcome",
-                      "prompt": "Patient says: I feel worse again. My throat is getting tight and I feel weak.",
-                      "end": true
+                      "prompt": "Patient says: I feel worse again. My throat is getting tight and I feel weak."
                     }
                   },
                   {
@@ -97,8 +90,7 @@
                     "feedback": "Repeating epinephrine can stabilize symptoms while awaiting definitive care.",
                     "next": {
                       "type": "outcome",
-                      "prompt": "Patient says: After the second injection, it improves again. I can breathe a little easier. EMS arrives and transports the patient.",
-                      "end": true
+                      "prompt": "Patient says: After the second injection, it improves again. I can breathe a little easier. EMS arrives and transports the patient."
                     }
                   }
                 ]
@@ -114,8 +106,7 @@
         "feedback": "Oral intake is not appropriate when nausea and airway tightness are present, and it delays assessment.",
         "next": {
           "type": "outcome",
-          "prompt": "Patient says: I can try but I feel nauseated and my throat feels tight.",
-          "end": true
+          "prompt": "Patient says: I can try but I feel nauseated and my throat feels tight."
         }
       },
       {
@@ -125,8 +116,7 @@
         "feedback": "Background history matters, but delaying airway assessment can miss rapid deterioration.",
         "next": {
           "type": "outcome",
-          "prompt": "Patient says: I have allergies but I have never felt this bad. My throat feels tight.",
-          "end": true
+          "prompt": "Patient says: I have allergies but I have never felt this bad. My throat feels tight."
         }
       }
     ]
