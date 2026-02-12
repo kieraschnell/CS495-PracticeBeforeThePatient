@@ -37,4 +37,18 @@ public class ApiClient
             return null;
         }
     }
+
+    public async Task<bool> UpdateScenarioAsync(string scenarioId, Scenario scenario)
+    {
+        try
+        {
+            var response = await _httpClient.PutAsJsonAsync($"api/scenarios/{scenarioId}", scenario);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating scenario: {ex.Message}");
+            return false;
+        }
+    }
 }

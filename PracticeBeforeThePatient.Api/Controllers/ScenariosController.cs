@@ -102,4 +102,54 @@ public class ScenariosController : ControllerBase
             ));
         }
     }
+
+    [HttpPut("{scenarioId}")]
+    public async Task<IActionResult> UpdateScenario(string scenarioId, [FromBody] Scenario scenario, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(scenarioId) || !ScenarioIdPattern.IsMatch(scenarioId))
+        {
+            return BadRequest(Problem(
+                title: "Invalid scenario id",
+                detail: "Scenario id may only include letters, numbers, underscore, and hyphen."
+            ));
+        }
+
+        if (scenario == null)
+        {
+            return BadRequest(Problem(
+                title: "Invalid scenario data",
+                detail: "Scenario cannot be null."
+            ));
+        }
+
+        try
+        {
+            if (!Directory.Exists(_dataPath))
+            {
+                Directory.CreateDirectory(_dataPath);
+            }
+
+            var filePath = Path.Combine(_dataPath, $"{scenarioId}.json");
+
+            var json = JsonSerializer.Serialize(scenario, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            await System.IO.File.WriteAllTextAsync(filePath, json, ct);
+
+            return Ok(new { message = "Scenario saved successfully" });
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(499);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, Problem(
+                title: "Error saving scenario",
+                detail: ex.Message
+            ));
+        }
+    }
 }
