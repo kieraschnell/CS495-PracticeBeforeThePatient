@@ -54,12 +54,32 @@ public partial class Simulation : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        AvailableScenarioIds = await ApiClient.GetAvailableScenariosAsync();
+        try
+        {
+            _errorMessage = null;
 
-        SelectedScenarioId = AvailableScenarioIds.FirstOrDefault() ?? "";
-        await LoadScenarioAsync(SelectedScenarioId);
+            var ids = await ApiClient.GetAvailableScenariosAsync();
+            AvailableScenarioIds = ids ?? new List<string>();
 
-        _isLoading = false;
+            SelectedScenarioId = AvailableScenarioIds.FirstOrDefault() ?? "";
+
+            if (string.IsNullOrWhiteSpace(SelectedScenarioId))
+            {
+                _errorMessage = "No scenarios are available right now.";
+                _isLoading = false;
+                return;
+            }
+
+            await LoadScenarioAsync(SelectedScenarioId);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed to load scenarios. {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 
     protected async Task OnScenarioChanged()
@@ -75,15 +95,35 @@ public partial class Simulation : ComponentBase
 
     private async Task LoadScenarioAsync(string scenarioId)
     {
-        if (string.IsNullOrWhiteSpace(scenarioId)) return;
+        if (string.IsNullOrWhiteSpace(scenarioId))
+        {
+            _errorMessage = "Select a scenario to continue.";
+            return;
+        }
 
-        _isLoadingScenario = true;
+        try
+        {
+            _errorMessage = null;
+            _isLoadingScenario = true;
 
-        _scenario = await ApiClient.GetScenarioAsync(scenarioId);
+            _scenario = await ApiClient.GetScenarioAsync(scenarioId);
 
-        ResetScenarioState();
+            if (_scenario == null)
+            {
+                _errorMessage = "Scenario could not be loaded.";
+                return;
+            }
 
-        _isLoadingScenario = false;
+            ResetScenarioState();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed to load scenario. {ex.Message}";
+        }
+        finally
+        {
+            _isLoadingScenario = false;
+        }
     }
 
     private void ResetScenarioState()
@@ -97,11 +137,19 @@ public partial class Simulation : ComponentBase
         HasSubmittedThisStep = false;
         SelectedOptionLabel = "";
         ReasoningText = "";
+        LastResponseText = "";
+        _pendingNode = null;
+        _selectedChoice = null;
 
         if (_scenario?.Root != null)
         {
             AddNarrationFromNode(_scenario.Root);
             CurrentDecisionNode = _scenario.Root;
+        }
+        else
+        {
+            CurrentDecisionNode = null;
+            _errorMessage = "Scenario is missing a root node.";
         }
     }
 
@@ -115,7 +163,10 @@ public partial class Simulation : ComponentBase
     {
         if (CurrentDecisionNode == null) return;
 
-        _selectedChoice = CurrentChoices.First(c => c.Label == SelectedOptionLabel);
+        var choice = CurrentChoices.FirstOrDefault(c => c.Label == SelectedOptionLabel);
+        if (choice == null) return;
+
+        _selectedChoice = choice;
         _pendingNode = _selectedChoice.Next;
 
         _studentHistory.Add(new StudentStepRecord
@@ -158,9 +209,9 @@ public partial class Simulation : ComponentBase
 
     private void AddNarrationFromNode(Node node)
     {
-        if (node.Info?.TryGetValue("narration", out var value) == true)
+        if (node.Info?.TryGetValue("narration", out var value) == true && value != null)
         {
-            CurrentNarration.Add(value.ToString()!);
+            CurrentNarration.Add(value.ToString() ?? "");
         }
     }
 
@@ -184,7 +235,6 @@ public partial class Simulation : ComponentBase
         }
     }
 
-
     protected void OpenScenarioMenu()
     {
         IsScenarioMenuOpen = true;
@@ -195,7 +245,6 @@ public partial class Simulation : ComponentBase
     {
         IsScenarioMenuOpen = false;
     }
-
 
     protected sealed class StudentStepRecord
     {
