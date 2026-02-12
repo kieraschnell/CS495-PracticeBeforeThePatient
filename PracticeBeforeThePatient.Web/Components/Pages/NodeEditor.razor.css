@@ -1,0 +1,220 @@
+::deep .nodeCard {
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: rgba(0,0,0,.02);
+  border: 1px solid rgba(0,0,0,.06);
+  border-left: 3px solid hsl(calc(220 - var(--depth, 0) * 15), 70%, 55%);
+  transition: all 0.2s;
+}
+
+::deep .nodeCard:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+::deep .nodeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+::deep .nodeHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+::deep .expandBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  color: rgba(0,0,0,.6);
+  transition: transform 0.2s;
+}
+
+::deep .expandBtn.expanded {
+  transform: rotate(90deg);
+}
+
+::deep .nodeTitle {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+::deep .nodeBadge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.08);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+::deep .nodeBody {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,.08);
+}
+
+::deep .editorField {
+  margin-bottom: 14px;
+}
+
+::deep .editorLabel {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+::deep .editorInput,
+::deep .editorTextarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.12);
+  font-family: inherit;
+}
+
+::deep .editorTextarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+::deep .choiceList {
+  margin-top: 8px;
+}
+
+::deep .choiceCard {
+  border-radius: 14px;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: white;
+  border: 1px solid rgba(0,0,0,.10);
+}
+
+::deep .choiceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+
+::deep .choiceActions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+::deep .choiceLabel {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+::deep .checkboxField {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+::deep .checkboxField input[type="checkbox"] {
+  width: auto;
+}
+
+::deep .nestedNodes {
+  margin-left: 16px;
+  margin-top: 8px;
+  padding-left: 12px;
+  border-left: 2px solid rgba(0,0,0,.08);
+}
+
+::deep .fieldHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+::deep .addBtn,
+::deep .deleteBtn,
+::deep .duplicateBtn,
+::deep .addNodeBtn,
+::deep .deleteNodeBtn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: white;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+::deep .addBtn,
+::deep .addNodeBtn {
+  background: rgba(34, 197, 94, 0.1);
+  color: rgb(21, 128, 61);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+::deep .addBtn:hover,
+::deep .addNodeBtn:hover {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+::deep .duplicateBtn {
+  background: rgba(59, 130, 246, 0.1);
+  color: rgb(30, 64, 175);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+::deep .duplicateBtn:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+::deep .deleteBtn,
+::deep .deleteNodeBtn {
+  background: rgba(239, 68, 68, 0.1);
+  color: rgb(185, 28, 28);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+::deep .deleteBtn:hover,
+::deep .deleteNodeBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+::deep .nodeActions {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+
+::deep .warningMessage,
+::deep .infoMessage {
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+::deep .warningMessage {
+  background: rgba(245, 158, 11, 0.1);
+  color: rgb(161, 98, 7);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+::deep .infoMessage {
+  background: rgba(59, 130, 246, 0.1);
+  color: rgb(30, 64, 175);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}

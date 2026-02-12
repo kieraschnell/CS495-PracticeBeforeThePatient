@@ -1,0 +1,303 @@
+@using PracticeBeforeThePatient.Core.Models
+@using System.Text.Json
+
+<div class="nodeCard" style="--depth: @Level;">
+    <div class="nodeHeader" @onclick="ToggleExpanded">
+        <div class="nodeHeaderLeft">
+            <button class="expandBtn @(IsExpanded ? "expanded" : "")" type="button">
+                ▶
+            </button>
+            <div class="nodeTitle">@Path</div>
+            <span class="nodeBadge">@Node.Type</span>
+        </div>
+    </div>
+
+    @if (IsExpanded)
+    {
+        <div class="nodeBody">
+            <div class="editorField">
+                <label class="editorLabel">Node Type</label>
+                <select class="editorInput" @bind="Node.Type" @bind:after="OnNodeTypeChanged">
+                    <option value="mcq">mcq</option>
+                    <option value="outcome">outcome</option>
+                </select>
+            </div>
+
+            <div class="editorField">
+                <label class="editorLabel">Prompt</label>
+                <textarea class="editorTextarea" @bind="Node.Prompt" rows="3"></textarea>
+            </div>
+
+            <div class="editorField">
+                <label class="editorLabel">Narration (Info)</label>
+                <textarea class="editorTextarea" @bind="NarrationText" @bind:after="UpdateNarration" rows="3" placeholder="Enter narration text that appears when this node is displayed..."></textarea>
+            </div>
+
+            @if (Node.Type == "mcq")
+            {
+                @if (Node.Choices == null || Node.Choices.Count == 0)
+                {
+                    <div class="warningMessage">
+                        ⚠️ This MCQ node has no choices. Add at least one choice below.
+                    </div>
+                }
+                else if (HasMultipleCorrectChoices())
+                {
+                    <div class="infoMessage">
+                        ℹ️ Multiple choices are marked as correct. This allows multiple valid paths.
+                    </div>
+                }
+
+                <div class="editorField">
+                    <div class="fieldHeader">
+                        <label class="editorLabel">Choices</label>
+                        <button type="button" class="addBtn" @onclick="AddChoice">+ Add Choice</button>
+                    </div>
+
+                    @if (Node.Choices != null && Node.Choices.Count > 0)
+                    {
+                        <div class="choiceList">
+                            @foreach (var (choice, index) in Node.Choices.Select((c, i) => (c, i)))
+                            {
+                                <div class="choiceCard">
+                                    <div class="choiceHeader">
+                                        <span class="choiceLabel">Choice @(index + 1) - @choice.Label</span>
+                                        <div class="choiceActions">
+                                            <button type="button" class="duplicateBtn" @onclick="() => DuplicateChoice(index)" title="Duplicate this choice">📋 Duplicate</button>
+                                            <button type="button" class="deleteBtn" @onclick="() => ConfirmDeleteChoice(index)" title="Delete this choice">🗑️ Delete</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="editorField">
+                                        <label class="editorLabel">Label</label>
+                                        <input type="text" class="editorInput" @bind="choice.Label" />
+                                    </div>
+
+                                    <div class="editorField">
+                                        <label class="editorLabel">Text</label>
+                                        <textarea class="editorTextarea" @bind="choice.Text" rows="2"></textarea>
+                                    </div>
+
+                                    <div class="editorField">
+                                        <label class="checkboxField">
+                                            <input type="checkbox" @bind="choice.IsCorrect" />
+                                            Is Correct
+                                        </label>
+                                    </div>
+
+                                    <div class="editorField">
+                                        <label class="editorLabel">Feedback</label>
+                                        <textarea class="editorTextarea" @bind="choice.Feedback" rows="2"></textarea>
+                                    </div>
+
+                                    @if (choice.Next != null)
+                                    {
+                                        <div class="nodeActions">
+                                            <button type="button" class="deleteNodeBtn" @onclick="() => ConfirmDeleteChildNode(choice)" title="Delete child node and all its descendants">🗑️ Delete Child Node</button>
+                                        </div>
+                                        <div class="nestedNodes">
+                                            <NodeEditor Node="choice.Next" Path="@($"{Path} → {choice.Label}")" Level="@(Level + 1)" @ref="_childEditors[GetChildEditorKey(index)]" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="nodeActions">
+                                            <button type="button" class="addNodeBtn" @onclick="() => AddChildNode(choice)" title="Add a new child node to this choice">+ Add Child Node</button>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Node Node { get; set; } = default!;
+    [Parameter] public string Path { get; set; } = "";
+    [Parameter] public int Level { get; set; } = 0;
+
+    private bool IsExpanded { get; set; } = false;
+    private string NarrationText { get; set; } = "";
+    private Dictionary<string, NodeEditor> _childEditors = new();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        LoadNarration();
+    }
+
+    private void LoadNarration()
+    {
+        if (Node.Info != null && Node.Info.ContainsKey("narration"))
+        {
+            NarrationText = Node.Info["narration"]?.ToString() ?? "";
+        }
+        else
+        {
+            NarrationText = "";
+        }
+    }
+
+    private void UpdateNarration()
+    {
+        if (Node.Info == null)
+        {
+            Node.Info = new Dictionary<string, object>();
+        }
+
+        if (!string.IsNullOrWhiteSpace(NarrationText))
+        {
+            Node.Info["narration"] = NarrationText;
+        }
+        else if (Node.Info.ContainsKey("narration"))
+        {
+            Node.Info.Remove("narration");
+        }
+    }
+
+    private void OnNodeTypeChanged()
+    {
+        if (Node.Type == "mcq" && Node.Choices == null)
+        {
+            Node.Choices = new List<Choice>();
+        }
+        else if (Node.Type == "outcome")
+        {
+            Node.Choices = null;
+        }
+    }
+
+    private void AddChoice()
+    {
+        if (Node.Choices == null)
+        {
+            Node.Choices = new List<Choice>();
+        }
+
+        var nextLabel = GetNextChoiceLabel();
+        Node.Choices.Add(new Choice
+        {
+            Label = nextLabel,
+            Text = "",
+            IsCorrect = false,
+            Feedback = "",
+            Next = null
+        });
+    }
+
+    private void DuplicateChoice(int index)
+    {
+        if (Node.Choices != null && index >= 0 && index < Node.Choices.Count)
+        {
+            var original = Node.Choices[index];
+            var duplicate = new Choice
+            {
+                Label = GetNextChoiceLabel(),
+                Text = original.Text,
+                IsCorrect = original.IsCorrect,
+                Feedback = original.Feedback,
+                Next = null // Don't duplicate the entire tree, just the choice
+            };
+            Node.Choices.Insert(index + 1, duplicate);
+        }
+    }
+
+    private void ConfirmDeleteChoice(int index)
+    {
+        if (Node.Choices != null && index >= 0 && index < Node.Choices.Count)
+        {
+            var choice = Node.Choices[index];
+            var hasChildren = choice.Next != null;
+            var message = hasChildren 
+                ? $"Delete choice '{choice.Label}' and all its child nodes?" 
+                : $"Delete choice '{choice.Label}'?";
+
+            // Note: In a production app, you'd want to use a proper confirmation dialog
+            // For now, we'll just delete directly. Consider adding a confirmation modal later.
+            Node.Choices.RemoveAt(index);
+        }
+    }
+
+    private void AddChildNode(Choice choice)
+    {
+        choice.Next = new Node
+        {
+            Type = "outcome",
+            Prompt = "",
+            Info = null,
+            Choices = null
+        };
+    }
+
+    private void ConfirmDeleteChildNode(Choice choice)
+    {
+        // Note: In a production app, you'd want to use a proper confirmation dialog
+        // For now, we'll just delete directly. Consider adding a confirmation modal later.
+        choice.Next = null;
+    }
+
+    public void ExpandAllNodes()
+    {
+        IsExpanded = true;
+        foreach (var editor in _childEditors.Values)
+        {
+            editor.ExpandAllNodes();
+        }
+        StateHasChanged();
+    }
+
+    public void CollapseAllNodes()
+    {
+        IsExpanded = false;
+        foreach (var editor in _childEditors.Values)
+        {
+            editor.CollapseAllNodes();
+        }
+        StateHasChanged();
+    }
+
+    private string GetChildEditorKey(int index)
+    {
+        return $"choice_{index}";
+    }
+
+    private string GetNextChoiceLabel()
+    {
+        if (Node.Choices == null || Node.Choices.Count == 0)
+        {
+            return "A";
+        }
+
+        var existingLabels = Node.Choices.Select(c => c.Label).ToHashSet();
+        var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        foreach (var letter in letters)
+        {
+            if (!existingLabels.Contains(letter.ToString()))
+            {
+                return letter.ToString();
+            }
+        }
+
+        return (Node.Choices.Count + 1).ToString();
+    }
+
+    private bool HasMultipleCorrectChoices()
+    {
+        if (Node.Choices == null)
+        {
+            return false;
+        }
+
+        return Node.Choices.Count(c => c.IsCorrect) > 1;
+    }
+
+    private void ToggleExpanded()
+    {
+        IsExpanded = !IsExpanded;
+    }
+}

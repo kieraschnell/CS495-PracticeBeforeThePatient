@@ -1,0 +1,89 @@
+@page "/scenario-editor"
+@rendermode InteractiveServer
+
+<PageTitle>Scenario Editor</PageTitle>
+
+<div class="simShell">
+
+    @if (_isLoading)
+    {
+        <div class="card">
+            <div class="sectionTitle">Loading</div>
+            <div class="narrLine">Fetching scenarios from the API...</div>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="card">
+            <div class="sectionTitle">Error</div>
+            <div class="narrLine">@_errorMessage</div>
+        </div>
+    }
+    else
+    {
+        <div class="simHeaderRow">
+            <div class="simHeaderText">
+                <div class="simBadge">Editor</div>
+                <div class="simTitle">Scenario Editor</div>
+                <div class="simSubtitle">Edit scenario nodes and save changes</div>
+            </div>
+
+            <div class="scenarioBar">
+                <select class="scenarioInlineSelect"
+                        @bind="SelectedScenarioId"
+                        @bind:after="OnScenarioChanged"
+                        disabled="@_isLoadingScenario">
+                    <option value="">-- Select Scenario --</option>
+                    @foreach (var id in AvailableScenarioIds)
+                    {
+                        <option value="@id">@id</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        @if (_scenario != null)
+        {
+            <div class="simGridSingle">
+                <div class="card">
+                    <div class="editorHeader">
+                        <div class="sectionTitle">@_scenario.Title</div>
+                        <button class="primaryBtn" @onclick="SaveScenario" disabled="@_isSaving">
+                            @(_isSaving ? "Saving..." : "Save Changes")
+                        </button>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(_saveMessage))
+                    {
+                        <div class="saveMessage @(_saveSuccess ? "success" : "error")">
+                            @_saveMessage
+                        </div>
+                    }
+
+                    <div class="divider"></div>
+
+                    <div class="scenarioTitleEditor">
+                        <label class="editorLabel">Scenario Title</label>
+                        <input type="text" class="editorInput" @bind="_scenario.Title" />
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="nodesHeader">
+                        <div class="sectionTitle">Scenario Nodes</div>
+                        <div class="nodeHeaderActions">
+                            <button type="button" class="secondaryBtn" @onclick="ExpandAll">Expand All</button>
+                            <button type="button" class="secondaryBtn" @onclick="CollapseAll">Collapse All</button>
+                        </div>
+                    </div>
+
+                    @if (_scenario.Root != null)
+                    {
+                        <NodeEditor @ref="_rootNodeEditor" Node="_scenario.Root" Path="Root" Level="0" />
+                    }
+                </div>
+            </div>
+        }
+    }
+
+</div>
