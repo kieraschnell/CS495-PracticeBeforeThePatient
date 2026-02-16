@@ -885,3 +885,210 @@ textarea:focus {
   outline: none;
   box-shadow: none;
 }
+
+
+.classMgmtTop {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.classMgmtCreate,
+.classMgmtSelect {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.classMgmtCardGap {
+  margin-top: 16px;
+}
+
+.classMgmtAddRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.classMgmtRosterHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.classMgmtCount {
+  opacity: 0.7;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.classMgmtRoster {
+  display: grid;
+  gap: 10px;
+}
+
+.classMgmtStudent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.classMgmtStudentEmail {
+  font-weight: 800;
+}
+
+.classMessage {
+  margin-bottom: 16px;
+}
+
+
+.classMessage {
+  margin-bottom: 16px;
+}
+
+.actionChips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.actionChip {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: white;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.actionChip:hover {
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.actionChip.selected {
+  background: var(--brand-soft);
+  color: var(--brand);
+  border-color: rgba(158, 27, 50, 0.25);
+}
+
+.createArea {
+  margin-top: 16px;
+}
+
+.createRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.createRow .editorInput {
+  flex: 1;
+  min-width: 260px;
+}
+
+.createHint {
+  margin-top: 10px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.editArea {
+  margin-top: 16px;
+}
+
+.editTopRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.editSelect {
+  flex: 1;
+  min-width: 260px;
+}
+
+.kebabWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.kebabBtn {
+  height: 40px;
+  width: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border-strong);
+  background: white;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.kebabBtn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.kebabBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.kebabMenu {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  width: 180px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  z-index: 50;
+}
+
+.kebabMenuItem {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 10px 10px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.kebabMenuItem:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.kebabMenuItem.danger {
+  color: rgb(185, 28, 28);
+}
+
+
+@media (max-width: 900px) {
+  .classMgmtTop {
+    grid-template-columns: 1fr;
+  }
+
+  .classMgmtAddRow {
+    grid-template-columns: 1fr;
+  }
+}

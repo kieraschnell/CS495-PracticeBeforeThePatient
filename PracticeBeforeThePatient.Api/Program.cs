@@ -1,5 +1,5 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
+using PracticeBeforeThePatient.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +10,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
-// Add CORS for Blazor app
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("BlazorApp", policy =>
@@ -21,11 +20,13 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddSingleton<ClassRosterStore>();
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseCors("BlazorApp");
-app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

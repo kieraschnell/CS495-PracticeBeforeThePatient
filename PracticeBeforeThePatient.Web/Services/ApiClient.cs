@@ -5,6 +5,8 @@ namespace PracticeBeforeThePatient.Web.Services;
 
 public class ApiClient
 {
+    public HttpClient Http => _httpClient;
+
     private readonly HttpClient _httpClient;
 
     public ApiClient(HttpClient httpClient)

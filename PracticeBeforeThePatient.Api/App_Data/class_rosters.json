@@ -1,0 +1,14 @@
+[
+  {
+    "Id": "b4e7fc6cdfe642b99d13f4004a3ad17a",
+    "Name": "CS 402",
+    "Students": [
+      "123@gmail.com"
+    ]
+  },
+  {
+    "Id": "7d64fae8aed3418796ac25803a3cd955",
+    "Name": "CS 100",
+    "Students": []
+  }
+]

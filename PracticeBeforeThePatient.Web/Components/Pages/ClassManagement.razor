@@ -1,0 +1,371 @@
+@* PracticeBeforeThePatient.Web/Components/Pages/ClassManagement.razor *@
+@page "/class-management"
+@rendermode InteractiveServer
+@using PracticeBeforeThePatient.Web.Services
+@inject ApiClient Api
+
+<PageTitle>Class Management</PageTitle>
+
+<div class="simShell">
+    <div class="simHeaderRow">
+        <div class="simHeaderText">
+            <div class="simBadge">Instructor</div>
+            <div class="simTitle">Class Management</div>
+            <div class="simSubtitle">Create classes, add students, remove students</div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <div class="saveMessage @_messageKind classMessage">@_message</div>
+    }
+
+    <div class="card">
+        <div class="sectionTitle">Choose an action</div>
+
+        <div class="actionChips">
+            <button class="@ChipClass(ActionMode.Create)" @onclick="() => SetModeAsync(ActionMode.Create)">Create new class</button>
+            <button class="@ChipClass(ActionMode.Edit)" @onclick="() => SetModeAsync(ActionMode.Edit)">Edit class</button>
+        </div>
+
+        @if (_mode == ActionMode.Create)
+        {
+            <div class="createArea">
+                <label class="editorLabel">Class name</label>
+                <div class="createRow">
+                    <input class="editorInput" value="@_newClassName" @oninput="OnNewClassNameInput" placeholder="Example, AT 301 Lab Section A" />
+                    <button class="primaryBtn" @onclick="CreateClassAsync" disabled="@string.IsNullOrWhiteSpace(_newClassName)">Create</button>
+                </div>
+                <div class="createHint">Class names must be unique</div>
+            </div>
+        }
+
+        @if (_mode == ActionMode.Edit)
+        {
+            <div class="editArea">
+                <div class="editTopRow">
+                    <div class="editSelect">
+                        <label class="editorLabel">Select a class</label>
+                        <select class="editorInput" value="@_selectedClassId" @onchange="OnSelectedClassChanged">
+                            <option value="">Select</option>
+                            @foreach (var c in _classes)
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="kebabWrap">
+                        <button class="kebabBtn" @onclick="ToggleMenu" disabled="@string.IsNullOrWhiteSpace(_selectedClassId)">&#8942;</button>
+
+                        @if (_menuOpen && !string.IsNullOrWhiteSpace(_selectedClassId))
+                        {
+                            <div class="kebabMenu">
+                                <button class="kebabMenuItem danger" @onclick="DeleteSelectedClassAsync">Delete class</button>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (_selectedClass is not null)
+                {
+                    <div class="divider"></div>
+
+                    <div class="sectionTitle">Manage Students</div>
+
+                    <div class="classMgmtAddRow">
+                        <div class="classMgmtAddInput">
+                            <label class="editorLabel">Student email</label>
+                            <input class="editorInput" value="@_emailToAdd" @oninput="OnEmailInput" placeholder="student@ua.edu" />
+                        </div>
+
+                        <div class="classMgmtAddBtn">
+                            <label class="editorLabel">&nbsp;</label>
+                            <button class="primaryBtn" @onclick="AddStudentAsync" disabled="@string.IsNullOrWhiteSpace(_emailToAdd)">Add student</button>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="classMgmtRosterHeader">
+                        <div class="panel-title">Roster</div>
+                        <div class="classMgmtCount">@_selectedClass.Students.Count student(s)</div>
+                    </div>
+
+                    @if (_selectedClass.Students.Count == 0)
+                    {
+                        <div class="infoMessage">No students yet, add one using the email field above</div>
+                    }
+                    else
+                    {
+                        <div class="classMgmtRoster">
+                            @foreach (var email in _selectedClass.Students.OrderBy(x => x))
+                            {
+                                <div class="classMgmtStudent">
+                                    <div class="classMgmtStudentEmail">@email</div>
+                                    <button class="deleteBtn" @onclick="() => RemoveStudentAsync(email)">Remove</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private enum ActionMode
+    {
+        Create,
+        Edit
+    }
+
+    private ActionMode _mode = ActionMode.Create;
+
+    private List<ClassRosterDto> _classes = new();
+    private string _newClassName = "";
+    private string _selectedClassId = "";
+    private ClassRosterDto? _selectedClass;
+    private string _emailToAdd = "";
+
+    private string _message = "";
+    private string _messageKind = "success";
+
+    private bool _menuOpen;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var data = await Api.Http.GetFromJsonAsync<List<ClassRosterDto>>("api/classes");
+            _classes = data ?? new List<ClassRosterDto>();
+            _selectedClass = _classes.FirstOrDefault(x => x.Id == _selectedClassId);
+        }
+        catch
+        {
+            _classes = new List<ClassRosterDto>();
+            _selectedClass = null;
+            await SetMessageAsync("Could not load classes from the API", false);
+        }
+    }
+
+    private string ChipClass(ActionMode mode)
+    {
+        return mode == _mode ? "actionChip selected" : "actionChip";
+    }
+
+private async Task SetModeAsync(ActionMode mode)
+{
+    _mode = mode;
+    _menuOpen = false;
+
+    if (_mode == ActionMode.Create)
+    {
+        _selectedClassId = "";
+        _selectedClass = null;
+        _emailToAdd = "";
+        return;
+    }
+
+    await ReloadAsync();
+}
+
+    private void ToggleMenu()
+    {
+        _menuOpen = !_menuOpen;
+    }
+
+    private async Task SetMessageAsync(string text, bool ok)
+    {
+        _message = text;
+        _messageKind = ok ? "success" : "error";
+        StateHasChanged();
+
+
+        _message = "";
+        StateHasChanged();
+    }
+
+    private void OnNewClassNameInput(ChangeEventArgs e)
+    {
+        _newClassName = (e.Value?.ToString() ?? "").Trim();
+    }
+
+    private void OnEmailInput(ChangeEventArgs e)
+    {
+        _emailToAdd = (e.Value?.ToString() ?? "").Trim();
+    }
+
+    private async Task CreateClassAsync()
+    {
+        var name = _newClassName.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            await SetMessageAsync("Enter a class name", false);
+            return;
+        }
+
+        try
+        {
+            var resp = await Api.Http.PostAsJsonAsync("api/classes", new CreateClassRequest { Name = name });
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                await SetMessageAsync($"Create failed {((int)resp.StatusCode)} {body}", false);
+                return;
+            }
+
+            var created = await resp.Content.ReadFromJsonAsync<ClassRosterDto>();
+            _newClassName = "";
+            _selectedClassId = created?.Id ?? "";
+            await SetMessageAsync("Class created", true);
+
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            await SetMessageAsync($"Create failed {ex.Message}", false);
+        }
+    }
+
+    private async Task DeleteSelectedClassAsync()
+    {
+        _menuOpen = false;
+
+        if (string.IsNullOrWhiteSpace(_selectedClassId))
+        {
+            await SetMessageAsync("Select a class first", false);
+            return;
+        }
+
+        try
+        {
+            var resp = await Api.Http.DeleteAsync($"api/classes/{_selectedClassId}");
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                await SetMessageAsync($"Delete failed {((int)resp.StatusCode)} {body}", false);
+                return;
+            }
+
+            _selectedClassId = "";
+            _selectedClass = null;
+            _emailToAdd = "";
+            await SetMessageAsync("Class deleted", true);
+
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            await SetMessageAsync($"Delete failed {ex.Message}", false);
+        }
+    }
+
+    private async Task OnSelectedClassChanged(ChangeEventArgs e)
+    {
+        _selectedClassId = e.Value?.ToString() ?? "";
+        _emailToAdd = "";
+        _menuOpen = false;
+        await ReloadAsync();
+    }
+
+    private async Task AddStudentAsync()
+    {
+        if (_selectedClass is null)
+        {
+            await SetMessageAsync("Select a class first", false);
+            return;
+        }
+
+        var email = _emailToAdd.Trim().ToLowerInvariant();
+        if (!LooksLikeEmail(email))
+        {
+            await SetMessageAsync("Enter a valid email", false);
+            return;
+        }
+
+        try
+        {
+            var resp = await Api.Http.PostAsJsonAsync($"api/classes/{_selectedClass.Id}/students", new StudentRequest { Email = email });
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                await SetMessageAsync($"Add failed {((int)resp.StatusCode)} {body}", false);
+                return;
+            }
+
+            _emailToAdd = "";
+            await SetMessageAsync("Student added", true);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            await SetMessageAsync($"Add failed {ex.Message}", false);
+        }
+    }
+
+    private async Task RemoveStudentAsync(string email)
+    {
+        if (_selectedClass is null) return;
+
+        try
+        {
+            var req = new HttpRequestMessage(HttpMethod.Delete, $"api/classes/{_selectedClass.Id}/students")
+            {
+                Content = JsonContent.Create(new StudentRequest { Email = email })
+            };
+
+            var resp = await Api.Http.SendAsync(req);
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                await SetMessageAsync($"Remove failed {((int)resp.StatusCode)} {body}", false);
+                return;
+            }
+
+            await SetMessageAsync("Student removed", true);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            await SetMessageAsync($"Remove failed {ex.Message}", false);
+        }
+    }
+
+    private static bool LooksLikeEmail(string value)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(value);
+            return string.Equals(addr.Address, value, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private sealed class ClassRosterDto
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public List<string> Students { get; set; } = new();
+    }
+
+    private sealed class CreateClassRequest
+    {
+        public string Name { get; set; } = "";
+    }
+
+    private sealed class StudentRequest
+    {
+        public string Email { get; set; } = "";
+    }
+}
