@@ -8,10 +8,17 @@ namespace PracticeBeforeThePatient.Api.Controllers;
 public sealed class ClassesController : ControllerBase
 {
     private readonly ClassRosterStore _store;
+    private readonly DevAccessStore _access;
 
-    public ClassesController(ClassRosterStore store)
+    public ClassesController(ClassRosterStore store, DevAccessStore access)
     {
         _store = store;
+        _access = access;
+    }
+
+    private async Task<bool> RequireAdmin()
+    {
+        return await _access.IsAdminAsync();
     }
 
     public sealed class ClassRosterDto
@@ -24,9 +31,11 @@ public sealed class ClassesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<ClassRosterDto>>> GetAll()
     {
+        if (!await RequireAdmin()) return Forbid();
+
         var all = await _store.GetAllAsync();
 
-        var sorted = all
+        return all
             .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
             .Select(x => new ClassRosterDto
             {
@@ -35,10 +44,7 @@ public sealed class ClassesController : ControllerBase
                 Students = x.Students
             })
             .ToList();
-
-        return sorted;
     }
-
 
     public sealed class CreateClassRequest
     {
@@ -48,13 +54,19 @@ public sealed class ClassesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ClassRosterDto>> Create([FromBody] CreateClassRequest req)
     {
+        if (!await RequireAdmin()) return Forbid();
+
         if (string.IsNullOrWhiteSpace(req.Name))
+        {
             return BadRequest("Class name cannot be empty.");
+        }
 
         var created = await _store.CreateClassAsync(req.Name);
 
         if (created == null)
+        {
             return Conflict("A class with that name already exists.");
+        }
 
         return new ClassRosterDto
         {
@@ -72,6 +84,8 @@ public sealed class ClassesController : ControllerBase
     [HttpPost("{classId}/students")]
     public async Task<IActionResult> AddStudent(string classId, [FromBody] StudentRequest req)
     {
+        if (!await RequireAdmin()) return Forbid();
+
         var ok = await _store.AddStudentAsync(classId, req.Email ?? "");
         if (!ok) return BadRequest();
         return NoContent();
@@ -80,6 +94,8 @@ public sealed class ClassesController : ControllerBase
     [HttpDelete("{classId}/students")]
     public async Task<IActionResult> RemoveStudent(string classId, [FromBody] StudentRequest req)
     {
+        if (!await RequireAdmin()) return Forbid();
+
         await _store.RemoveStudentAsync(classId, req.Email ?? "");
         return NoContent();
     }
@@ -87,7 +103,34 @@ public sealed class ClassesController : ControllerBase
     [HttpDelete("{classId}")]
     public async Task<IActionResult> Delete(string classId)
     {
+        if (!await RequireAdmin()) return Forbid();
+
         await _store.DeleteClassAsync(classId);
+        return NoContent();
+    }
+
+    [HttpGet("{classId}/scenarios")]
+    public async Task<ActionResult<List<string>>> GetScenarioAccess(string classId)
+    {
+        if (!await RequireAdmin()) return Forbid();
+
+        var allowed = await _store.GetAllowedScenarioIdsAsync(classId);
+        if (allowed is null) return NotFound();
+        return allowed;
+    }
+
+    public sealed class SetScenarioAccessRequest
+    {
+        public List<string> ScenarioIds { get; set; } = new();
+    }
+
+    [HttpPut("{classId}/scenarios")]
+    public async Task<IActionResult> SetScenarioAccess(string classId, [FromBody] SetScenarioAccessRequest req)
+    {
+        if (!await RequireAdmin()) return Forbid();
+
+        var ok = await _store.SetAllowedScenarioIdsAsync(classId, req.ScenarioIds ?? new List<string>());
+        if (!ok) return BadRequest("Invalid class id or scenario ids.");
         return NoContent();
     }
 }

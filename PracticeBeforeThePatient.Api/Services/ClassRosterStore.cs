@@ -1,23 +1,28 @@
 using System.Text.Json;
-using PracticeBeforeThePatient.Core.Models;
+using System.Text.RegularExpressions;
 
 namespace PracticeBeforeThePatient.Services;
 
 public sealed class ClassRosterStore
 {
-    private readonly string _filePath;
-    private readonly SemaphoreSlim _gate = new(1, 1);
+    private static readonly Regex ScenarioIdPattern = new("^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
 
-    private static readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        WriteIndented = true
-    };
+    private readonly SemaphoreSlim _gate = new(1, 1);
+    private readonly string _filePath;
 
     public ClassRosterStore(IWebHostEnvironment env)
     {
-        var dir = Path.Combine(env.ContentRootPath, "App_Data");
-        Directory.CreateDirectory(dir);
-        _filePath = Path.Combine(dir, "class_rosters.json");
+        var dataDir = Path.Combine(env.ContentRootPath, "Data");
+        Directory.CreateDirectory(dataDir);
+        _filePath = Path.Combine(dataDir, "classes.json");
+    }
+
+    public sealed class ClassRoster
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public List<string> Students { get; set; } = new();
+        public List<string> AllowedScenarioIds { get; set; } = new();
     }
 
     public async Task<List<ClassRoster>> GetAllAsync()
@@ -39,7 +44,6 @@ public sealed class ClassRosterStore
         try
         {
             var all = await ReadUnlockedAsync();
-
             var normalized = name.Trim();
 
             if (all.Any(x => string.Equals(x.Name, normalized, StringComparison.OrdinalIgnoreCase)))
@@ -51,7 +55,8 @@ public sealed class ClassRosterStore
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Name = normalized,
-                Students = new List<string>()
+                Students = new List<string>(),
+                AllowedScenarioIds = new List<string>()
             };
 
             all.Add(roster);
@@ -65,15 +70,14 @@ public sealed class ClassRosterStore
         }
     }
 
-    public async Task<bool> DeleteClassAsync(string classId)
+    public async Task DeleteClassAsync(string classId)
     {
         await _gate.WaitAsync();
         try
         {
             var all = await ReadUnlockedAsync();
-            var removed = all.RemoveAll(x => x.Id == classId) > 0;
-            if (removed) await WriteUnlockedAsync(all);
-            return removed;
+            all.RemoveAll(x => x.Id == classId);
+            await WriteUnlockedAsync(all);
         }
         finally
         {
@@ -90,9 +94,13 @@ public sealed class ClassRosterStore
             var roster = all.FirstOrDefault(x => x.Id == classId);
             if (roster is null) return false;
 
-            var normalized = email.Trim().ToLowerInvariant();
+            var normalized = (email ?? "").Trim().ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(normalized)) return false;
+
             if (roster.Students.Any(x => string.Equals(x, normalized, StringComparison.OrdinalIgnoreCase)))
+            {
                 return false;
+            }
 
             roster.Students.Add(normalized);
             await WriteUnlockedAsync(all);
@@ -104,7 +112,45 @@ public sealed class ClassRosterStore
         }
     }
 
-    public async Task<bool> RemoveStudentAsync(string classId, string email)
+    public async Task RemoveStudentAsync(string classId, string email)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var all = await ReadUnlockedAsync();
+            var roster = all.FirstOrDefault(x => x.Id == classId);
+            if (roster is null) return;
+
+            var normalized = (email ?? "").Trim().ToLowerInvariant();
+            roster.Students.RemoveAll(x => string.Equals(x, normalized, StringComparison.OrdinalIgnoreCase));
+
+            await WriteUnlockedAsync(all);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<List<string>?> GetAllowedScenarioIdsAsync(string classId)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var all = await ReadUnlockedAsync();
+            var roster = all.FirstOrDefault(x => x.Id == classId);
+            if (roster is null) return null;
+
+            roster.AllowedScenarioIds ??= new List<string>();
+            return roster.AllowedScenarioIds.ToList();
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<bool> SetAllowedScenarioIdsAsync(string classId, List<string> scenarioIds)
     {
         await _gate.WaitAsync();
         try
@@ -113,9 +159,20 @@ public sealed class ClassRosterStore
             var roster = all.FirstOrDefault(x => x.Id == classId);
             if (roster is null) return false;
 
-            var removed = roster.Students.RemoveAll(x => string.Equals(x, email, StringComparison.OrdinalIgnoreCase)) > 0;
-            if (removed) await WriteUnlockedAsync(all);
-            return removed;
+            var cleaned = (scenarioIds ?? new List<string>())
+                .Select(x => (x ?? "").Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (cleaned.Any(x => !ScenarioIdPattern.IsMatch(x)))
+            {
+                return false;
+            }
+
+            roster.AllowedScenarioIds = cleaned;
+            await WriteUnlockedAsync(all);
+            return true;
         }
         finally
         {
@@ -125,20 +182,33 @@ public sealed class ClassRosterStore
 
     private async Task<List<ClassRoster>> ReadUnlockedAsync()
     {
-        if (!File.Exists(_filePath))
-            return new List<ClassRoster>();
+        if (!File.Exists(_filePath)) return new List<ClassRoster>();
 
         var json = await File.ReadAllTextAsync(_filePath);
-        if (string.IsNullOrWhiteSpace(json))
-            return new List<ClassRoster>();
 
-        var data = JsonSerializer.Deserialize<List<ClassRoster>>(json, _jsonOptions);
-        return data ?? new List<ClassRoster>();
+        var data = JsonSerializer.Deserialize<List<ClassRoster>>(json, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        if (data is null) return new List<ClassRoster>();
+
+        foreach (var c in data)
+        {
+            c.Students ??= new List<string>();
+            c.AllowedScenarioIds ??= new List<string>();
+        }
+
+        return data;
     }
 
-    private async Task WriteUnlockedAsync(List<ClassRoster> all)
+    private async Task WriteUnlockedAsync(List<ClassRoster> data)
     {
-        var json = JsonSerializer.Serialize(all, _jsonOptions);
+        var json = JsonSerializer.Serialize(data, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+
         await File.WriteAllTextAsync(_filePath, json);
     }
 }

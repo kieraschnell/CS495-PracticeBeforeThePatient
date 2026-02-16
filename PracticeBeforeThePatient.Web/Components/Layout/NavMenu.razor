@@ -1,4 +1,6 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject PracticeBeforeThePatient.Web.Services.ApiClient Api
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Patient Practice</a>
     </div>
@@ -26,17 +28,29 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="scenario-editor">
-                <span class="bi bi-pencil-square-nav-menu" aria-hidden="true"></span> Scenario Editor
-            </NavLink>
-        </div>
+        @if (_isAdmin)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="scenario-editor">
+                    <span class="bi bi-pencil-square-nav-menu" aria-hidden="true"></span> Scenario Editor
+                </NavLink>
+            </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="class-management">
-                <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> Class Management
-            </NavLink>
-        </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="class-management">
+                    <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> Class Management
+                </NavLink>
+            </div>
+        }
     </nav>
 </div>
 
+@code {
+    private bool _isAdmin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var access = await Api.GetAccessAsync();
+        _isAdmin = access?.IsAdmin == true;
+    }
+}

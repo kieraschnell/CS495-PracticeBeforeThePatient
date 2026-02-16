@@ -41,8 +41,7 @@ public partial class Simulation : ComponentBase
 
     protected string CurrentStepTitle => $"Step {_decisionCount + 1}";
     protected string CurrentPrompt => CurrentDecisionNode?.Prompt ?? "";
-    protected IReadOnlyList<Choice> CurrentChoices =>
-        CurrentDecisionNode?.Choices ?? new List<Choice>();
+    protected IReadOnlyList<Choice> CurrentChoices => CurrentDecisionNode?.Choices ?? new List<Choice>();
 
     protected bool CanSubmit =>
         !IsComplete &&
@@ -58,16 +57,34 @@ public partial class Simulation : ComponentBase
         {
             _errorMessage = null;
 
-            var ids = await ApiClient.GetAvailableScenariosAsync();
-            AvailableScenarioIds = ids ?? new List<string>();
+            var access = await ApiClient.GetAccessAsync();
 
-            SelectedScenarioId = AvailableScenarioIds.FirstOrDefault() ?? "";
-
-            if (string.IsNullOrWhiteSpace(SelectedScenarioId))
+            if (access == null)
             {
-                _errorMessage = "No scenarios are available right now.";
+                _errorMessage = "Could not determine access right now.";
                 _isLoading = false;
                 return;
+            }
+
+            AvailableScenarioIds = (access.AllowedScenarioIds ?? new List<string>())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (AvailableScenarioIds.Count == 0)
+            {
+                _errorMessage = access.IsAdmin
+                    ? "No scenarios are available right now."
+                    : "You do not have access to any scenarios right now.";
+
+                _isLoading = false;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(SelectedScenarioId) || !AvailableScenarioIds.Contains(SelectedScenarioId, StringComparer.OrdinalIgnoreCase))
+            {
+                SelectedScenarioId = AvailableScenarioIds[0];
             }
 
             await LoadScenarioAsync(SelectedScenarioId);
@@ -85,6 +102,13 @@ public partial class Simulation : ComponentBase
     protected async Task OnScenarioChanged()
     {
         IsScenarioMenuOpen = false;
+
+        if (!AvailableScenarioIds.Contains(SelectedScenarioId, StringComparer.OrdinalIgnoreCase))
+        {
+            _errorMessage = "That scenario is not available to you.";
+            return;
+        }
+
         await LoadScenarioAsync(SelectedScenarioId);
     }
 
@@ -98,6 +122,12 @@ public partial class Simulation : ComponentBase
         if (string.IsNullOrWhiteSpace(scenarioId))
         {
             _errorMessage = "Select a scenario to continue.";
+            return;
+        }
+
+        if (!AvailableScenarioIds.Contains(scenarioId, StringComparer.OrdinalIgnoreCase))
+        {
+            _errorMessage = "That scenario is not available to you.";
             return;
         }
 
@@ -226,9 +256,7 @@ public partial class Simulation : ComponentBase
                 StepTitle = record.StepTitle,
                 StudentChoice = $"{record.ChosenChoice.Label}. {record.ChosenChoice.Text}",
                 StudentReasoning = record.Reasoning,
-                RecommendedChoice = correct != null
-                    ? $"{correct.Label}. {correct.Text}"
-                    : "No correct option defined for this step.",
+                RecommendedChoice = correct != null ? $"{correct.Label}. {correct.Text}" : "No correct option defined for this step.",
                 RecommendedWhy = correct?.Feedback ?? "",
                 Result = record.ChosenChoice.Feedback ?? ""
             });

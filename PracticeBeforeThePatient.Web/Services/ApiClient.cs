@@ -14,15 +14,33 @@ public class ApiClient
         _httpClient = httpClient;
     }
 
+    public sealed class AccessResponse
+    {
+        public string Email { get; set; } = "";
+        public bool IsAdmin { get; set; }
+        public List<string> AllowedScenarioIds { get; set; } = new();
+    }
+
+    public async Task<AccessResponse?> GetAccessAsync()
+    {
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<AccessResponse>("api/access");
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task<Scenario?> GetScenarioAsync(string scenarioId)
     {
         try
         {
             return await _httpClient.GetFromJsonAsync<Scenario>($"api/scenarios/{scenarioId}");
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"Error fetching scenario: {ex.Message}");
             return null;
         }
     }
@@ -33,9 +51,8 @@ public class ApiClient
         {
             return await _httpClient.GetFromJsonAsync<List<string>>("api/scenarios");
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"Error fetching scenarios: {ex.Message}");
             return null;
         }
     }
@@ -47,9 +64,8 @@ public class ApiClient
             var response = await _httpClient.PutAsJsonAsync($"api/scenarios/{scenarioId}", scenario);
             return response.IsSuccessStatusCode;
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"Error updating scenario: {ex.Message}");
             return false;
         }
     }

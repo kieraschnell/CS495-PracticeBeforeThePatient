@@ -21,12 +21,13 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddSingleton<ClassRosterStore>();
+builder.Services.AddSingleton<DevAccessStore>();
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseCors("BlazorApp");
-
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

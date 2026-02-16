@@ -1,0 +1,23 @@
+[
+  {
+    "Id": "b82d188f0f8c4f92ae34726037c6ac1e",
+    "Name": "CS 100",
+    "Students": [
+      "test@test.com"
+    ],
+    "AllowedScenarioIds": [
+      "sixStepTest"
+    ]
+  },
+  {
+    "Id": "50747690d8a346d3a5fa803b9f52b617",
+    "Name": "CS 200",
+    "Students": [
+      "test2@test.com",
+      "test@test.com"
+    ],
+    "AllowedScenarioIds": [
+      "testScenario"
+    ]
+  }
+]

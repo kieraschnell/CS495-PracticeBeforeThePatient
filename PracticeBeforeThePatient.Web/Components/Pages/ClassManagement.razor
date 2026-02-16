@@ -1,10 +1,27 @@
-@* PracticeBeforeThePatient.Web/Components/Pages/ClassManagement.razor *@
 @page "/class-management"
 @rendermode InteractiveServer
 @using PracticeBeforeThePatient.Web.Services
 @inject ApiClient Api
 
 <PageTitle>Class Management</PageTitle>
+
+@if (!_isAdminLoaded)
+{
+    <div class="card">
+        <div class="sectionTitle">Loading</div>
+        <div class="narrLine">Checking access</div>
+    </div>
+    return;
+}
+
+@if (!_isAdmin)
+{
+    <div class="card">
+        <div class="sectionTitle">Not available</div>
+        <div class="narrLine">This page is only available to admins</div>
+    </div>
+    return;
+}
 
 <div class="simShell">
     <div class="simHeaderRow">
@@ -20,7 +37,7 @@
         <div class="saveMessage @_messageKind classMessage">@_message</div>
     }
 
-    <div class="card">
+    <div class="card" @onclick="CloseMenu">
         <div class="sectionTitle">Choose an action</div>
 
         <div class="actionChips">
@@ -55,7 +72,7 @@
                         </select>
                     </div>
 
-                    <div class="kebabWrap">
+                    <div class="kebabWrap" @onclick:stopPropagation="true">
                         <button class="kebabBtn" @onclick="ToggleMenu" disabled="@string.IsNullOrWhiteSpace(_selectedClassId)">&#8942;</button>
 
                         @if (_menuOpen && !string.IsNullOrWhiteSpace(_selectedClassId))
@@ -69,6 +86,39 @@
 
                 @if (_selectedClass is not null)
                 {
+                    <div class="divider"></div>
+
+                    <div class="sectionTitle">Scenario Access</div>
+
+                    @if (_isLoadingScenarios)
+                    {
+                        <div class="infoMessage">Loading scenarios</div>
+                    }
+                    else if (_allScenarioIds.Count == 0)
+                    {
+                        <div class="warningMessage">No scenarios found in the API</div>
+                    }
+                    else
+                    {
+                        <div class="scenarioAccessTop">
+                            <div class="scenarioAccessHint">
+                                Select which scenarios this class can use. If none are selected, all scenarios are allowed.
+                            </div>
+                            <button class="secondaryBtn" @onclick="SaveScenarioAccessAsync" disabled="@(_selectedClass is null)">Save access</button>
+                        </div>
+
+                        <div class="scenarioAccessGrid">
+                            @foreach (var id in _allScenarioIds)
+                            {
+                                var on = _allowedScenarioIds.Contains(id, StringComparer.OrdinalIgnoreCase);
+                                <label class="scenarioAccessItem">
+                                    <input type="checkbox" checked="@on" @onchange="(e) => ToggleScenario(id, e)" />
+                                    <span class="scenarioAccessText">@id</span>
+                                </label>
+                            }
+                        </div>
+                    }
+
                     <div class="divider"></div>
 
                     <div class="sectionTitle">Manage Students</div>
@@ -134,25 +184,42 @@
 
     private bool _menuOpen;
 
+    private bool _isLoadingScenarios;
+    private List<string> _allScenarioIds = new();
+    private HashSet<string> _allowedScenarioIds = new(StringComparer.OrdinalIgnoreCase);
+
+    private bool _isAdminLoaded;
+    private bool _isAdmin;
+
     protected override async Task OnInitializedAsync()
     {
-        await ReloadAsync();
+        var access = await Api.GetAccessAsync();
+        _isAdmin = access?.IsAdmin == true;
+        _isAdminLoaded = true;
+
+        if (_isAdmin)
+        {
+            await ReloadClassesAsync();
+        }
     }
 
-    private async Task ReloadAsync()
+
+    private async Task SetModeAsync(ActionMode mode)
     {
-        try
+        _mode = mode;
+        _menuOpen = false;
+
+        if (_mode == ActionMode.Create)
         {
-            var data = await Api.Http.GetFromJsonAsync<List<ClassRosterDto>>("api/classes");
-            _classes = data ?? new List<ClassRosterDto>();
-            _selectedClass = _classes.FirstOrDefault(x => x.Id == _selectedClassId);
-        }
-        catch
-        {
-            _classes = new List<ClassRosterDto>();
+            _selectedClassId = "";
             _selectedClass = null;
-            await SetMessageAsync("Could not load classes from the API", false);
+            _emailToAdd = "";
+            _allScenarioIds = new List<string>();
+            _allowedScenarioIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            return;
         }
+
+        await ReloadClassesAsync();
     }
 
     private string ChipClass(ActionMode mode)
@@ -160,36 +227,29 @@
         return mode == _mode ? "actionChip selected" : "actionChip";
     }
 
-private async Task SetModeAsync(ActionMode mode)
-{
-    _mode = mode;
-    _menuOpen = false;
-
-    if (_mode == ActionMode.Create)
-    {
-        _selectedClassId = "";
-        _selectedClass = null;
-        _emailToAdd = "";
-        return;
-    }
-
-    await ReloadAsync();
-}
-
     private void ToggleMenu()
     {
         _menuOpen = !_menuOpen;
     }
 
-    private async Task SetMessageAsync(string text, bool ok)
+    private void CloseMenu()
+    {
+        _menuOpen = false;
+    }
+
+    private void SetMessage(string text, bool ok)
     {
         _message = text;
         _messageKind = ok ? "success" : "error";
         StateHasChanged();
+        _ = ClearMessageLater();
+    }
 
-
+    private async Task ClearMessageLater()
+    {
+        await Task.Delay(3000);
         _message = "";
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OnNewClassNameInput(ChangeEventArgs e)
@@ -202,12 +262,103 @@ private async Task SetModeAsync(ActionMode mode)
         _emailToAdd = (e.Value?.ToString() ?? "").Trim();
     }
 
+    private async Task ReloadClassesAsync()
+    {
+        try
+        {
+            var data = await Api.Http.GetFromJsonAsync<List<ClassRosterDto>>("api/classes");
+            _classes = data ?? new List<ClassRosterDto>();
+            _selectedClass = _classes.FirstOrDefault(x => x.Id == _selectedClassId);
+        }
+        catch
+        {
+            _classes = new List<ClassRosterDto>();
+            _selectedClass = null;
+            SetMessage("Could not load classes from the API", false);
+        }
+    }
+
+    private async Task ReloadScenarioAccessAsync()
+    {
+        if (_selectedClass is null)
+        {
+            _allScenarioIds = new List<string>();
+            _allowedScenarioIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            return;
+        }
+
+        _isLoadingScenarios = true;
+
+        try
+        {
+            var all = await Api.Http.GetFromJsonAsync<List<string>>("api/scenarios");
+            _allScenarioIds = (all ?? new List<string>())
+                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var allowed = await Api.Http.GetFromJsonAsync<List<string>>($"api/classes/{_selectedClass.Id}/scenarios");
+            _allowedScenarioIds = new HashSet<string>(allowed ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            _allScenarioIds = new List<string>();
+            _allowedScenarioIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            SetMessage("Could not load scenario access from the API", false);
+        }
+        finally
+        {
+            _isLoadingScenarios = false;
+        }
+    }
+
+    private void ToggleScenario(string id, ChangeEventArgs e)
+    {
+        var on = e.Value is bool b && b;
+
+        if (on)
+        {
+            _allowedScenarioIds.Add(id);
+        }
+        else
+        {
+            _allowedScenarioIds.Remove(id);
+        }
+    }
+
+    private async Task SaveScenarioAccessAsync()
+    {
+        if (_selectedClass is null) return;
+
+        try
+        {
+            var payload = new SetScenarioAccessRequest
+            {
+                ScenarioIds = _allowedScenarioIds.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList()
+            };
+
+            var resp = await Api.Http.PutAsJsonAsync($"api/classes/{_selectedClass.Id}/scenarios", payload);
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                SetMessage($"Save failed {((int)resp.StatusCode)} {body}", false);
+                return;
+            }
+
+            SetMessage("Scenario access saved", true);
+        }
+        catch
+        {
+            SetMessage("Could not save scenario access", false);
+        }
+    }
+
     private async Task CreateClassAsync()
     {
         var name = _newClassName.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
-            await SetMessageAsync("Enter a class name", false);
+            SetMessage("Enter a class name", false);
             return;
         }
 
@@ -218,20 +369,20 @@ private async Task SetModeAsync(ActionMode mode)
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync();
-                await SetMessageAsync($"Create failed {((int)resp.StatusCode)} {body}", false);
+                SetMessage($"Create failed {((int)resp.StatusCode)} {body}", false);
                 return;
             }
 
             var created = await resp.Content.ReadFromJsonAsync<ClassRosterDto>();
             _newClassName = "";
             _selectedClassId = created?.Id ?? "";
-            await SetMessageAsync("Class created", true);
+            SetMessage("Class created", true);
 
-            await ReloadAsync();
+            await ReloadClassesAsync();
         }
-        catch (Exception ex)
+        catch
         {
-            await SetMessageAsync($"Create failed {ex.Message}", false);
+            SetMessage("Could not create class", false);
         }
     }
 
@@ -241,7 +392,7 @@ private async Task SetModeAsync(ActionMode mode)
 
         if (string.IsNullOrWhiteSpace(_selectedClassId))
         {
-            await SetMessageAsync("Select a class first", false);
+            SetMessage("Select a class first", false);
             return;
         }
 
@@ -251,20 +402,23 @@ private async Task SetModeAsync(ActionMode mode)
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync();
-                await SetMessageAsync($"Delete failed {((int)resp.StatusCode)} {body}", false);
+                SetMessage($"Delete failed {((int)resp.StatusCode)} {body}", false);
                 return;
             }
 
             _selectedClassId = "";
             _selectedClass = null;
             _emailToAdd = "";
-            await SetMessageAsync("Class deleted", true);
+            _allScenarioIds = new List<string>();
+            _allowedScenarioIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            await ReloadAsync();
+            SetMessage("Class deleted", true);
+
+            await ReloadClassesAsync();
         }
-        catch (Exception ex)
+        catch
         {
-            await SetMessageAsync($"Delete failed {ex.Message}", false);
+            SetMessage("Could not delete class", false);
         }
     }
 
@@ -273,21 +427,23 @@ private async Task SetModeAsync(ActionMode mode)
         _selectedClassId = e.Value?.ToString() ?? "";
         _emailToAdd = "";
         _menuOpen = false;
-        await ReloadAsync();
+
+        await ReloadClassesAsync();
+        await ReloadScenarioAccessAsync();
     }
 
     private async Task AddStudentAsync()
     {
         if (_selectedClass is null)
         {
-            await SetMessageAsync("Select a class first", false);
+            SetMessage("Select a class first", false);
             return;
         }
 
         var email = _emailToAdd.Trim().ToLowerInvariant();
         if (!LooksLikeEmail(email))
         {
-            await SetMessageAsync("Enter a valid email", false);
+            SetMessage("Enter a valid email", false);
             return;
         }
 
@@ -297,17 +453,17 @@ private async Task SetModeAsync(ActionMode mode)
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync();
-                await SetMessageAsync($"Add failed {((int)resp.StatusCode)} {body}", false);
+                SetMessage($"Add failed {((int)resp.StatusCode)} {body}", false);
                 return;
             }
 
             _emailToAdd = "";
-            await SetMessageAsync("Student added", true);
-            await ReloadAsync();
+            SetMessage("Student added", true);
+            await ReloadClassesAsync();
         }
-        catch (Exception ex)
+        catch
         {
-            await SetMessageAsync($"Add failed {ex.Message}", false);
+            SetMessage("Could not add student", false);
         }
     }
 
@@ -326,16 +482,16 @@ private async Task SetModeAsync(ActionMode mode)
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync();
-                await SetMessageAsync($"Remove failed {((int)resp.StatusCode)} {body}", false);
+                SetMessage($"Remove failed {((int)resp.StatusCode)} {body}", false);
                 return;
             }
 
-            await SetMessageAsync("Student removed", true);
-            await ReloadAsync();
+            SetMessage("Student removed", true);
+            await ReloadClassesAsync();
         }
-        catch (Exception ex)
+        catch
         {
-            await SetMessageAsync($"Remove failed {ex.Message}", false);
+            SetMessage("Could not remove student", false);
         }
     }
 
@@ -367,5 +523,10 @@ private async Task SetModeAsync(ActionMode mode)
     private sealed class StudentRequest
     {
         public string Email { get; set; } = "";
+    }
+
+    private sealed class SetScenarioAccessRequest
+    {
+        public List<string> ScenarioIds { get; set; } = new();
     }
 }

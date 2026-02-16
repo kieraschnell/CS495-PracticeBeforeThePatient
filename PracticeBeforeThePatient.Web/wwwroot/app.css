@@ -1092,3 +1092,52 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 }
+
+
+.scenarioAccessTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.scenarioAccessHint {
+  color: rgba(0, 0, 0, 0.65);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.scenarioAccessGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.scenarioAccessItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.scenarioAccessItem input[type="checkbox"] {
+  width: auto;
+}
+
+.scenarioAccessText {
+  font-weight: 800;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+@media (max-width: 720px) {
+  .scenarioAccessGrid {
+    grid-template-columns: 1fr;
+  }
+}
