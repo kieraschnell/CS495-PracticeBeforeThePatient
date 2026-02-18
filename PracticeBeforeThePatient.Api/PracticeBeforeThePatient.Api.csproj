@@ -4,10 +4,10 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>77a55544-da5d-4741-b7f7-10d3e21e1c76</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
-
-  <ItemGroup>
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PracticeBeforeThePatient.Core\PracticeBeforeThePatient.Core.csproj" />
@@ -15,6 +15,10 @@
 
   <ItemGroup>
     <Folder Include="Data\scenarios\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
   </ItemGroup>
 
 </Project>

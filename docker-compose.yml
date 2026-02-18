@@ -1,0 +1,13 @@
+services:
+  practicebeforethepatient.api:
+    image: ${DOCKER_REGISTRY-}practicebeforethepatientapi
+    build:
+      context: .
+      dockerfile: PracticeBeforeThePatient.Api/Dockerfile
+
+  practicebeforethepatient.web:
+    image: ${DOCKER_REGISTRY-}practicebeforethepatientweb
+    build:
+      context: .
+      dockerfile: PracticeBeforeThePatient.Web/Dockerfile
+

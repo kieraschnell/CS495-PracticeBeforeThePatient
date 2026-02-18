@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PracticeBeforeThePatient.Core\PracticeBeforeThePatient.Core.csproj" />
   </ItemGroup>
 
@@ -8,6 +12,9 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>913d6c0d-9334-4d17-998f-307b26fa2142</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
 </Project>
