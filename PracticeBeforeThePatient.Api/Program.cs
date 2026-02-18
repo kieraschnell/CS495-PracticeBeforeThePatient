@@ -14,7 +14,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("BlazorApp", policy =>
     {
-        policy.WithOrigins("https://localhost:7168", "http://localhost:5168")
+        policy.WithOrigins("https://localhost:7124", "http://localhost:5009")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -25,7 +25,10 @@ builder.Services.AddSingleton<DevAccessStore>();
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("BlazorApp");
 app.UseAuthorization();
 app.MapControllers();

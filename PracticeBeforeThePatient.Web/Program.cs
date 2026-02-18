@@ -8,7 +8,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7144/");
+    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
 });
 
 var app = builder.Build();
