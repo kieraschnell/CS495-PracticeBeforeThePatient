@@ -25,10 +25,6 @@ builder.Services.AddSingleton<DevAccessStore>();
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
 app.UseCors("BlazorApp");
 app.UseAuthorization();
 app.MapControllers();
