@@ -1,0 +1,493 @@
+﻿{
+  "title": "On-Field Exertional Heat Stroke — Emergency Management",
+  "setting": "Late-August varsity football practice. Ambient temperature 92°F (33°C), high humidity. Team was in full pads for 60 minutes.",
+  "learnerRole": "You are the Athletic Trainer of record on-field.",
+  "initialScene": {
+    "time": "Practice, immediately after activity",
+    "presentingCondition": "A 20-year-old collegiate football lineman collapses suddenly during a cool-down lap. He is confused and combative when teammates try to help.",
+    "initialVitals": {
+      "mentalStatus": "Confused, intermittently combative (GCS 12)",
+      "rectalTempC": 40.5,
+      "heartRate": 130,
+      "bloodPressure": "100/60",
+      "respiratoryRate": 24,
+      "skin": "Hot, diaphoretic"
+    },
+    "context": "You have two assistants, an AED nearby, typical sideline supplies (ice, towels, IV kit, oxygen, bag-valve mask, oral airways), and phone access to EMS. Crowd and teammates are anxious.",
+    "firstPrompt": "Describe your first on-field actions. What do you do next?"
+  },
+  "nodes": [
+    {
+      "id": "decision_1",
+      "text": "You approach the athlete who is confused and hot. The clock starts. Choices:\nA) Remove pads/clothing and begin immediate ice-water immersion on the sideline while assigning one staff to call EMS and one to monitor vitals.\nB) Move him to shade, cool with fans and misting plus ice packs to axilla/groin, call EMS.\nC) Place ice packs only and wait for EMS to arrive before doing more aggressive cooling.\nD) Give oral fluids (water) and remove helmet; call for rest and observe without aggressive cooling.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "1A",
+          "text": "Immediate cold-water immersion, remove equipment, continuous monitoring; delegate EMS call.",
+          "nextId": "after_cold_immersion"
+        },
+        {
+          "id": "1B",
+          "text": "Move to shade, mist/fan, targeted ice packs, call EMS.",
+          "nextId": "after_passive_cooling"
+        },
+        {
+          "id": "1C",
+          "text": "Apply ice packs and wait for EMS—no aggressive cooling until they arrive.",
+          "nextId": "after_delay_wait"
+        },
+        {
+          "id": "1D",
+          "text": "Give oral fluids and rest; no active cooling beyond removing helmet.",
+          "nextId": "terminal_delay_death"
+        }
+      ]
+    },
+    {
+      "id": "after_cold_immersion",
+      "text": "You initiate rapid cold-water immersion. After 6 minutes: rectal temp 39.0°C, heart rate 110, BP 106/64, mental status improving (GCS 14). EMS is en route but estimated 12 minutes out. Choices for next action:\nA) Maintain immersion until rectal temp <39.0°C, provide high-flow oxygen, prepare for IV access and continued monitoring.\nB) Remove from immersion now (temperature improving), dry and continue passive cooling; prepare to transfer to EMS when they arrive.\nC) Attempt endotracheal intubation immediately on-field by your staff member to secure airway before transfer.\nD) Stop interventions and let teammates help move him to the sideline; wait for EMS.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "2A",
+          "text": "Continue immersion until cooled safely, provide oxygen, establish IV access, continuous monitoring.",
+          "nextId": "after_maintain_and_iv"
+        },
+        {
+          "id": "2B",
+          "text": "Remove from immersion and switch to passive cooling, call for rapid transport.",
+          "nextId": "after_remove_passive"
+        },
+        {
+          "id": "2C",
+          "text": "Attempt on-field endotracheal intubation by a staff member without full airway equipment or RSI drugs.",
+          "nextId": "after_onfield_intubation"
+        },
+        {
+          "id": "2D",
+          "text": "Stop active measures and let teammates move him to a bench while waiting for EMS.",
+          "nextId": "after_stop_and_wait"
+        }
+      ]
+    },
+    {
+      "id": "after_passive_cooling",
+      "text": "You move the athlete to shade, start misting/fans and place ice packs. After 10 minutes: rectal temp 40.0°C, HR 125, BP 98/58, mental status unchanged (GCS 12). EMS estimates 10–12 minutes arrival. Choices:\nA) Convert to immediate cold-water immersion on-field now while delegating continued monitoring and IV access.\nB) Continue passive cooling and give oral fluids; arrange for EMS transport when they arrive.\nC) Delay immersion, focus on observation and letting EMS lead cooling on arrival.\nD) Remove helmet and let athlete drink water while you call for additional cold packs only.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "2A_passive",
+          "text": "Convert to immediate cold-water immersion now.",
+          "nextId": "after_cold_immersion_from_passive"
+        },
+        {
+          "id": "2B_passive",
+          "text": "Continue passive cooling and give oral fluids; await EMS.",
+          "nextId": "after_passive_continue"
+        },
+        {
+          "id": "2C_passive",
+          "text": "Delay aggressive cooling; wait for EMS to perform interventions.",
+          "nextId": "after_delay_worsen"
+        },
+        {
+          "id": "2D_passive",
+          "text": "Give water and extra ice packs only; limit intervention.",
+          "nextId": "terminal_delay_death2"
+        }
+      ]
+    },
+    {
+      "id": "after_delay_wait",
+      "text": "You applied ice packs but waited for EMS. After 8 minutes: rectal temp rises to 41.0°C, athlete has a generalized tonic-clonic seizure; GCS drops to 6. Choices:\nA) Begin cold-water immersion immediately and protect airway with bag-valve-mask ventilation; call for urgent advanced airway.\nB) Allow EMS to manage seizure on arrival while continuing only ice packs.\nC) Attempt oral suction and give oral fluids during the seizure.\nD) Do chest compressions because pulse is weak and irregular.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "2A_delay",
+          "text": "Start immediate immersion and BVM ventilation; secure airway if able.",
+          "nextId": "after_rescue_from_seizure"
+        },
+        {
+          "id": "2B_delay",
+          "text": "Wait for EMS to handle seizure; continue ice packs.",
+          "nextId": "terminal_severe_brain_injury"
+        },
+        {
+          "id": "2C_delay",
+          "text": "Attempt oral suction and give oral fluids during seizure.",
+          "nextId": "terminal_choking_death"
+        },
+        {
+          "id": "2D_delay",
+          "text": "Start chest compressions because pulse is weak and irregular.",
+          "nextId": "after_compressions_recoverable"
+        }
+      ]
+    },
+    {
+      "id": "terminal_delay_death",
+      "text": "After 12 minutes without aggressive cooling, the athlete becomes unresponsive. He progresses to ventricular arrhythmia and cannot be resuscitated on scene. The case ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non-recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_delay_death2",
+      "text": "Passive measures and oral fluids fail. The athlete deteriorates over minutes, becomes unresponsive and later suffers cardiac arrest during transit to care. The case ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non-recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "after_maintain_and_iv",
+      "text": "You continue immersion safely until rectal temp reaches 38.5°C. You provide high-flow O2 and establish IV access (18G). Vitals now: T 38.5°C, HR 100, BP 110/70, GCS 15. EMS arrives and asks about disposition. Choices:\nA) Transfer to nearest emergency department with structured handoff; remain with patient through EMS handoff and provide your cooling records.\nB) Allow EMS to decide while you return to team; the athlete feels better and asks to sit up.\nC) Stop cooling and recommend transport but sign athlete out to family once responsive.\nD) Clear athlete to return to practice now since vitals improved.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "4A",
+          "text": "Transfer to ED with structured handoff; remain for handoff and documentation.",
+          "nextId": "end_success"
+        },
+        {
+          "id": "4B",
+          "text": "Return to duties and let EMS decide; trust them with care and leave the scene.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "4C",
+          "text": "Recommend transport but sign athlete out to family when he wants to go home.",
+          "nextId": "end_late_complication"
+        },
+        {
+          "id": "4D",
+          "text": "Clear athlete to return to practice after observation on sideline.",
+          "nextId": "terminal_return_practice_death"
+        }
+      ]
+    },
+    {
+      "id": "after_remove_passive",
+      "text": "You stop immersion early and switch to passive cooling. After transfer, rectal temp rebounds to 39.5°C over 10 minutes; athlete is lethargic (GCS 13). EMS arrives and asks about on-field care. Choices:\nA) Explain your interventions, request rapid transport to ED for continued monitoring, and hand off care.\nB) Say cooling was done and allow athlete to be evaluated by team physician only.\nC) Reinitiate immediate immersion in the ambulance against local protocol.\nD) Discharge athlete from sideline care to return home with instructions.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "3A_remove",
+          "text": "Request rapid transport and hand off with full report.",
+          "nextId": "end_success_delayed"
+        },
+        {
+          "id": "3B_remove",
+          "text": "Allow team physician to manage and remain at sidelines.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3C_remove",
+          "text": "Reinitiate immersion in ambulance without clearance.",
+          "nextId": "after_ambulance_immersion_complication"
+        },
+        {
+          "id": "3D_remove",
+          "text": "Release athlete to go home with instructions.",
+          "nextId": "terminal_late_multi_organ_failure"
+        }
+      ]
+    },
+    {
+      "id": "after_onfield_intubation",
+      "text": "An unplanned on-field intubation attempt leads to bradycardia and hypotension; you interrupt and provide BVM ventilation. Temp 39.2°C, GCS 8. EMS arrives and prepares RSI-capable airway control. Choices:\nA) Assist EMS with rapid sequence intubation and sedation under their guidance and continue cooling.\nB) Attempt another intubation immediately without medications.\nC) Cease airway attempts and continue BVM while waiting for EMS to provide definitive airway.\nD) Remove airway attempts and let teammates move him without airway protection.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "3A_intubation",
+          "text": "Assist EMS with RSI and continue cooling and IV resuscitation.",
+          "nextId": "end_success"
+        },
+        {
+          "id": "3B_intubation",
+          "text": "Attempt another intubation without RSI drugs.",
+          "nextId": "terminal_airway_complication"
+        },
+        {
+          "id": "3C_intubation",
+          "text": "Continue BVM and let EMS handle definitive airway.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3D_intubation",
+          "text": "Stop airway management and let untrained staff move him.",
+          "nextId": "terminal_choking_death"
+        }
+      ]
+    },
+    {
+      "id": "after_stop_and_wait",
+      "text": "You stop active measures. After 7 minutes without immersion, athlete becomes more obtunded (GCS 9) and develops hypotension. EMS arrives. Choices:\nA) Resume aggressive cooling and establish IV access immediately before handoff.\nB) Allow EMS to perform cooling; provide passive rewarming instructions.\nC) Document and transfer all responsibility immediately without further treatment.\nD) Tell family the athlete is stable and release to them.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "3A_stop",
+          "text": "Resume aggressive cooling and establish IV access prior to handoff.",
+          "nextId": "after_rescue_from_delay"
+        },
+        {
+          "id": "3B_stop",
+          "text": "Wait for EMS to perform cooling.",
+          "nextId": "terminal_severe_brain_injury"
+        },
+        {
+          "id": "3C_stop",
+          "text": "Hand off immediately without further treatment.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3D_stop",
+          "text": "Release to family on the spot.",
+          "nextId": "terminal_late_multi_organ_failure"
+        }
+      ]
+    },
+    {
+      "id": "after_cold_immersion_from_passive",
+      "text": "You convert to immersion; over next 8 minutes temp falls to 38.6°C, HR 110, GCS 13. EMS arrives. Choices:\nA) Continue cooling until below 38.5°C, start IV, and transfer with clear handoff.\nB) Stop cooling now and send athlete with EMS without documentation.\nC) Let coaching staff decide transport while you return to duties.\nD) Discontinue active measures and allow athlete to rest on sideline.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "3A_conv",
+          "text": "Continue cooling to target, start IV, transfer with handoff.",
+          "nextId": "end_success_delayed"
+        },
+        {
+          "id": "3B_conv",
+          "text": "Stop cooling and rely on EMS without documentation.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3C_conv",
+          "text": "Let coaches decide transport and leave.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3D_conv",
+          "text": "Discontinue and observe on sideline.",
+          "nextId": "terminal_return_practice_death"
+        }
+      ]
+    },
+    {
+      "id": "after_passive_continue",
+      "text": "Passive cooling and oral fluids do not lower core temperature sufficiently; athlete becomes more lethargic during EMS transfer and requires escalation in ED. Choices:\nA) Provide full handoff and remain available to EMS for questions.\nB) Leave quickly; you have other athletes to manage.\nC) Advise family that the athlete was treated fully and no further care is needed.\nD) Refuse transfer because athlete declined further treatment.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "3A_passivecont",
+          "text": "Provide handoff and remain available.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3B_passivecont",
+          "text": "Leave the scene.",
+          "nextId": "terminal_late_complication"
+        },
+        {
+          "id": "3C_passivecont",
+          "text": "Assure family no further care needed.",
+          "nextId": "terminal_late_multi_organ_failure"
+        },
+        {
+          "id": "3D_passivecont",
+          "text": "Refuse transport and discharge.",
+          "nextId": "terminal_late_multi_organ_failure"
+        }
+      ]
+    },
+    {
+      "id": "after_rescue_from_seizure",
+      "text": "You start immersion and BVM ventilation. Seizure stops after 90 seconds with supportive care. Temp falls to 38.9°C over next 8 minutes, pulse stabilizes, GCS improves to 10. EMS arrives with advanced airway capability. Choices:\nA) Assist EMS with airway control and transfer with continuous cooling and IV fluids.\nB) Allow EMS to manage; sign out to coach once athlete is awake.\nC) Give oral acetaminophen and release athlete after observation.\nD) Attempt to mobilize athlete to a car for private transport.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "3A_seizure",
+          "text": "Assist EMS and transfer with full handoff.",
+          "nextId": "end_success"
+        },
+        {
+          "id": "3B_seizure",
+          "text": "Leave responsibility to EMS and return to duties.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3C_seizure",
+          "text": "Give acetaminophen and discharge after observation.",
+          "nextId": "terminal_late_multi_organ_failure"
+        },
+        {
+          "id": "3D_seizure",
+          "text": "Move athlete privately to car for transport.",
+          "nextId": "terminal_transport_complication"
+        }
+      ]
+    },
+    {
+      "id": "after_compressions_recoverable",
+      "text": "You start compressions, pulse and rhythm respond with CPR and cooling started. EMS arrives and provides ACLS; patient stabilizes. Choices:\nA) Continue to assist EMS with documentation and handoff.\nB) Stop involvement once EMS arrives and leave.\nC) Refuse to share interventions used.\nD) Authorize removal of cooling during transport because chest compressions were done.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "3A_compress",
+          "text": "Assist EMS with handoff and documentation.",
+          "nextId": "end_success"
+        },
+        {
+          "id": "3B_compress",
+          "text": "Leave scene once EMS arrives.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3C_compress",
+          "text": "Refuse to share interventions.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3D_compress",
+          "text": "Stop cooling during transport.",
+          "nextId": "terminal_late_complication"
+        }
+      ]
+    },
+    {
+      "id": "after_ambulance_immersion_complication",
+      "text": "Reinitiating immersion in the ambulance without coordination leads to equipment conflicts and delay; the athlete develops aspiration and needs intubation in ED. Outcome: prolonged hospitalization with complications. Choices:\nA) Document the reason and remain for handoff.\nB) Leave immediately.\nC) Tell EMS you were correct to reinitiate immersion.\nD) Refuse to assist with documentation.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "3A_amb",
+          "text": "Document and remain for handoff.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3B_amb",
+          "text": "Leave immediately.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3C_amb",
+          "text": "Defend your choice aggressively.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3D_amb",
+          "text": "Refuse to assist.",
+          "nextId": "end_partial_issue"
+        }
+      ]
+    },
+    {
+      "id": "after_rescue_from_delay",
+      "text": "You resume aggressive cooling and establish IV access. Temperature drops to 38.8°C; however, patient had a longer period of hyperthermia and remains lethargic (GCS 12). EMS takes patient to ED; outcome: prolonged monitoring and mild neurologic sequelae. Choices:\nA) Provide full documentation and remain for handoff.\nB) Minimize the events in your report and return to team duties.\nC) Blame delayed EMS response in your documentation.\nD) Try to hide the delay in your notes.\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "3A_rescue",
+          "text": "Provide full documentation and remain for handoff.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3B_rescue",
+          "text": "Minimize events and return to duties.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3C_rescue",
+          "text": "Blame EMS delays in report.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3D_rescue",
+          "text": "Omit critical details from documentation.",
+          "nextId": "end_partial_issue"
+        }
+      ]
+    },
+    {
+      "id": "terminal_airway_complication",
+      "text": "A second poorly performed airway attempt precipitates severe hypoxia and cardiac arrest on-field. Resuscitative efforts fail. Case ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non-recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_choking_death",
+      "text": "Airway left unprotected leads to aspiration and rapid deterioration; the athlete cannot be resuscitated. Case ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non-recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_transport_complication",
+      "text": "Private transport leads to delayed definitive care and poor outcome. Case ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non-recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_return_practice_death",
+      "text": "Clearing the athlete to return after inadequate cooling leads to collapse during practice; fatal outcome later. Case ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non-recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_late_multi_organ_failure",
+      "text": "Delayed or insufficient cooling produced irreversible multi-organ injury; the athlete survives initial event but with severe permanent deficits. Case ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non-recoverable_severe_disability",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "end_success",
+      "text": "You performed rapid, guideline-based on-field resuscitation: immediate cold‑water immersion, airway/oxygen management as needed, IV access, and structured handoff to EMS/ED. The athlete is transported to the ED awake, with no short‑term neurologic deficit and an expected full recovery.\nScenario complete.",
+      "end": true,
+      "outcome": "optimal_recovery",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "end_success_delayed",
+      "text": "Interventions were ultimately effective but delayed or partially suboptimal. The athlete requires ED monitoring and had transient complications (seizure or transient hypotension) but is expected to survive with possible short-term deficits.\nScenario complete.",
+      "end": true,
+      "outcome": "suboptimal_recovery",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "end_partial_issue",
+      "text": "You provided some appropriate interventions but omitted critical elements (timely immersion, complete airway/IV management, or clear handoff). The athlete required ED care; outcome variable with possible prolonged recovery and medicolegal scrutiny.\nScenario complete.",
+      "end": true,
+      "outcome": "partial_recovery_with_issues",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    }
+  ],
+  "feedbackSummary": {
+    "decisionByDecision": [
+      {
+        "decisionPoint": 1,
+        "review": "Immediate recognition and rapid reduction of core temperature (preferably via cold-water immersion) is the highest priority. Passive cooling and oral fluids are inadequate for exertional heat stroke and risk progression to seizures, arrhythmia, and death."
+      },
+      {
+        "decisionPoint": 2,
+        "review": "Airway and breathing must be monitored continuously. Provide high-flow oxygen and be prepared to ventilate. Definitive airway should be performed by an experienced provider with appropriate medications and monitoring—avoid unplanned intubation attempts."
+      },
+      {
+        "decisionPoint": 3,
+        "review": "Establish IV access early for isotonic crystalloid administration and to facilitate medication delivery. Oral fluids are insufficient for patients with AMS. Inappropriate fluids or delays worsen outcomes."
+      },
+      {
+        "decisionPoint": 4,
+        "review": "Transfer to definitive care with a structured, documented handoff is required even after apparent stabilization. Leaving the scene prematurely or clearing the athlete to return to play risks delayed deterioration and legal consequences."
+      }
+    ],
+    "keyTeachingPoints": [
+      "Rapid recognition and immediate cold‑water immersion are the most critical lifesaving actions for exertional heat stroke.",
+      "Simultaneously cool and maintain airway/breathing; cooling must not be delayed for airway or transport issues.",
+      "Establish IV access and monitor vitals continuously; treat secondary complications (seizure, hypotension, rhabdomyolysis) early.",
+      "Provide clear, documented handoff to EMS/ED and remain involved until care is transferred; release decisions require medical clearance.",
+      "Some errors (delayed cooling, unmanaged airway) can be irreversible—prioritize time-sensitive interventions."
+    ],
+    "bocStyleTakeaways": [
+      "Prioritize time-sensitive interventions that directly affect physiology (rapid cooling before definitive diagnosis).",
+      "Anticipate complications: secure airway support, establish IV access, monitor for arrhythmia and seizure, and communicate clearly with EMS/ED.",
+      "Document interventions, timing, and observations precisely; decisions and timing influence patient outcomes and professional accountability.",
+      "Escalate early when resources or skills are insufficient; you remain responsible for care until a formal handoff is completed."
+    ],
+    "reflectionPrompts": [
+      "Which decision you made had the greatest impact on the athlete's physiologic trajectory?",
+      "Where in the timeline could earlier or different action have prevented deterioration?",
+      "How would you summarize this case in a structured handoff to EMS to ensure continuity of care?"
+    ]
+  }
+}

@@ -1,0 +1,522 @@
+﻿{
+  "title": "On-Field Anaphylaxis — Rapid Management",
+  "setting": "Early-season cross-country meet on a cool morning. Small crowd, one assistant ATC, first-aid kit, epinephrine auto-injector (1 mg/1 mL syringe not present on scene), oxygen, inhaler, IV supplies, phone access to EMS.",
+  "learnerRole": "You are the Athletic Trainer of record on-course.",
+  "initialScene": {
+    "time": "Immediately after a race",
+    "presentingCondition": "A 19-year-old female runner reports sudden throat tightness and lightheadedness within minutes of finishing. Teammates note she was eating a granola bar pre-race and had a previous mild rash to unknown food months ago.",
+    "initialVitals": {
+      "mentalStatus": "Alert but anxious, speaking in short phrases",
+      "heartRate": 120,
+      "bloodPressure": "92/58",
+      "respiratoryRate": 26,
+      "spO2": 94,
+      "skin": "Generalized urticaria and flushing, perioral swelling observed"
+    },
+    "context": "You have one assistant, an oxygen tank with mask, a bronchodilator inhaler, oral antihistamine, intramuscular epinephrine auto-injector(s) stored in team medical bag, IV kit, towels. EMS ETA 10–12 minutes. What do you do next?"
+  },
+  "nodes": [
+    {
+      "id": "decision_1",
+      "text": "You approach the athlete who is anxious, has throat tightness, urticaria, hypotension, and mild swelling. Options:\nA) Administer intramuscular epinephrine immediately (0.3–0.5 mg IM into lateral thigh), call EMS, position supine with legs elevated. (Appropriate: epinephrine is first-line and time-sensitive.)\nB) Give albuterol inhaler and high-flow oxygen; monitor and call EMS. (Partially appropriate: bronchodilator helps bronchospasm but does not treat systemic hypotension.)\nC) Offer oral antihistamine (diphenhydramine) and observe while calling EMS. (Incorrect but recoverable: antihistamines are adjunctive and delay of epinephrine risks deterioration.)\nD) Allow patient to sit up, provide water, and call coach to drive her to student health. (Incorrect, non-recoverable: delays definitive treatment and transport by nonmedical personnel may be fatal.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "1A",
+          "text": "Give IM epinephrine immediately, call EMS, position supine with legs elevated.",
+          "explanation": "Appropriate: IM epinephrine is the first-line, life‑saving intervention for anaphylaxis and should be delivered promptly prior to other interventions.",
+          "nextId": "after_epi_immediate"
+        },
+        {
+          "id": "1B",
+          "text": "Administer albuterol and oxygen; call EMS.",
+          "explanation": "Partially appropriate: addresses bronchospasm but does not reverse vasodilation/hypotension caused by anaphylaxis; epinephrine remains necessary.",
+          "nextId": "after_albuterol_partial"
+        },
+        {
+          "id": "1C",
+          "text": "Give oral diphenhydramine and observe while waiting for EMS.",
+          "explanation": "Incorrect but recoverable: antihistamines may relieve cutaneous symptoms but do not treat airway compromise or hypotension—delay increases risk of deterioration.",
+          "nextId": "after_antihistamine_delay"
+        },
+        {
+          "id": "1D",
+          "text": "Provide water and arrange nonmedical transport to student health.",
+          "explanation": "Incorrect, non-recoverable: delaying epinephrine and relying on nonmedical transport in a hypotensive, airway‑threatened patient risks rapid decompensation and death.",
+          "nextId": "terminal_no_epi_death"
+        }
+      ]
+    },
+    {
+      "id": "after_epi_immediate",
+      "text": "You give 0.3 mg IM epinephrine into the lateral thigh, call EMS, position patient supine with legs elevated, and start high-flow oxygen. After 2 minutes: HR 110, BP 100/66, respiratory distress decreased, swelling less prominent, mental status stable. EMS ETA 9 minutes. Choices:\nA) Prepare IV access and give a second IM epinephrine in 5 minutes if symptoms persist; arrange immediate transport to ED with structured handoff. (Appropriate: anticipate biphasic reactions and prepare escalation.)\nB) Rely on the single dose of epinephrine and give only antihistamine/steroid; document and await EMS. (Partially appropriate: adjuncts are useful but do not replace monitoring/possible repeat epi.)\nC) Attempt to intubate now because of perioral swelling to preempt airway compromise. (Incorrect but recoverable: invasive airway attempt by non‑expert risks worsening airway and hemodynamics; coordinate with EMS.)\nD) Stop interventions and allow family to take her home once she feels better. (Incorrect, non-recoverable: discharge after anaphylaxis risks biphasic or recurrent severe reaction.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "2A",
+          "text": "Prepare IV access, plan for possible second IM epinephrine, and arrange ED transport with full handoff.",
+          "explanation": "Appropriate: early IV access allows fluid resuscitation for hypotension; planning for repeat epinephrine and prompt ED evaluation is best practice.",
+          "nextId": "after_prepare_iv_and_plan"
+        },
+        {
+          "id": "2B",
+          "text": "Administer diphenhydramine and a steroid, rely on single epi dose, and await EMS.",
+          "explanation": "Partially appropriate: adjunct medications help cutaneous symptoms and inflammation but are not substitutes for repeat epinephrine or active monitoring for recurrence.",
+          "nextId": "after_adjuncts_only"
+        },
+        {
+          "id": "2C",
+          "text": "Attempt immediate on-site intubation to secure airway.",
+          "explanation": "Incorrect but recoverable: attempting definitive airway without RSI or expert backup risks provoking collapse or failed airway; coordinate with EMS/advanced providers.",
+          "nextId": "after_failed_intubation"
+        },
+        {
+          "id": "2D",
+          "text": "Discontinue active care and allow discharge to family when she feels improved.",
+          "explanation": "Incorrect, non-recoverable: early discharge after anaphylaxis can result in unmonitored recurrence and fatal outcomes.",
+          "nextId": "terminal_discharge_death"
+        }
+      ]
+    },
+    {
+      "id": "after_albuterol_partial",
+      "text": "You give albuterol via inhaler and oxygen. Bronchospasm improves transiently but urticaria and hypotension persist; patient becomes more drowsy. EMS ETA 10 minutes. Choices:\nA) Immediately give IM epinephrine now and call EMS. (Appropriate: delayed epinephrine must be administered promptly once recognition is clear.)\nB) Continue bronchodilator therapy and give oral antihistamine; wait for EMS to give epinephrine. (Incorrect but recoverable: further delay increases risk of airway compromise and shock.)\nC) Attempt to treat hypotension with oral fluids and position upright to help breathing. (Incorrect, non-recoverable: oral fluids and upright position are contraindicated for hypotensive, airway-compromised patient.)\nD) Attempt nebulized epinephrine as sole therapy. (Partially appropriate: nebulized epinephrine may help upper airway edema but does not reliably treat systemic anaphylaxis.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "1A_from_alb",
+          "text": "Give IM epinephrine immediately and call EMS.",
+          "explanation": "Appropriate: epinephrine is required to treat systemic features—delaying it risks progression to shock and airway compromise.",
+          "nextId": "after_delayed_epi_admin"
+        },
+        {
+          "id": "1B_from_alb",
+          "text": "Continue bronchodilators and give oral antihistamine; await EMS.",
+          "explanation": "Incorrect but recoverable: treating symptoms without addressing systemic mediator release delays definitive care and can worsen outcome.",
+          "nextId": "after_worsen_waiting"
+        },
+        {
+          "id": "1C_from_alb",
+          "text": "Offer oral fluids and keep patient upright to assist breathing.",
+          "explanation": "Incorrect, non-recoverable: oral fluids in hypotensive patients risk aspiration; upright position may worsen perfusion.",
+          "nextId": "terminal_aspiration_cardiac"
+        },
+        {
+          "id": "1D_from_alb",
+          "text": "Try nebulized epinephrine as primary therapy.",
+          "explanation": "Partially appropriate: nebulized epinephrine can help laryngeal edema but should not replace IM epinephrine for systemic anaphylaxis.",
+          "nextId": "after_nebulized_epinephrine"
+        }
+      ]
+    },
+    {
+      "id": "after_antihistamine_delay",
+      "text": "You gave oral diphenhydramine and waited. After 6 minutes the athlete's voice becomes hoarse, stridor develops, BP falls to 78/44, and she appears confused. Choices:\nA) Administer IM epinephrine immediately, call for urgent airway support, and position supine with legs elevated. (Appropriate: convert to definitive anaphylaxis management without delay.)\nB) Continue antihistamine and give oxygen only while waiting for EMS. (Incorrect but recoverable: continued delay risks cardiac arrest.)\nC) Try to place oral airway and give oral fluids to improve BP. (Incorrect, non-recoverable: oral fluids and airway manipulation in a compromised patient risk aspiration and further deterioration.)\nD) Perform subcutaneous epinephrine injection because IM is not available. (Partially appropriate: subcutaneous injection is slower and less reliable than IM but better than no epinephrine.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "1A_from_antihistamine",
+          "text": "Give IM epinephrine immediately and call urgent airway support.",
+          "explanation": "Appropriate: immediate epinephrine and airway planning are essential when the patient deteriorates—do not delay for adjuncts.",
+          "nextId": "after_rescue_from_delay"
+        },
+        {
+          "id": "1B_from_antihistamine",
+          "text": "Continue antihistamine and oxygen only; await EMS.",
+          "explanation": "Incorrect but recoverable: insufficient treatment while hypotension and airway compromise progress increases risk of poor outcome.",
+          "nextId": "terminal_severe_brain_injury"
+        },
+        {
+          "id": "1C_from_antihistamine",
+          "text": "Place an oral airway and give oral fluids.",
+          "explanation": "Incorrect, non-recoverable: oral airway in a not-fully-protecting airway and giving oral fluids risks aspiration and rapid deterioration.",
+          "nextId": "terminal_aspiration_death"
+        },
+        {
+          "id": "1D_from_antihistamine",
+          "text": "Give subcutaneous epinephrine because IM supplies are not handy.",
+          "explanation": "Partially appropriate: SC epinephrine has slower absorption but is preferable to no epinephrine—still requires prompt escalation and monitoring.",
+          "nextId": "after_subcutaneous_epirescue"
+        }
+      ]
+    },
+    {
+      "id": "after_prepare_iv_and_plan",
+      "text": "You obtain IV access, start isotonic crystalloid bolus for hypotension, prepare repeat epi if needed, and document interventions. Patient remains stable: HR 110, BP 102/68, improved respiratory effort. EMS arrives and asks about disposition. Choices:\nA) Transfer to ED with structured handoff, provide times and doses of epinephrine and fluids, and remain until handoff is complete. (Appropriate: ED observation is required and your clear documentation supports continuity.)\nB) Allow patient to refuse transport once improved and sign out to family after documentation. (Incorrect but recoverable: patient after anaphylaxis should be transported for observation; refusal introduces medicolegal risk.)\nC) Send patient to urgent care by private vehicle because symptoms improved. (Incorrect, non-recoverable: private transport may delay advanced care if recurrence occurs.)\nD) Discontinue monitoring and return to meet coaching obligations. (Incorrect, non-recoverable: abandoning a recent anaphylaxis patient risks missed deterioration.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "4A",
+          "text": "Transfer to ED with structured handoff and remain through handoff.",
+          "explanation": "Appropriate: observation for biphasic reactions and continued monitoring/therapy in ED are standard; staying for handoff ensures continuity.",
+          "nextId": "end_success"
+        },
+        {
+          "id": "4B",
+          "text": "Allow refusal of transport and release to family after documentation.",
+          "explanation": "Incorrect but recoverable: while patient autonomy matters, releasing a patient without medical clearance after anaphylaxis invites risk and liability.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "4C",
+          "text": "Recommend private vehicle transport to urgent care.",
+          "explanation": "Incorrect, non-recoverable: urgent care lacks resources for potential recurrent severe anaphylaxis; private transport circumvents EMS and advanced care.",
+          "nextId": "terminal_private_transport_death"
+        },
+        {
+          "id": "4D",
+          "text": "Stop monitoring and return to duties.",
+          "explanation": "Incorrect, non-recoverable: abandoning post-anaphylaxis patient can lead to unobserved deterioration and harm.",
+          "nextId": "terminal_abandonment_death"
+        }
+      ]
+    },
+    {
+      "id": "after_adjuncts_only",
+      "text": "You give diphenhydramine and methylprednisolone, monitor closely. Over 15 minutes, vitals slowly improve but intermittent wheeze and hypotension recur; EMS arrives. Choices:\nA) Advise EMS of treatments given and request rapid transport to ED; be prepared to administer repeat epi if necessary. (Appropriate: adjuncts help but do not replace vigilance and readiness to repeat epinephrine.)\nB) Declare resolved and clear athlete to return to activity. (Incorrect, non-recoverable: early return risks life‑threatening recurrence.)\nC) Withhold further medication until ED evaluation. (Incorrect but recoverable: withholding epi if needed delays life‑saving treatment.)\nD) Sign athlete out to coach on condition they watch her for 24 hours. (Incorrect, non-recoverable: nonmedical observation is unsafe.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "4A_adj",
+          "text": "Provide full handoff to EMS and request ED transport with readiness for repeat epi.",
+          "explanation": "Appropriate: communicate interventions and stay prepared—adjuncts require observation in ED due to recurrence risk.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "4B_adj",
+          "text": "Clear athlete to resume activity.",
+          "explanation": "Incorrect, non-recoverable: returning to activity after anaphylaxis is unsafe and may lead to recurrence during exertion.",
+          "nextId": "terminal_return_practice_death"
+        },
+        {
+          "id": "4C_adj",
+          "text": "Withhold further meds and wait for ED.",
+          "explanation": "Incorrect but recoverable: unnecessary delay in ongoing management can worsen outcomes if relapse occurs.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "4D_adj",
+          "text": "Sign athlete out to coach for nonmedical observation.",
+          "explanation": "Incorrect, non-recoverable: nonmedical observation fails to provide necessary monitoring and interventions, risking serious harm.",
+          "nextId": "terminal_nonmedical_observation_death"
+        }
+      ]
+    },
+    {
+      "id": "after_failed_intubation",
+      "text": "Attempted on-site intubation without full support leads to hypoxia and bradycardia; you revert to BVM ventilation while calling EMS urgently. Patient becomes obtunded but responds to BVM and fluids. Choices:\nA) Continue BVM, prepare for assisted airway by EMS, and document events. (Appropriate: revert to basic airway and coordinate with advanced providers.)\nB) Attempt another intubation immediately. (Incorrect but recoverable: repeated failed attempts increase risk of hypoxia/arrest.)\nC) Stop oxygenation attempts and wait for EMS arrival. (Incorrect, non-recoverable: withholding ventilation risks arrest.)\nD) Attempt cricothyrotomy yourself. (Incorrect, non-recoverable if untrained: high risk of morbidity and death.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "3A_failedintub",
+          "text": "Continue BVM, prepare for EMS airway, and document events.",
+          "explanation": "Appropriate: revert to proven supportive measures and coordinate with advanced airway providers to minimize further harm.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "3B_failedintub",
+          "text": "Attempt another immediate intubation.",
+          "explanation": "Incorrect but recoverable: repeated attempts without advanced support risk further hypoxia and cardiac arrest.",
+          "nextId": "terminal_airway_complication_death"
+        },
+        {
+          "id": "3C_failedintub",
+          "text": "Cease ventilation and wait passively for EMS.",
+          "explanation": "Incorrect, non-recoverable: withholding ventilation during airway compromise will likely lead to arrest.",
+          "nextId": "terminal_no_ventilation_death"
+        },
+        {
+          "id": "3D_failedintub",
+          "text": "Attempt emergency cricothyrotomy yourself.",
+          "explanation": "Incorrect, non-recoverable if untrained: performing surgical airway without training or sterility can cause fatal complications.",
+          "nextId": "terminal_crico_death"
+        }
+      ]
+    },
+    {
+      "id": "after_delayed_epi_admin",
+      "text": "You give IM epinephrine after earlier bronchodilator. BP and respiratory status improve slowly; patient is somnolent but responsive. EMS arrives and prepares IV and monitoring. Choices:\nA) Explain delay, give medication times, prepare IV fluids, and transfer with handoff. (Appropriate: transparent documentation and escalation are essential.)\nB) Minimize the delay in your report and allow coach to transport privately. (Incorrect but recoverable: obfuscation and private transport risk continuity and safety.)\nC) Give a second IM epinephrine immediately without communicating to EMS. (Incorrect but recoverable: repeat dosing should be coordinated and documented.)\nD) Discontinue monitoring since patient reports feeling better. (Incorrect, non-recoverable: discharging monitoring risks missing biphasic reactions.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "2A_from_delay",
+          "text": "Document fully, initiate IV fluids, and transfer with EMS handoff.",
+          "explanation": "Appropriate: clear documentation, escalation, and ED observation are necessary after delayed epinephrine and instability.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "2B_from_delay",
+          "text": "Minimize events and allow private transport.",
+          "explanation": "Incorrect but recoverable: minimizing details undermines patient safety and legal accountability and risks poor continuity of care.",
+          "nextId": "terminal_private_transport_death"
+        },
+        {
+          "id": "2C_from_delay",
+          "text": "Give second IM epinephrine immediately without EMS coordination.",
+          "explanation": "Incorrect but recoverable: duplicate undocumented interventions complicate handoff and may cause dosing errors—coordinate with EMS.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "2D_from_delay",
+          "text": "Stop monitoring and return to duties.",
+          "explanation": "Incorrect, non-recoverable: abandoning a recently unstable anaphylaxis patient risks missed deterioration and severe harm.",
+          "nextId": "terminal_abandonment_death"
+        }
+      ]
+    },
+    {
+      "id": "after_worsen_waiting",
+      "text": "You delayed epinephrine; on reassessment the patient becomes hypotensive with worsening stridor. EMS is 5 minutes away. Choices:\nA) Administer IM epinephrine immediately and begin IV fluids; call for urgent airway backup. (Appropriate: convert to aggressive management without delay.)\nB) Keep monitoring and let EMS handle it on arrival. (Incorrect but recoverable: further delay increases risk of arrest.)\nC) Give only oxygen and nebulized bronchodilator. (Incorrect, non-recoverable: insufficient for systemic anaphylaxis.)\nD) Attempt to transfer patient to car to speed transport. (Incorrect, non-recoverable: private transport without airway/monitoring risks deterioration en route.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "2A_worsen",
+          "text": "Give IM epinephrine immediately, start fluids, and call for airway backup.",
+          "explanation": "Appropriate: when deterioration occurs, immediate epinephrine and fluid resuscitation are necessary while arranging advanced airway support.",
+          "nextId": "after_rescue_from_delay"
+        },
+        {
+          "id": "2B_worsen",
+          "text": "Wait for EMS arrival without further interventions.",
+          "explanation": "Incorrect but recoverable: waiting without intervention increases risk of cardiac arrest before EMS arrival.",
+          "nextId": "terminal_severe_brain_injury"
+        },
+        {
+          "id": "2C_worsen",
+          "text": "Administer oxygen and bronchodilator only.",
+          "explanation": "Incorrect, non-recoverable: treating bronchospasm alone fails to reverse anaphylactic vasodilation and airway edema, risking death.",
+          "nextId": "terminal_rapid_decompensation_death"
+        },
+        {
+          "id": "2D_worsen",
+          "text": "Move patient to private car for faster transport.",
+          "explanation": "Incorrect, non-recoverable: private transport without monitoring or airway support can result in uncontrolled deterioration.",
+          "nextId": "terminal_private_transport_death"
+        }
+      ]
+    },
+    {
+      "id": "after_nebulized_epinephrine",
+      "text": "You use nebulized racemic epinephrine; the voice and stridor mildly improve but hypotension persists. EMS is 8 minutes away. Choices:\nA) Give IM epinephrine now and establish IV access. (Appropriate: combine therapies—nebulized epi may help laryngeal edema but systemic IM epi is required.)\nB) Continue nebulized therapy only and await EMS. (Incorrect but recoverable: failure to address hypotension risks arrest.)\nC) Attempt subcutaneous epinephrine to avoid IM. (Partially appropriate: SC absorption is slower and less reliable than IM but better than none.)\nD) Stop treatment believing improvement is sufficient. (Incorrect, non-recoverable: premature cessation risks recurrence.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "neb_A",
+          "text": "Administer IM epinephrine and start IV fluids.",
+          "explanation": "Appropriate: combine airway-directed nebulized therapy with systemic IM epinephrine and IV fluids for hemodynamic support.",
+          "nextId": "after_rescue_from_delay"
+        },
+        {
+          "id": "neb_B",
+          "text": "Continue nebulized therapy only.",
+          "explanation": "Incorrect but recoverable: treating only the airway without correcting hypotension risks rapid deterioration.",
+          "nextId": "terminal_severe_brain_injury"
+        },
+        {
+          "id": "neb_C",
+          "text": "Give subcutaneous epinephrine.",
+          "explanation": "Partially appropriate: SC epi is inferior to IM for speed of absorption but preferable to no epinephrine; still requires escalation.",
+          "nextId": "after_subcutaneous_epirescue"
+        },
+        {
+          "id": "neb_D",
+          "text": "Stop therapy and observe.",
+          "explanation": "Incorrect, non-recoverable: stopping therapy when systemic features persist risks rebound or fatal recurrence.",
+          "nextId": "terminal_return_practice_death"
+        }
+      ]
+    },
+    {
+      "id": "after_subcutaneous_epirescue",
+      "text": "Subcutaneous epinephrine produces slow improvement in symptoms; BP rises modestly but patient remains somnolent. EMS arrives. Choices:\nA) Communicate interventions and transfer for ED observation and possible IV epinephrine. (Appropriate: SC epi is suboptimal; ED monitoring is required.)\nB) Discharge once vitals stabilize slightly. (Incorrect but recoverable: suboptimal therapy requires ED follow-up.)\nC) Give additional SC doses frequently to avoid EMS interventions. (Incorrect but recoverable: repeated SC dosing risks dosing errors and delayed effective treatment.)\nD) Refuse EMS transfer because you believe patient is stable. (Incorrect, non-recoverable: refusing transfer after inadequate therapy can lead to unmonitored deterioration.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "sc_A",
+          "text": "Provide a full handoff and transfer to ED for observation and possible IV therapy.",
+          "explanation": "Appropriate: communicate the limitations of SC epi and ensure ED can provide definitive care and monitoring.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "sc_B",
+          "text": "Discharge after modest stabilization.",
+          "explanation": "Incorrect but recoverable: discharge after suboptimal therapy risks rebound and legal consequences.",
+          "nextId": "terminal_late_multi_organ_failure"
+        },
+        {
+          "id": "sc_C",
+          "text": "Administer repeated SC epinephrine yourself.",
+          "explanation": "Incorrect but recoverable: repeated dosing without proper monitoring risks cardiovascular complications and confusion in handoff.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "sc_D",
+          "text": "Refuse EMS transfer and keep patient at meet.",
+          "explanation": "Incorrect, non-recoverable: failing to transfer after inadequate therapy places patient at high risk of untreated recurrence.",
+          "nextId": "terminal_abandonment_death"
+        }
+      ]
+    },
+    {
+      "id": "after_rescue_from_delay",
+      "text": "You administer epinephrine (IM or IV as indicated), begin IV fluids, and provide oxygen and BVM support when needed. Patient stabilizes slowly: BP 98/64, HR 110, speaking in short phrases, urticaria fading. EMS arrives and prepares for transport. Choices:\nA) Give structured verbal and written handoff detailing timing/doses, remain until patient is transferred to EMS/ED. (Appropriate: documentation and remaining for handoff are standard obligations.)\nB) Leave once EMS arrives because care is now 'their responsibility'. (Incorrect but recoverable: EMS arrival does not immediately terminate your professional responsibility until handoff.)\nC) Minimize events in documentation and tell EMS you'll fill details later. (Incorrect but recoverable: incomplete documentation harms continuity and carries professional risk.)\nD) Encourage private transport by family to avoid ED waiting. (Incorrect, non-recoverable: private transport may delay care for biphasic reactions.)\nWhat do you do next?",
+      "choices": [
+        {
+          "id": "final_A",
+          "text": "Provide detailed handoff and stay through transfer.",
+          "explanation": "Appropriate: thorough handoff and presence through transfer ensure continuity and reduce risk of errors.",
+          "nextId": "end_success"
+        },
+        {
+          "id": "final_B",
+          "text": "Leave immediately once EMS arrives.",
+          "explanation": "Incorrect but recoverable: leaving before a formal handoff risks omission of critical information and possible adverse outcomes.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "final_C",
+          "text": "Minimize or delay documentation about the incident.",
+          "explanation": "Incorrect but recoverable: incomplete records impede care continuity and expose the clinician to medicolegal risk.",
+          "nextId": "end_partial_issue"
+        },
+        {
+          "id": "final_D",
+          "text": "Recommend private family transport to speed disposition.",
+          "explanation": "Incorrect, non-recoverable: private transport can lead to delayed management of biphasic or recurrent severe reactions.",
+          "nextId": "terminal_private_transport_death"
+        }
+      ]
+    },
+    {
+      "id": "terminal_no_epi_death",
+      "text": "Delay in delivering epinephrine and arranging nonmedical transport results in rapid airway compromise and circulatory collapse; resuscitation is unsuccessful. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_discharge_death",
+      "text": "Discharging the athlete after initial improvement results in a biphasic recurrence during private transport; the patient arrests and cannot be resuscitated. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_aspiration_cardiac",
+      "text": "Oral fluids and poor airway management lead to aspiration and rapid respiratory failure; resuscitation fails. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_aspiration_death",
+      "text": "Attempts to place oral airway and give oral fluids during airway compromise cause aspiration and fatal deterioration. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_private_transport_death",
+      "text": "Private transport delays definitive therapy during recurrence; patient arrests en route and cannot be resuscitated. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_abandonment_death",
+      "text": "Abandoning the patient after initial stabilization results in unobserved deterioration and fatal outcome. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_severe_brain_injury",
+      "text": "Delay in definitive therapy leads to prolonged hypotension and hypoxia with severe brain injury; the athlete survives with major neurologic deficits. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_severe_disability",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_airway_complication_death",
+      "text": "Repeated emergent airway attempts precipitate catastrophic hypoxia and cardiac arrest; resuscitation fails. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_no_ventilation_death",
+      "text": "Withholding ventilation during airway compromise leads to cardiac arrest; resuscitation unsuccessful. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_crico_death",
+      "text": "Unskilled surgical airway attempt results in catastrophic hemorrhage and death. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_return_practice_death",
+      "text": "Allowing return to exertion after partial treatment triggers recurrence during activity with fatal outcome. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "end_success",
+      "text": "You delivered timely IM epinephrine, supported airway/oxygenation, established IV access and fluids when needed, and transferred the patient with clear, documented handoff. The athlete is observed in the ED and discharged after appropriate monitoring with an epinephrine prescription and follow-up plan.\nScenario complete.",
+      "end": true,
+      "outcome": "optimal_recovery",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "end_partial_issue",
+      "text": "Interventions were provided but delayed or incomplete (e.g., initial antihistamines instead of epinephrine, suboptimal airway management, or unclear handoff). The athlete requires ED care and may have prolonged observation or minor sequelae; professional remediation recommended.\nScenario complete.",
+      "end": true,
+      "outcome": "suboptimal_recovery",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_nonmedical_observation_death",
+      "text": "Nonmedical observation after incomplete therapy allowed recurrence with fatal outcome. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_death",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    },
+    {
+      "id": "terminal_late_multi_organ_failure",
+      "text": "Delayed or inadequate therapy produced prolonged hypoperfusion and multi-organ failure; the athlete survives with severe disability. Scenario ends.\nWhat do you do next?",
+      "end": true,
+      "outcome": "non_recoverable_severe_disability",
+      "finalPrompt": "Scenario complete. Proceed to feedback summary."
+    }
+  ],
+  "feedbackSummary": {
+    "decisionByDecision": [
+      {
+        "decisionPoint": 1,
+        "review": "Recognition of anaphylaxis and immediate IM epinephrine are the highest priority. Epinephrine rapidly reverses vasodilation, bronchospasm, and laryngeal edema—delays substantially increase morbidity and mortality."
+      },
+      {
+        "decisionPoint": 2,
+        "review": "After initial epinephrine, anticipate the need for IV fluids, repeat epinephrine, airway support, and ED observation. Adjuncts (antihistamines/steroids, bronchodilators) support care but do not replace epinephrine."
+      },
+      {
+        "decisionPoint": 3,
+        "review": "If initial management was incomplete or delayed, escalate immediately—give epinephrine without hesitation, secure IV access, and prepare for advanced airway rather than attempting high‑risk procedures alone."
+      },
+      {
+        "decisionPoint": 4,
+        "review": "Disposition matters: transfer with structured handoff and documentation ensures continuity; discharging or using private transport after anaphylaxis risks biphasic reactions and medicolegal consequences."
+      }
+    ],
+    "keyTeachingPoints": [
+      "Administer intramuscular epinephrine immediately for suspected anaphylaxis; do not wait for EMS or adjunctive medications.",
+      "Simultaneously support airway/oxygenation and establish IV access for fluids and medication delivery.",
+      "Adjuncts (antihistamines, steroids, bronchodilators) are secondary—use them after or concurrent with epinephrine as appropriate.",
+      "Anticipate recurrence (biphasic reaction) and arrange ED observation; remain through handoff and document all timings and doses."
+    ],
+    "bocStyleTakeaways": [
+      "Prioritize physiologic stabilization with time‑sensitive, evidence‑based interventions (IM epinephrine first) rather than relying on symptomatic treatments.",
+      "Escalate early when the patient demonstrates systemic involvement—airway compromise or hypotension requires immediate action and coordination with advanced providers.",
+      "Document actions, timings and clinical responses precisely; structured handoff is part of clinical responsibility until care is transferred.",
+      "Nonmedical transport or premature discharge after anaphylaxis is inappropriate due to risk of rapid recurrence and insufficient monitoring."
+    ],
+    "reflectionPrompts": [
+      "Which action had the greatest influence on the patient's physiologic trajectory, and why?",
+      "Where did delays or choice of adjunctive therapies alter the outcome, and how could you prioritize differently?",
+      "How would you concisely summarize this case and your interventions in a structured handoff to EMS/ED?"
+    ]
+  }
+}
