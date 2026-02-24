@@ -1,0 +1,109 @@
+{
+  "title": "Friday Night Collapse - Rapid Sideline Decision Making",
+  "root": {
+    "type": "mcq",
+    "prompt": "A 17-year-old soccer midfielder collapses after a sprint and does not respond to verbal commands. What is your first action?",
+    "info": {
+      "narration": "Home game, 2nd half, humid evening. You are the athletic trainer with one assistant, AED, oxygen, and direct EMS access."
+    },
+    "choices": [
+      {
+        "label": "A",
+        "text": "Check responsiveness, breathing, and pulse immediately while directing your assistant to bring the AED and call EMS.",
+        "isCorrect": true,
+        "feedback": "Correct. Immediate primary assessment and early AED/EMS activation are critical.",
+        "next": {
+          "type": "mcq",
+          "prompt": "The athlete is unresponsive, has agonal breathing, and no palpable pulse. What next?",
+          "info": {
+            "narration": "Crowd noise rises. Coach asks if this could be dehydration."
+          },
+          "choices": [
+            {
+              "label": "A",
+              "text": "Begin high-quality CPR and apply AED as soon as it arrives.",
+              "isCorrect": true,
+              "feedback": "Correct. This is presumed sudden cardiac arrest until proven otherwise.",
+              "next": {
+                "type": "mcq",
+                "prompt": "AED says 'Shock advised.' After first shock and 2 minutes of CPR, there is weak spontaneous breathing and pulse returns. What is best now?",
+                "choices": [
+                  {
+                    "label": "A",
+                    "text": "Place in recovery position, monitor airway/breathing/circulation continuously, provide concise handoff to EMS, and remove from play.",
+                    "isCorrect": true,
+                    "feedback": "Correct. Stabilize, monitor for re-arrest, and ensure emergency transport with full documentation.",
+                    "next": {
+                      "type": "outcome",
+                      "prompt": "Strong outcome: EMS transports after complete handoff. Athlete is admitted for cardiac workup and does not return to play that night."
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": "Let the athlete sit up and decide if they feel ready to return because they are now awake.",
+                    "isCorrect": false,
+                    "feedback": "Unsafe. Any post-arrest athlete requires emergency evaluation and no same-day return.",
+                    "next": {
+                      "type": "outcome",
+                      "prompt": "Poor outcome: athlete becomes dizzy again and nearly collapses, delaying definitive care."
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": "Stop monitoring to calm family and manage the sideline while waiting for EMS.",
+                    "isCorrect": false,
+                    "feedback": "Incorrect. Continuous monitoring is essential after ROSC due to high risk of deterioration.",
+                    "next": {
+                      "type": "outcome",
+                      "prompt": "Poor outcome: airway support is delayed when breathing worsens before EMS arrival."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "label": "B",
+              "text": "Move athlete to bench first, then reassess away from the field.",
+              "isCorrect": false,
+              "feedback": "Incorrect. Movement delays CPR/AED and can worsen outcomes in cardiac arrest.",
+              "next": {
+                "type": "outcome",
+                "prompt": "Poor outcome: delayed defibrillation leads to prolonged downtime and worse neurologic prognosis."
+              }
+            },
+            {
+              "label": "C",
+              "text": "Give oxygen and wait for EMS before starting compressions.",
+              "isCorrect": false,
+              "feedback": "Incorrect. In pulseless collapse, CPR and AED take priority immediately.",
+              "next": {
+                "type": "outcome",
+                "prompt": "Poor outcome: no-flow time increases while waiting, reducing chance of good recovery."
+              }
+            }
+          ]
+        }
+      },
+      {
+        "label": "B",
+        "text": "Assume dehydration, move to shade, and give oral fluids first.",
+        "isCorrect": false,
+        "feedback": "Incorrect. Unresponsive collapse must be treated as life-threatening until primary survey is complete.",
+        "next": {
+          "type": "outcome",
+          "prompt": "Poor outcome: critical life-saving interventions are delayed while the athlete remains pulseless."
+        }
+      },
+      {
+        "label": "C",
+        "text": "Ask coach and teammates what happened before touching the athlete.",
+        "isCorrect": false,
+        "feedback": "Incorrect. History is secondary to immediate ABC assessment in an unresponsive athlete.",
+        "next": {
+          "type": "outcome",
+          "prompt": "Poor outcome: the delay in assessment postpones CPR/AED use."
+        }
+      }
+    ]
+  }
+}
