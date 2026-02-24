@@ -220,6 +220,16 @@
         }
 
         await ReloadClassesAsync();
+
+        if (_selectedClass is not null)
+        {
+            await ReloadScenarioAccessAsync();
+        }
+        else
+        {
+            _allScenarioIds = new List<string>();
+            _allowedScenarioIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
     }
 
     private string ChipClass(ActionMode mode)

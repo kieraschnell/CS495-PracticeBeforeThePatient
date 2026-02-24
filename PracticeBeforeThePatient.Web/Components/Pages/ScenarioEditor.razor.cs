@@ -31,7 +31,11 @@ public partial class ScenarioEditor : ComponentBase
         var scenarios = await ApiClient.GetAvailableScenariosAsync();
         if (scenarios != null)
         {
-            AvailableScenarioIds = scenarios;
+            AvailableScenarioIds = scenarios
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
         else
         {
