@@ -1,62 +1,71 @@
 {
-  "title": "On-Field Exertional Heat Stroke - Emergency Management",
-  "root": {
-    "type": "mcq",
-    "prompt": "A collegiate lineman collapses after practice. Rectal temp is 40.5 C, confused and combative. What is your first action?",
-    "info": {
+  "Title": "On-Field Exertional Heat Stroke - Emergency Management",
+  "Root": {
+    "Type": "mcq",
+    "Prompt": "A collegiate lineman collapses after practice. Rectal temp is 40.5 C, confused and combative. What is your first action?",
+    "Info": {
       "narration": "Late-August practice, high heat and humidity. You have assistants, ice, oxygen, IV supplies, and EMS phone access."
     },
-    "choices": [
+    "Choices": [
       {
-        "label": "A",
-        "text": "Start immediate cold-water immersion, remove equipment, assign one person to call EMS and one to monitor vitals.",
-        "isCorrect": true,
-        "feedback": "Correct. Cool first, transport second for exertional heat stroke.",
-        "next": {
-          "type": "mcq",
-          "prompt": "After 6 minutes of immersion: temp 39.0 C, mental status improving. EMS is still 12 minutes away. What next?",
-          "choices": [
+        "Label": "A",
+        "Text": "Start immediate cold-water immersion, remove equipment, assign one person to call EMS and one to monitor vitals.",
+        "IsCorrect": true,
+        "Feedback": "Correct. Cool first, transport second for exertional heat stroke.",
+        "Next": {
+          "Type": "mcq",
+          "Prompt": "After 6 minutes of immersion: temp 39.0 C, mental status improving. EMS is still 12 minutes away. What next?",
+          "Info": null,
+          "Choices": [
             {
-              "label": "A",
-              "text": "Continue immersion until under 39.0 C, provide oxygen, prepare IV access, and continue monitoring.",
-              "isCorrect": true,
-              "feedback": "Correct. Continue active cooling and supportive care.",
-              "next": {
-                "type": "outcome",
-                "prompt": "Temp reaches 38.5 C, vitals stabilize, and EMS transport is completed with structured handoff."
+              "Label": "A",
+              "Text": "Continue immersion until under 39.0 C, provide oxygen, prepare IV access, and continue monitoring.",
+              "IsCorrect": true,
+              "Feedback": "Correct. Continue active cooling and supportive care.",
+              "Next": {
+                "Type": "outcome",
+                "Prompt": "Temp reaches 38.5 C, vitals stabilize, and EMS transport is completed with structured handoff.",
+                "Info": null,
+                "Choices": null
               }
             },
             {
-              "label": "B",
-              "text": "Stop immersion early and switch to passive cooling only.",
-              "isCorrect": false,
-              "feedback": "Suboptimal. Stopping early can lead to rebound hyperthermia.",
-              "next": {
-                "type": "outcome",
-                "prompt": "Patient initially looks better but later deteriorates from inadequate cooling."
+              "Label": "B",
+              "Text": "Stop immersion early and switch to passive cooling only.",
+              "IsCorrect": false,
+              "Feedback": "Suboptimal. Stopping early can lead to rebound hyperthermia.",
+              "Next": {
+                "Type": "outcome",
+                "Prompt": "Patient initially looks better but later deteriorates from inadequate cooling.",
+                "Info": null,
+                "Choices": null
               }
             }
           ]
         }
       },
       {
-        "label": "B",
-        "text": "Use shade, fans, and ice packs only while waiting for EMS.",
-        "isCorrect": false,
-        "feedback": "Too slow for severe heat stroke with neurologic symptoms.",
-        "next": {
-          "type": "outcome",
-          "prompt": "Temperature remains dangerously high and neurologic status worsens before definitive care."
+        "Label": "B",
+        "Text": "Use shade, fans, and ice packs only while waiting for EMS.",
+        "IsCorrect": false,
+        "Feedback": "Too slow for severe heat stroke with neurologic symptoms.",
+        "Next": {
+          "Type": "outcome",
+          "Prompt": "Temperature remains dangerously high and neurologic status worsens before definitive care.",
+          "Info": null,
+          "Choices": null
         }
       },
       {
-        "label": "C",
-        "text": "Give oral fluids and observe without aggressive cooling.",
-        "isCorrect": false,
-        "feedback": "Incorrect. This delays life-saving treatment.",
-        "next": {
-          "type": "outcome",
-          "prompt": "Patient deteriorates rapidly from untreated exertional heat stroke."
+        "Label": "C",
+        "Text": "Give oral fluids and observe without aggressive cooling.",
+        "IsCorrect": false,
+        "Feedback": "Incorrect. This delays life-saving treatment.",
+        "Next": {
+          "Type": "outcome",
+          "Prompt": "Patient deteriorates rapidly from untreated exertional heat stroke.",
+          "Info": null,
+          "Choices": null
         }
       }
     ]
