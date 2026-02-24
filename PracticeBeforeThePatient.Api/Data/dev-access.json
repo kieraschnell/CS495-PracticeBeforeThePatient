@@ -1,7 +1,6 @@
 {
-    "currentEmail": "test@test.com",
-    "adminEmails": [
-      "admin@test.com"
-    ]
-  }
-  
+  "CurrentEmail": "admin@test.com",
+  "AdminEmails": [
+    "admin@test.com"
+  ]
+}

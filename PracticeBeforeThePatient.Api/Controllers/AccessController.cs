@@ -25,8 +25,32 @@ public sealed class AccessController : ControllerBase
         public List<string> AllowedScenarioIds { get; set; } = new();
     }
 
+    public sealed class SetDevUserRequest
+    {
+        public string Email { get; set; } = "";
+    }
+
     [HttpGet]
     public async Task<ActionResult<AccessResponse>> Get()
+    {
+        var response = await BuildAccessResponseAsync();
+        return response;
+    }
+
+    [HttpPost("dev-user")]
+    public async Task<ActionResult<AccessResponse>> SetDevUser([FromBody] SetDevUserRequest? request)
+    {
+        if (request is null)
+        {
+            return BadRequest("Request body is required.");
+        }
+
+        await _devAccess.SetCurrentEmailAsync(request.Email);
+        var response = await BuildAccessResponseAsync();
+        return response;
+    }
+
+    private async Task<AccessResponse> BuildAccessResponseAsync()
     {
         var email = (await _devAccess.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
         var isAdmin = await _devAccess.IsAdminAsync();

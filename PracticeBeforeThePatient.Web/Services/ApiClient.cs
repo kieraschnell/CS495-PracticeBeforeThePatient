@@ -21,11 +21,38 @@ public class ApiClient
         public List<string> AllowedScenarioIds { get; set; } = new();
     }
 
+    public sealed class SetDevUserRequest
+    {
+        public string Email { get; set; } = "";
+    }
+
     public async Task<AccessResponse?> GetAccessAsync()
     {
         try
         {
             return await _httpClient.GetFromJsonAsync<AccessResponse>("api/access");
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<AccessResponse?> SetCurrentDevUserAsync(string email)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/access/dev-user", new SetDevUserRequest
+            {
+                Email = email ?? ""
+            });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<AccessResponse>();
         }
         catch
         {

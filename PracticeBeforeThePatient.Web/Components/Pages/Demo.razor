@@ -1,5 +1,8 @@
 @page "/demo"
+@rendermode InteractiveServer
 @attribute [StreamRendering]
+@using PracticeBeforeThePatient.Web.Services
+@inject ApiClient Api
 
 <PageTitle>Demo</PageTitle>
 
@@ -7,5 +10,83 @@
     <div class="card">
         <div class="sectionTitle">Demo</div>
         <div class="narrLine">A demo video will go here.</div>
+
+        <div class="divider"></div>
+
+        <div class="sectionTitle">Mock Login (Temporary)</div>
+        <div class="narrLine">Current user: @CurrentUserLabel</div>
+        <div class="narrLine">Role: @(IsAdmin ? "Admin" : "Student")</div>
+
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <div class="saveMessage @StatusKind">@StatusMessage</div>
+        }
+
+        <div class="createRow">
+            <input class="editorInput"
+                   value="@EmailInput"
+                   @oninput="OnEmailInput"
+                   placeholder="student@ua.edu (blank clears user)" />
+            <button class="primaryBtn" @onclick="ApplyUserAsync" disabled="@IsSaving">Apply</button>
+        </div>
     </div>
 </div>
+
+@code {
+    private string EmailInput { get; set; } = "";
+    private string CurrentUserLabel { get; set; } = "(none)";
+    private bool IsAdmin { get; set; }
+    private bool IsSaving { get; set; }
+    private string StatusMessage { get; set; } = "";
+    private string StatusKind { get; set; } = "success";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshAccessAsync();
+    }
+
+    private void OnEmailInput(ChangeEventArgs e)
+    {
+        EmailInput = e.Value?.ToString() ?? "";
+    }
+
+    private async Task ApplyUserAsync()
+    {
+        IsSaving = true;
+        StatusMessage = "";
+
+        try
+        {
+            var access = await Api.SetCurrentDevUserAsync(EmailInput);
+
+            if (access is null)
+            {
+                SetStatus("Could not update mock user.", false);
+                return;
+            }
+
+            CurrentUserLabel = string.IsNullOrWhiteSpace(access.Email) ? "(none)" : access.Email;
+            IsAdmin = access.IsAdmin;
+            EmailInput = access.Email ?? "";
+            SetStatus("Mock user updated.", true);
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task RefreshAccessAsync()
+    {
+        var access = await Api.GetAccessAsync();
+        CurrentUserLabel = string.IsNullOrWhiteSpace(access?.Email) ? "(none)" : access!.Email;
+        IsAdmin = access?.IsAdmin == true;
+        EmailInput = access?.Email ?? "";
+    }
+
+    private void SetStatus(string message, bool ok)
+    {
+        StatusMessage = message;
+        StatusKind = ok ? "success" : "error";
+    }
+}

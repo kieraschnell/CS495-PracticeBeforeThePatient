@@ -25,36 +25,7 @@ public sealed class DevAccessStore
         await _gate.WaitAsync();
         try
         {
-            if (!File.Exists(_path))
-            {
-                var seed = new DevAccessConfig
-                {
-                    CurrentEmail = "student@ua.edu",
-                    AdminEmails = new List<string> { "admin@ua.edu" }
-                };
-
-                await WriteUnlockedAsync(seed);
-                return seed;
-            }
-
-            var json = await File.ReadAllTextAsync(_path);
-
-            var cfg = JsonSerializer.Deserialize<DevAccessConfig>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            }) ?? new DevAccessConfig();
-
-            cfg.AdminEmails ??= new List<string>();
-            cfg.CurrentEmail ??= "";
-
-            cfg.CurrentEmail = cfg.CurrentEmail.Trim().ToLowerInvariant();
-            cfg.AdminEmails = cfg.AdminEmails
-                .Select(x => (x ?? "").Trim().ToLowerInvariant())
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            return cfg;
+            return await ReadUnlockedAsync();
         }
         finally
         {
@@ -73,6 +44,55 @@ public sealed class DevAccessStore
         var cfg = await GetAsync();
         if (string.IsNullOrWhiteSpace(cfg.CurrentEmail)) return false;
         return cfg.AdminEmails.Contains(cfg.CurrentEmail, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public async Task SetCurrentEmailAsync(string email)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var cfg = await ReadUnlockedAsync();
+            cfg.CurrentEmail = (email ?? "").Trim().ToLowerInvariant();
+            await WriteUnlockedAsync(cfg);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    private async Task<DevAccessConfig> ReadUnlockedAsync()
+    {
+        if (!File.Exists(_path))
+        {
+            var seed = new DevAccessConfig
+            {
+                CurrentEmail = "student@ua.edu",
+                AdminEmails = new List<string> { "admin@ua.edu" }
+            };
+
+            await WriteUnlockedAsync(seed);
+            return seed;
+        }
+
+        var json = await File.ReadAllTextAsync(_path);
+
+        var cfg = JsonSerializer.Deserialize<DevAccessConfig>(json, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        }) ?? new DevAccessConfig();
+
+        cfg.AdminEmails ??= new List<string>();
+        cfg.CurrentEmail ??= "";
+
+        cfg.CurrentEmail = cfg.CurrentEmail.Trim().ToLowerInvariant();
+        cfg.AdminEmails = cfg.AdminEmails
+            .Select(x => (x ?? "").Trim().ToLowerInvariant())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return cfg;
     }
 
     private async Task WriteUnlockedAsync(DevAccessConfig cfg)
