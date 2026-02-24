@@ -24,3 +24,6 @@ publish/
 # Dotnet tools
 .dotnet/
 /.vs
+
+# Local Docker overrides
+docker-compose.override.mac.local.yml
