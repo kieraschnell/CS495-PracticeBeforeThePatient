@@ -18,6 +18,7 @@ public partial class ScenarioEditor : ComponentBase
     protected Scenario? _scenario;
     protected List<string> AvailableScenarioIds { get; set; } = new();
     protected string SelectedScenarioId { get; set; } = "";
+    protected NodeSelectionState _nodeSelection = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -43,6 +44,7 @@ public partial class ScenarioEditor : ComponentBase
         if (string.IsNullOrWhiteSpace(SelectedScenarioId))
         {
             _scenario = null;
+            _nodeSelection.Clear();
             return;
         }
 
@@ -55,6 +57,7 @@ public partial class ScenarioEditor : ComponentBase
         if (scenario != null)
         {
             _scenario = scenario;
+            _nodeSelection.Clear();
         }
         else
         {

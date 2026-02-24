@@ -79,7 +79,9 @@
 
                     @if (_scenario.Root != null)
                     {
-                        <NodeEditor @ref="_rootNodeEditor" Node="_scenario.Root" Path="Root" Level="0" />
+                        <CascadingValue Value="_nodeSelection">
+                            <NodeEditor @ref="_rootNodeEditor" Node="_scenario.Root" Path="Root" Level="0" />
+                        </CascadingValue>
                     }
                 </div>
             </div>

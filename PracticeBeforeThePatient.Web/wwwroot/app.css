@@ -529,7 +529,14 @@ code {
 }
 
 .optionCard.selected {
-  outline: 3px solid rgba(0, 0, 0, 0.22);
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.18);
+}
+
+.optionCard:focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0.28);
+  outline-offset: 2px;
 }
 
 .reasoning {
@@ -654,6 +661,12 @@ textarea:focus {
 
 .nodeCard:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.nodeCard.selected {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
 }
 
 .nodeHeader {

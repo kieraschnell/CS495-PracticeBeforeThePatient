@@ -64,15 +64,17 @@
                     <div class="sectionTitle">@CurrentStepTitle</div>
                     <div class="prompt">@CurrentPrompt</div>
 
-                    <div class="options">
-                        @foreach (var opt in CurrentChoices)
-                        {
-                            <button class="optionCard @(SelectedOptionLabel == opt.Label ? "selected" : "")"
+                        <div class="options">
+                            @foreach (var opt in CurrentChoices)
+                            {
+                                <button class="optionCard @(SelectedOptionLabel == opt.Label ? "selected" : "")"
+                                        type="button"
+                                        @onmousedown="() => SelectOption(opt.Label)"
                                     @onclick="() => SelectOption(opt.Label)"
                                     disabled="@HasSubmittedThisStep">
-                                <div class="optionKey">@opt.Label</div>
-                                <div class="optionText">@opt.Text</div>
-                            </button>
+                                    <div class="optionKey">@opt.Label</div>
+                                    <div class="optionText">@opt.Text</div>
+                                </button>
                         }
                     </div>
 

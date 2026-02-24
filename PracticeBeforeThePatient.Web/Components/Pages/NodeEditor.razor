@@ -1,8 +1,13 @@
 @using PracticeBeforeThePatient.Core.Models
 @using System.Text.Json
+@implements IDisposable
 
-<div class="nodeCard" style="--depth: @Level;">
-    <div class="nodeHeader" @onclick="ToggleExpanded">
+<div class="nodeCard @(IsSelected ? "selected" : "")"
+     style="--depth: @Level;"
+     @onmousedown="SelectThisNode"
+     @onmousedown:stopPropagation="true"
+     @onfocusin="SelectThisNode">
+    <div class="nodeHeader" @onclick="OnHeaderClicked">
         <div class="nodeHeaderLeft">
             <button class="expandBtn @(IsExpanded ? "expanded" : "")" type="button">
                 ▶
@@ -119,15 +124,40 @@
     [Parameter] public Node Node { get; set; } = default!;
     [Parameter] public string Path { get; set; } = "";
     [Parameter] public int Level { get; set; } = 0;
+    [CascadingParameter] public NodeSelectionState? SelectionState { get; set; }
 
     private bool IsExpanded { get; set; } = false;
     private string NarrationText { get; set; } = "";
     private Dictionary<string, NodeEditor> _childEditors = new();
+    private bool IsSelected => ReferenceEquals(SelectionState?.SelectedNode, Node);
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        SubscribeToSelection();
+    }
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        SubscribeToSelection();
         LoadNarration();
+    }
+
+    private void SubscribeToSelection()
+    {
+        if (SelectionState == null)
+        {
+            return;
+        }
+
+        SelectionState.SelectionChanged -= OnSelectionChanged;
+        SelectionState.SelectionChanged += OnSelectionChanged;
+    }
+
+    private void OnSelectionChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private void LoadNarration()
@@ -296,8 +326,27 @@
         return Node.Choices.Count(c => c.IsCorrect) > 1;
     }
 
+    private void OnHeaderClicked()
+    {
+        SelectThisNode();
+        ToggleExpanded();
+    }
+
+    private void SelectThisNode()
+    {
+        SelectionState?.Select(Node);
+    }
+
     private void ToggleExpanded()
     {
         IsExpanded = !IsExpanded;
+    }
+
+    public void Dispose()
+    {
+        if (SelectionState != null)
+        {
+            SelectionState.SelectionChanged -= OnSelectionChanged;
+        }
     }
 }
