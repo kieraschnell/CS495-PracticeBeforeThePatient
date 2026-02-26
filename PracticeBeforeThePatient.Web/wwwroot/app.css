@@ -520,6 +520,7 @@ code {
   border: 1px solid rgba(0, 0, 0, 0.1);
   cursor: pointer;
   background: rgba(0, 0, 0, 0.02);
+  color: var(--text);
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
@@ -537,6 +538,15 @@ code {
 .optionCard:focus-visible {
   outline: 2px solid rgba(0, 0, 0, 0.28);
   outline-offset: 2px;
+}
+
+.optionKey {
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.optionText {
+  opacity: 0.92;
 }
 
 .reasoning {
@@ -582,6 +592,11 @@ textarea:focus {
 .softTitle {
   font-weight: 900;
   margin-bottom: 6px;
+}
+
+.softText,
+.summaryText {
+  color: var(--text);
 }
 
 .summaryBlock {
@@ -1151,7 +1166,8 @@ html[data-theme="dark"] {
   --border: rgba(236, 240, 246, 0.14);
   --border-strong: rgba(236, 240, 246, 0.2);
   --card: #1a1f27;
-  --brand-soft: rgba(158, 27, 50, 0.25);
+  --brand: #d43a56;
+  --brand-soft: rgba(212, 58, 86, 0.24);
   --shadow-sm: 0 12px 26px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 20px 48px rgba(0, 0, 0, 0.42);
 }
@@ -1187,9 +1203,71 @@ html[data-theme="dark"] .scenarioAccessHint {
   color: var(--muted);
 }
 
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .sectionTitle,
+html[data-theme="dark"] .simTitle,
+html[data-theme="dark"] .simSubtitle,
+html[data-theme="dark"] .narrLine,
+html[data-theme="dark"] .prompt,
+html[data-theme="dark"] .optionKey,
+html[data-theme="dark"] .optionText,
+html[data-theme="dark"] .reasoningLabel,
+html[data-theme="dark"] .softTitle,
+html[data-theme="dark"] .softText,
+html[data-theme="dark"] .summaryLabel,
+html[data-theme="dark"] .summaryText,
+html[data-theme="dark"] .compareTitle,
+html[data-theme="dark"] .compareLabel,
+html[data-theme="dark"] .compareText,
+html[data-theme="dark"] .nodeTitle,
+html[data-theme="dark"] .choiceLabel,
+html[data-theme="dark"] .editorLabel,
+html[data-theme="dark"] .settingsLabel,
+html[data-theme="dark"] .classMgmtStudentEmail {
+  color: var(--text);
+}
+
+html[data-theme="dark"] .settingsSubLabel,
+html[data-theme="dark"] .compareSmall,
+html[data-theme="dark"] .simSubtitle,
+html[data-theme="dark"] .narrLine {
+  color: var(--muted);
+}
+
 html[data-theme="dark"] .panel-title,
 html[data-theme="dark"] .stat-value,
 html[data-theme="dark"] .feature h3 {
+  color: var(--brand);
+}
+
+html[data-theme="dark"] .hero-badge {
+  color: #ffd7df;
+  background: rgba(212, 58, 86, 0.22);
+  border: 1px solid rgba(212, 58, 86, 0.35);
+}
+
+html[data-theme="dark"] .panel-card::before {
+  background: linear-gradient(90deg, #d43a56 0%, #b72643 58%, #7f172c 100%);
+}
+
+html[data-theme="dark"] .btn-primary {
+  background: linear-gradient(135deg, #c92f4b 0%, #b72643 100%);
+  border-color: rgba(212, 58, 86, 0.45);
+  box-shadow: 0 12px 26px rgba(212, 58, 86, 0.32);
+}
+
+html[data-theme="dark"] .btn-primary:hover {
+  box-shadow: 0 16px 34px rgba(212, 58, 86, 0.4);
+}
+
+html[data-theme="dark"] .actionChip.selected {
+  background: rgba(212, 58, 86, 0.24);
+  color: #ffd7df;
+  border-color: rgba(212, 58, 86, 0.45);
+}
+
+html[data-theme="dark"] .scenarioAccessText,
+html[data-theme="dark"] .simBadge {
   color: var(--text);
 }
 
@@ -1220,6 +1298,12 @@ html[data-theme="dark"] .scenarioInlineSelect {
   border-color: var(--border-strong);
 }
 
+html[data-theme="dark"] .editorInput::placeholder,
+html[data-theme="dark"] .editorTextarea::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: rgba(236, 240, 246, 0.62);
+}
+
 html[data-theme="dark"] .editorInput:focus,
 html[data-theme="dark"] .editorTextarea:focus,
 html[data-theme="dark"] textarea:focus,
@@ -1242,6 +1326,11 @@ html[data-theme="dark"] .optionCard,
 html[data-theme="dark"] .classMgmtStudent {
   background: rgba(236, 240, 246, 0.05);
   border-color: var(--border);
+}
+
+html[data-theme="dark"] .optionCard,
+html[data-theme="dark"] .optionCard * {
+  color: var(--text);
 }
 
 html[data-theme="dark"] .optionCard:hover {
