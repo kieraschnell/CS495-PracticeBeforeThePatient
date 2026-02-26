@@ -700,7 +700,6 @@ textarea:focus {
 }
 
 .expandBtn {
-  background: none;
   border: none;
   border-radius: 100%;
   cursor: pointer;
@@ -815,15 +814,16 @@ textarea:focus {
 
 .addBtn,
 .addNodeBtn {
-  background: rgba(34, 197, 94, 0.1);
-  color: rgb(21, 128, 61);
-  border-color: rgba(34, 197, 94, 0.3);
+    background: rgb(238, 246, 241);
+    color: rgb(21, 128, 61);
+    border-color: rgba(34, 197, 94, 0.3);
 }
 
-.addBtn:hover,
-.addNodeBtn:hover {
-  background: rgba(34, 197, 94, 0.2);
-}
+    .addBtn:hover,
+    .addNodeBtn:hover {
+        color: rgb(17, 102, 49);
+        background: rgba(34, 197, 94, 0.1);
+    }
 
 .duplicateBtn {
   background: rgba(59, 130, 246, 0.1);
