@@ -26,6 +26,7 @@
             <input class="editorInput"
                    value="@EmailInput"
                    @oninput="OnEmailInput"
+                   @onkeydown="OnEmailInputKeyDown"
                    placeholder="student@ua.edu (blank clears user)" />
             <button class="primaryBtn" @onclick="ApplyUserAsync" disabled="@IsSaving">Apply</button>
         </div>
@@ -73,6 +74,14 @@
         finally
         {
             IsSaving = false;
+        }
+    }
+
+    private async Task OnEmailInputKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !IsSaving)
+        {
+            await ApplyUserAsync();
         }
     }
 

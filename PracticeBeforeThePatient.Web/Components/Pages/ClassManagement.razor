@@ -50,7 +50,7 @@
             <div class="createArea">
                 <label class="editorLabel">Class name</label>
                 <div class="createRow">
-                    <input class="editorInput" value="@_newClassName" @oninput="OnNewClassNameInput" placeholder="Example, AT 301 Lab Section A" />
+                    <input class="editorInput" value="@_newClassName" @oninput="OnNewClassNameInput" @onkeydown="OnNewClassNameKeyDown" placeholder="Example, AT 301 Lab Section A" />
                     <button class="primaryBtn" @onclick="CreateClassAsync" disabled="@string.IsNullOrWhiteSpace(_newClassName)">Create</button>
                 </div>
                 <div class="createHint">Class names must be unique</div>
@@ -126,7 +126,7 @@
                     <div class="classMgmtAddRow">
                         <div class="classMgmtAddInput">
                             <label class="editorLabel">Student email</label>
-                            <input class="editorInput" value="@_emailToAdd" @oninput="OnEmailInput" placeholder="student@ua.edu" />
+                            <input class="editorInput" value="@_emailToAdd" @oninput="OnEmailInput" @onkeydown="OnAddStudentKeyDown" placeholder="student@ua.edu" />
                         </div>
 
                         <div class="classMgmtAddBtn">
@@ -270,6 +270,22 @@
     private void OnEmailInput(ChangeEventArgs e)
     {
         _emailToAdd = (e.Value?.ToString() ?? "").Trim();
+    }
+
+    private async Task OnNewClassNameKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await CreateClassAsync();
+        }
+    }
+
+    private async Task OnAddStudentKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await AddStudentAsync();
+        }
     }
 
     private async Task ReloadClassesAsync()
