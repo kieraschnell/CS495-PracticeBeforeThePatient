@@ -28,4 +28,8 @@ RUN dotnet publish "./PracticeBeforeThePatient.Api.csproj" -c $BUILD_CONFIGURATI
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+USER root
+RUN mkdir -p /app/Data/scenarios /app/App_Data \
+    && chown -R $APP_UID /app
+USER $APP_UID
 ENTRYPOINT ["dotnet", "PracticeBeforeThePatient.Api.dll"]
