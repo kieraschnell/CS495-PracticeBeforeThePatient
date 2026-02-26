@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "Id": "e91f25b3cc674f3597178d3b0bf35280",
+    "Name": "mmm",
+    "Students": [],
+    "AllowedScenarioIds": []
+  },
+  {
+    "Id": "5111c87ec4f8478d873ad1723727fe37",
+    "Name": "testcolor",
+    "Students": [],
+    "AllowedScenarioIds": []
+  }
+]

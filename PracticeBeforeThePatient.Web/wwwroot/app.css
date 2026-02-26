@@ -702,10 +702,12 @@ textarea:focus {
 .expandBtn {
   background: none;
   border: none;
+  border-radius: 100%;
   cursor: pointer;
   font-size: 16px;
   padding: 4px 8px;
-  color: rgba(0, 0, 0, 0.6);
+  padding-top: 0px;
+  color: rgba(0, 0, 0, 0.7);
   transition: transform 0.2s;
 }
 
