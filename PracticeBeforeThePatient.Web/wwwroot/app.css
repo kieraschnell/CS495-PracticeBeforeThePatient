@@ -1123,6 +1123,137 @@ textarea:focus {
   line-height: 1.4;
 }
 
+/* Settings */
+
+.settingsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.settingsLabel {
+  font-weight: 800;
+}
+
+.settingsSubLabel {
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Dark mode */
+
+html[data-theme="dark"] {
+  --bg: #111318;
+  --text: #ecf0f6;
+  --muted: rgba(236, 240, 246, 0.68);
+  --border: rgba(236, 240, 246, 0.14);
+  --border-strong: rgba(236, 240, 246, 0.2);
+  --card: #1a1f27;
+  --brand-soft: rgba(158, 27, 50, 0.25);
+  --shadow-sm: 0 12px 26px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 20px 48px rgba(0, 0, 0, 0.42);
+}
+
+html[data-theme="dark"] body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+html[data-theme="dark"] code {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .hero-content,
+html[data-theme="dark"] .panel-card,
+html[data-theme="dark"] .feature,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .compareCol,
+html[data-theme="dark"] .compareFooter,
+html[data-theme="dark"] .choiceCard,
+html[data-theme="dark"] .kebabMenu {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .hero-subtitle,
+html[data-theme="dark"] .feature p,
+html[data-theme="dark"] .panel-list,
+html[data-theme="dark"] .panel-foot,
+html[data-theme="dark"] .stat-label,
+html[data-theme="dark"] .createHint,
+html[data-theme="dark"] .scenarioAccessHint {
+  color: var(--muted);
+}
+
+html[data-theme="dark"] .panel-title,
+html[data-theme="dark"] .stat-value,
+html[data-theme="dark"] .feature h3 {
+  color: var(--text);
+}
+
+html[data-theme="dark"] .btn-secondary,
+html[data-theme="dark"] .primaryBtn,
+html[data-theme="dark"] .secondaryBtn,
+html[data-theme="dark"] .actionChip,
+html[data-theme="dark"] .kebabBtn {
+  background: #202734;
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+html[data-theme="dark"] .primaryBtn:hover,
+html[data-theme="dark"] .secondaryBtn:hover,
+html[data-theme="dark"] .actionChip:hover,
+html[data-theme="dark"] .kebabBtn:hover,
+html[data-theme="dark"] .btn-secondary:hover {
+  background: #273041;
+}
+
+html[data-theme="dark"] .editorInput,
+html[data-theme="dark"] .editorTextarea,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] .scenarioInlineSelect {
+  background: #202734;
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+html[data-theme="dark"] .editorInput:focus,
+html[data-theme="dark"] .editorTextarea:focus,
+html[data-theme="dark"] textarea:focus,
+html[data-theme="dark"] .scenarioInlineSelect:focus {
+  box-shadow: 0 0 0 4px rgba(236, 240, 246, 0.12);
+  border-color: rgba(236, 240, 246, 0.32);
+}
+
+html[data-theme="dark"] .divider,
+html[data-theme="dark"] .narrLine,
+html[data-theme="dark"] .noteLine,
+html[data-theme="dark"] .nodeBody {
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .softFeedback,
+html[data-theme="dark"] .compareCard,
+html[data-theme="dark"] .nodeCard,
+html[data-theme="dark"] .optionCard,
+html[data-theme="dark"] .classMgmtStudent {
+  background: rgba(236, 240, 246, 0.05);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .optionCard:hover {
+  background: rgba(236, 240, 246, 0.08);
+}
+
+html[data-theme="dark"] .optionCard.selected,
+html[data-theme="dark"] .nodeCard.selected {
+  background: rgba(236, 240, 246, 0.1);
+  border-color: rgba(236, 240, 246, 0.3);
+}
+
 .scenarioAccessGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

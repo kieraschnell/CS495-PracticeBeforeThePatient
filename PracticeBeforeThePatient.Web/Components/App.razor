@@ -1,10 +1,25 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
+    <script>
+        (function () {
+            try {
+                var storedTheme = localStorage.getItem("pbp-theme");
+                if (storedTheme === "dark" || storedTheme === "light") {
+                    document.documentElement.setAttribute("data-theme", storedTheme);
+                    document.addEventListener("DOMContentLoaded", function () {
+                        document.body.setAttribute("data-theme", storedTheme);
+                    }, { once: true });
+                }
+            } catch {
+                // Ignore storage access errors.
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["PracticeBeforeThePatient.Web.styles.css"]" />
@@ -14,7 +29,8 @@
 </head>
 
 <body>
-    <Routes />
+    <Routes @rendermode="InteractiveServer" />
+    <script src="theme.js"></script>
     <script src="_framework/blazor.web.js"></script>
 </body>
 

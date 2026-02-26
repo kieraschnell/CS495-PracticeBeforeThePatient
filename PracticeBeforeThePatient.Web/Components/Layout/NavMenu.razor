@@ -1,4 +1,5 @@
 ﻿@inject PracticeBeforeThePatient.Web.Services.ApiClient Api
+@inject IJSRuntime JS
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -54,10 +55,40 @@
 
 @code {
     private bool _isAdmin;
+    private string? _themeToApply;
 
     protected override async Task OnInitializedAsync()
     {
         var access = await Api.GetAccessAsync();
         _isAdmin = access?.IsAdmin == true;
+        _themeToApply = NormalizeTheme(access?.Theme);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_themeToApply))
+        {
+            await JS.InvokeVoidAsync("pbpTheme.setTheme", _themeToApply);
+        }
+    }
+
+    private static string? NormalizeTheme(string? theme)
+    {
+        if (string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase))
+        {
+            return "dark";
+        }
+
+        if (string.Equals(theme, "light", StringComparison.OrdinalIgnoreCase))
+        {
+            return "light";
+        }
+
+        return null;
     }
 }

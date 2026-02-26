@@ -3,6 +3,7 @@
 @attribute [StreamRendering]
 @using PracticeBeforeThePatient.Web.Services
 @inject ApiClient Api
+@inject IJSRuntime JS
 
 <PageTitle>Demo</PageTitle>
 
@@ -40,10 +41,24 @@
     private bool IsSaving { get; set; }
     private string StatusMessage { get; set; } = "";
     private string StatusKind { get; set; } = "success";
+    private string? _themeToApply;
 
     protected override async Task OnInitializedAsync()
     {
         await RefreshAccessAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_themeToApply))
+        {
+            await JS.InvokeVoidAsync("pbpTheme.setTheme", _themeToApply);
+        }
     }
 
     private void OnEmailInput(ChangeEventArgs e)
@@ -69,6 +84,11 @@
             CurrentUserLabel = string.IsNullOrWhiteSpace(access.Email) ? "(none)" : access.Email;
             IsAdmin = access.IsAdmin;
             EmailInput = access.Email ?? "";
+            _themeToApply = NormalizeTheme(access.Theme);
+            if (!string.IsNullOrWhiteSpace(_themeToApply))
+            {
+                await JS.InvokeVoidAsync("pbpTheme.setTheme", _themeToApply);
+            }
             SetStatus("Mock user updated.", true);
         }
         finally
@@ -91,11 +111,27 @@
         CurrentUserLabel = string.IsNullOrWhiteSpace(access?.Email) ? "(none)" : access!.Email;
         IsAdmin = access?.IsAdmin == true;
         EmailInput = access?.Email ?? "";
+        _themeToApply = NormalizeTheme(access?.Theme);
     }
 
     private void SetStatus(string message, bool ok)
     {
         StatusMessage = message;
         StatusKind = ok ? "success" : "error";
+    }
+
+    private static string? NormalizeTheme(string? theme)
+    {
+        if (string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase))
+        {
+            return "dark";
+        }
+
+        if (string.Equals(theme, "light", StringComparison.OrdinalIgnoreCase))
+        {
+            return "light";
+        }
+
+        return null;
     }
 }

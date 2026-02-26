@@ -23,11 +23,17 @@ public sealed class AccessController : ControllerBase
         public string Email { get; set; } = "";
         public bool IsAdmin { get; set; }
         public List<string> AllowedScenarioIds { get; set; } = new();
+        public string Theme { get; set; } = DevAccessStore.LightTheme;
     }
 
     public sealed class SetDevUserRequest
     {
         public string Email { get; set; } = "";
+    }
+
+    public sealed class SetThemeRequest
+    {
+        public string Theme { get; set; } = DevAccessStore.LightTheme;
     }
 
     [HttpGet]
@@ -50,10 +56,29 @@ public sealed class AccessController : ControllerBase
         return response;
     }
 
+    [HttpPost("theme")]
+    public async Task<ActionResult<AccessResponse>> SetTheme([FromBody] SetThemeRequest? request)
+    {
+        if (request is null)
+        {
+            return BadRequest("Request body is required.");
+        }
+
+        var ok = await _devAccess.SetThemeForCurrentEmailAsync(request.Theme);
+        if (!ok)
+        {
+            return BadRequest("Current user is not set.");
+        }
+
+        var response = await BuildAccessResponseAsync();
+        return response;
+    }
+
     private async Task<AccessResponse> BuildAccessResponseAsync()
     {
         var email = (await _devAccess.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
         var isAdmin = await _devAccess.IsAdminAsync();
+        var theme = await _devAccess.GetThemeForCurrentEmailAsync();
 
         if (isAdmin)
         {
@@ -61,7 +86,8 @@ public sealed class AccessController : ControllerBase
             {
                 Email = email,
                 IsAdmin = true,
-                AllowedScenarioIds = GetAllScenarioIds()
+                AllowedScenarioIds = GetAllScenarioIds(),
+                Theme = theme
             };
         }
 
@@ -71,7 +97,8 @@ public sealed class AccessController : ControllerBase
             {
                 Email = "",
                 IsAdmin = false,
-                AllowedScenarioIds = new List<string>()
+                AllowedScenarioIds = new List<string>(),
+                Theme = theme
             };
         }
 
@@ -88,7 +115,8 @@ public sealed class AccessController : ControllerBase
             {
                 Email = email,
                 IsAdmin = false,
-                AllowedScenarioIds = new List<string>()
+                AllowedScenarioIds = new List<string>(),
+                Theme = theme
             };
         }
 
@@ -100,7 +128,8 @@ public sealed class AccessController : ControllerBase
             {
                 Email = email,
                 IsAdmin = false,
-                AllowedScenarioIds = allScenarios
+                AllowedScenarioIds = allScenarios,
+                Theme = theme
             };
         }
 
@@ -120,7 +149,8 @@ public sealed class AccessController : ControllerBase
         {
             Email = email,
             IsAdmin = false,
-            AllowedScenarioIds = filtered
+            AllowedScenarioIds = filtered,
+            Theme = theme
         };
     }
 

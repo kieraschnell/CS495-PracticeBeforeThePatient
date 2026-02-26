@@ -19,11 +19,17 @@ public class ApiClient
         public string Email { get; set; } = "";
         public bool IsAdmin { get; set; }
         public List<string> AllowedScenarioIds { get; set; } = new();
+        public string Theme { get; set; } = "";
     }
 
     public sealed class SetDevUserRequest
     {
         public string Email { get; set; } = "";
+    }
+
+    public sealed class SetThemeRequest
+    {
+        public string Theme { get; set; } = "light";
     }
 
     public async Task<AccessResponse?> GetAccessAsync()
@@ -45,6 +51,28 @@ public class ApiClient
             var response = await _httpClient.PostAsJsonAsync("api/access/dev-user", new SetDevUserRequest
             {
                 Email = email ?? ""
+            });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<AccessResponse>();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<AccessResponse?> SetThemeAsync(string theme)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/access/theme", new SetThemeRequest
+            {
+                Theme = theme ?? "light"
             });
 
             if (!response.IsSuccessStatusCode)

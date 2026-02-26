@@ -1,10 +1,89 @@
 @page "/settings"
+@rendermode InteractiveServer
+@using PracticeBeforeThePatient.Web.Services
+@inject ApiClient Api
+@inject IJSRuntime JS
 
 <PageTitle>Settings</PageTitle>
 
 <div class="simShell">
     <div class="card">
         <div class="sectionTitle">Settings</div>
-        <div class="narrLine">Settings will be added here soon.</div>
+
+        @if (!string.IsNullOrWhiteSpace(_message))
+        {
+            <div class="saveMessage @_messageKind">@_message</div>
+        }
+
+        <div class="settingsRow">
+            <div>
+                <div class="settingsLabel">Theme</div>
+                <div class="settingsSubLabel">Current mode: @(_isDarkMode ? "Dark" : "Light")</div>
+            </div>
+
+            <button class="primaryBtn" @onclick="ToggleThemeAsync" disabled="@(!_isReady)">
+                @(_isDarkMode ? "Switch to Light" : "Switch to Dark")
+            </button>
+        </div>
     </div>
 </div>
+
+@code {
+    private bool _isReady;
+    private bool _isDarkMode;
+    private string _message = "";
+    private string _messageKind = "success";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var access = await Api.GetAccessAsync();
+        var theme = NormalizeTheme(access?.Theme) ?? await JS.InvokeAsync<string>("pbpTheme.getTheme");
+        await JS.InvokeVoidAsync("pbpTheme.setTheme", theme);
+        _isDarkMode = string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase);
+        _isReady = true;
+
+        StateHasChanged();
+    }
+
+    private async Task ToggleThemeAsync()
+    {
+        var nextTheme = _isDarkMode ? "light" : "dark";
+        var access = await Api.SetThemeAsync(nextTheme);
+        if (access is null)
+        {
+            SetMessage("Could not save theme preference.", false);
+            return;
+        }
+
+        var savedTheme = NormalizeTheme(access.Theme);
+        await JS.InvokeVoidAsync("pbpTheme.setTheme", savedTheme);
+        _isDarkMode = string.Equals(savedTheme, "dark", StringComparison.OrdinalIgnoreCase);
+        SetMessage("Theme preference saved.", true);
+    }
+
+    private static string? NormalizeTheme(string? theme)
+    {
+        if (string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase))
+        {
+            return "dark";
+        }
+
+        if (string.Equals(theme, "light", StringComparison.OrdinalIgnoreCase))
+        {
+            return "light";
+        }
+
+        return null;
+    }
+
+    private void SetMessage(string text, bool ok)
+    {
+        _message = text;
+        _messageKind = ok ? "success" : "error";
+    }
+}
