@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+using PracticeBeforeThePatient.Api.Data;
 using PracticeBeforeThePatient.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +21,11 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+// Add Entity Framework Core with SQLite
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") 
+        ?? "Data Source=practicebeforethepatient.db"));
 
 builder.Services.AddSingleton<ClassRosterStore>();
 builder.Services.AddSingleton<DevAccessStore>();
