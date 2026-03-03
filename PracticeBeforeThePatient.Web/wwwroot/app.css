@@ -2,8 +2,8 @@
   --bg: #fbfbfc;
   --text: #111;
   --muted: rgba(0, 0, 0, 0.65);
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.12);
+  --border: rgba(0, 0, 0, 0.45);
+  --border-strong: rgba(0, 0, 0, 0.58);
   --card: #ffffff;
 
   --brand: #9e1b32;
@@ -1165,8 +1165,8 @@ html[data-theme="dark"] {
   --bg: #111318;
   --text: #ecf0f6;
   --muted: rgba(236, 240, 246, 0.68);
-  --border: rgba(236, 240, 246, 0.14);
-  --border-strong: rgba(236, 240, 246, 0.2);
+  --border: rgba(236, 240, 246, 0.36);
+  --border-strong: rgba(236, 240, 246, 0.5);
   --card: #1a1f27;
   --brand: #d43a56;
   --brand-soft: rgba(212, 58, 86, 0.24);
@@ -1369,6 +1369,137 @@ html[data-theme="dark"] .nodeCard.selected {
   font-weight: 800;
   font-size: 13px;
   opacity: 0.9;
+}
+
+/* WCAG 2.2 AA contrast overrides */
+
+.hero-content,
+.panel-card,
+.feature,
+.card,
+.stat,
+.compareCol,
+.compareFooter,
+.softFeedback,
+.compareCard,
+.nodeCard,
+.choiceCard,
+.classMgmtStudent,
+.scenarioAccessItem,
+.kebabMenu,
+.btn-secondary,
+.primaryBtn,
+.secondaryBtn,
+.actionChip,
+.kebabBtn,
+.editorInput,
+.editorTextarea,
+textarea,
+.scenarioInlineSelect,
+.optionCard,
+.addBtn,
+.deleteBtn,
+.duplicateBtn,
+.addNodeBtn,
+.deleteNodeBtn,
+.saveMessage,
+.warningMessage,
+.infoMessage {
+  border-color: var(--border);
+}
+
+.narrLine,
+.noteLine,
+.nodeBody,
+.nodeActions,
+.panel-foot {
+  border-color: var(--border);
+}
+
+.editorInput:focus,
+.editorTextarea:focus,
+textarea:focus,
+.scenarioInlineSelect:focus,
+.optionCard:focus-visible {
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.5);
+  border-color: rgba(15, 23, 42, 0.75);
+}
+
+.saveMessage.success,
+.addBtn,
+.addNodeBtn {
+  background: #eaf7ef;
+  color: #14532d;
+  border-color: #14532d;
+}
+
+.saveMessage.error,
+.deleteBtn,
+.deleteNodeBtn,
+.kebabMenuItem.danger {
+  color: #991b1b;
+}
+
+.saveMessage.error,
+.deleteBtn,
+.deleteNodeBtn {
+  background: #fdecec;
+  border-color: #991b1b;
+}
+
+.duplicateBtn,
+.infoMessage {
+  background: #e8f0ff;
+  color: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+.warningMessage {
+  background: #fff4db;
+  color: #7c2d12;
+  border-color: #7c2d12;
+}
+
+.actionChip.selected {
+  border-color: var(--brand);
+}
+
+html[data-theme="dark"] .editorInput:focus,
+html[data-theme="dark"] .editorTextarea:focus,
+html[data-theme="dark"] textarea:focus,
+html[data-theme="dark"] .scenarioInlineSelect:focus,
+html[data-theme="dark"] .optionCard:focus-visible {
+  box-shadow: 0 0 0 3px rgba(236, 240, 246, 0.35);
+  border-color: rgba(236, 240, 246, 0.7);
+}
+
+html[data-theme="dark"] .saveMessage.success,
+html[data-theme="dark"] .addBtn,
+html[data-theme="dark"] .addNodeBtn {
+  background: #113220;
+  color: #bbf7d0;
+  border-color: #86efac;
+}
+
+html[data-theme="dark"] .saveMessage.error,
+html[data-theme="dark"] .deleteBtn,
+html[data-theme="dark"] .deleteNodeBtn {
+  background: #3a1414;
+  color: #fecaca;
+  border-color: #fca5a5;
+}
+
+html[data-theme="dark"] .duplicateBtn,
+html[data-theme="dark"] .infoMessage {
+  background: #1b2850;
+  color: #dbeafe;
+  border-color: #93c5fd;
+}
+
+html[data-theme="dark"] .warningMessage {
+  background: #3c2a12;
+  color: #ffedd5;
+  border-color: #fdba74;
 }
 
 @media (max-width: 720px) {
