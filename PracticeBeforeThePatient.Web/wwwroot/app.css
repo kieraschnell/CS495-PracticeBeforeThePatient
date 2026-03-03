@@ -989,11 +989,68 @@ textarea:focus {
   grid-template-columns: 1fr 1fr 1fr 1fr auto;
   gap: 12px;
   align-items: end;
+}
+
+.assignmentTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
 .assignmentCreateAction {
   min-width: 160px;
+}
+
+.classMgmtModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(2px);
+}
+
+.classMgmtModalCard {
+  width: min(920px, calc(100vw - 48px));
+  border: 1px solid rgba(15, 23, 42, 0.25);
+  border-radius: 18px;
+  padding: 20px;
+  background: #ffffff;
+  box-shadow: 0 26px 70px rgba(15, 23, 42, 0.35);
+}
+
+.classMgmtModalCardNarrow {
+  width: min(640px, calc(100vw - 48px));
+}
+
+.classMgmtModalTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.assignmentModalForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.assignmentModalFormSingle {
+  grid-template-columns: 1fr;
+  margin-top: 10px;
+}
+
+.assignmentModalActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
 }
 
 .assignmentList {
@@ -1006,6 +1063,7 @@ textarea:focus {
   justify-content: space-between;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 10px 12px;
@@ -1027,6 +1085,14 @@ textarea:focus {
   gap: 8px;
 }
 
+.assignmentDueModalActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .assignmentTitle {
   font-weight: 800;
 }
@@ -1036,16 +1102,48 @@ textarea:focus {
   font-size: 13px;
 }
 
+.gradingShell {
+  max-width: 1360px;
+}
+
+.gradingMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.gradingMetaItem {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.gradingMetaLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.gradingMetaValue {
+  font-weight: 800;
+}
+
 .gradeList {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
   gap: 12px;
 }
 
 .gradeCard {
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 12px;
+  padding: 14px;
   background: rgba(0, 0, 0, 0.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
 }
 
 .gradeStudentRow {
@@ -1078,9 +1176,76 @@ textarea:focus {
 
 .gradeInputRow {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 180px 1fr;
   gap: 12px;
   margin-bottom: 10px;
+}
+
+.submissionViewer {
+  min-height: 70vh;
+  width: 100%;
+}
+
+.submissionFocusCard {
+  border: 2px solid var(--brand);
+  border-radius: 20px;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(158, 27, 50, 0.06) 0%, var(--card) 36%);
+  min-height: 80vh;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.08);
+}
+
+.submissionViewerFull {
+  min-height: 68vh;
+}
+
+.simShellWide {
+  max-width: none;
+}
+
+.submissionModePage {
+  min-height: calc(100vh - 70px);
+  padding: 14px;
+  border-radius: 20px;
+  border: 2px solid var(--brand);
+  background: linear-gradient(180deg, rgba(158, 27, 50, 0.08) 0%, var(--card) 30%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.08);
+}
+
+.submissionModeTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.submissionModeBanner {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  border: 1px solid rgba(158, 27, 50, 0.35);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.submissionFocusTitle {
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+html[data-theme="dark"] .submissionFocusCard {
+  background: linear-gradient(180deg, rgba(212, 58, 86, 0.22) 0%, var(--card) 34%);
+  border-color: #fda4b4;
+}
+
+html[data-theme="dark"] .submissionModePage {
+  background: linear-gradient(180deg, rgba(212, 58, 86, 0.26) 0%, var(--card) 30%);
+  border-color: #fda4b4;
 }
 
 .actionChips {
@@ -1223,6 +1388,25 @@ textarea:focus {
 
   .assignmentCreateGrid,
   .gradeInputRow {
+    grid-template-columns: 1fr;
+  }
+
+  .assignmentModalForm {
+    grid-template-columns: 1fr;
+  }
+
+  .classMgmtModalBackdrop {
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  .classMgmtModalCard {
+    border-radius: 16px 16px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .gradingMetaGrid {
     grid-template-columns: 1fr;
   }
 }

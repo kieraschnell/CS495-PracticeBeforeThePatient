@@ -212,6 +212,22 @@ public sealed class ClassesController : ControllerBase
         return NoContent();
     }
 
+    public sealed class UpdateAssignmentDueRequest
+    {
+        public DateTimeOffset? DueAtUtc { get; set; }
+    }
+
+    [HttpPut("{classId}/assignments/{assignmentId}/due")]
+    public async Task<IActionResult> UpdateAssignmentDue(string classId, string assignmentId, [FromBody] UpdateAssignmentDueRequest req)
+    {
+        if (!await RequireAdmin()) return Forbid();
+
+        var ok = await _store.UpdateAssignmentDueAtAsync(classId, assignmentId, req.DueAtUtc);
+        if (!ok) return NotFound();
+
+        return NoContent();
+    }
+
     public sealed class GradeAssignmentRequest
     {
         public string StudentEmail { get; set; } = "";

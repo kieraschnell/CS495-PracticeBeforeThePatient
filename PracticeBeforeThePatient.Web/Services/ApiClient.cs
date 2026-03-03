@@ -19,7 +19,17 @@ public class ApiClient
         public string Email { get; set; } = "";
         public bool IsAdmin { get; set; }
         public List<string> AllowedScenarioIds { get; set; } = new();
+        public List<AllowedScenarioOption> AllowedScenarioOptions { get; set; } = new();
         public string Theme { get; set; } = "";
+    }
+
+    public sealed class AllowedScenarioOption
+    {
+        public string AssignmentId { get; set; } = "";
+        public string ScenarioId { get; set; } = "";
+        public string Label { get; set; } = "";
+        public DateTimeOffset? DueAtUtc { get; set; }
+        public bool IsSubmitted { get; set; }
     }
 
     public sealed class SetDevUserRequest

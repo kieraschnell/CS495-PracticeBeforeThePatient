@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PracticeBeforeThePatient.Core.Models;
+using PracticeBeforeThePatient.Services;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -11,10 +12,14 @@ public class ScenariosController : ControllerBase
 {
     private static readonly Regex ScenarioIdPattern = new("^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
     private readonly string _dataPath;
+    private readonly DevAccessStore _access;
+    private readonly ClassRosterStore _classes;
 
-    public ScenariosController(IWebHostEnvironment env)
+    public ScenariosController(IWebHostEnvironment env, DevAccessStore access, ClassRosterStore classes)
     {
         _dataPath = Path.Combine(env.ContentRootPath, "Data", "scenarios");
+        _access = access;
+        _classes = classes;
     }
 
     [HttpGet("{scenarioId}")]
@@ -26,6 +31,11 @@ public class ScenariosController : ControllerBase
                 title: "Invalid scenario id",
                 detail: "Scenario id may only include letters, numbers, underscore, and hyphen."
             ));
+        }
+
+        if (!await CanCurrentUserAccessScenarioAsync(scenarioId))
+        {
+            return Forbid();
         }
 
         var filePath = Path.Combine(_dataPath, $"{scenarioId}.json");
@@ -78,7 +88,7 @@ public class ScenariosController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<string>> GetAvailableScenarios()
+    public async Task<ActionResult<List<string>>> GetAvailableScenarios()
     {
         try
         {
@@ -87,12 +97,37 @@ public class ScenariosController : ControllerBase
                 return Ok(new List<string>());
             }
 
-            var scenarios = Directory.GetFiles(_dataPath, "*.json")
+            var allScenarios = Directory.GetFiles(_dataPath, "*.json")
                 .Select(Path.GetFileNameWithoutExtension)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x!)
+                .ToList()!;
+
+            if (await _access.IsAdminAsync())
+            {
+                return Ok(allScenarios);
+            }
+
+            var email = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return Ok(new List<string>());
+            }
+
+            var classRosters = await _classes.GetAllAsync();
+            var allowedScenarioIds = classRosters
+                .Where(c => c.Students.Any(s => string.Equals(s, email, StringComparison.OrdinalIgnoreCase)))
+                .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
+                .Select(a => (a.ScenarioId ?? "").Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var filtered = allScenarios
+                .Where(id => allowedScenarioIds.Contains(id))
                 .ToList();
 
-            return Ok(scenarios!);
+            return Ok(filtered);
         }
         catch (Exception ex)
         {
@@ -101,6 +136,26 @@ public class ScenariosController : ControllerBase
                 detail: ex.Message
             ));
         }
+    }
+
+    private async Task<bool> CanCurrentUserAccessScenarioAsync(string scenarioId)
+    {
+        if (await _access.IsAdminAsync())
+        {
+            return true;
+        }
+
+        var email = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return false;
+        }
+
+        var classRosters = await _classes.GetAllAsync();
+        return classRosters
+            .Where(c => c.Students.Any(s => string.Equals(s, email, StringComparison.OrdinalIgnoreCase)))
+            .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
+            .Any(a => string.Equals(a.ScenarioId, scenarioId, StringComparison.OrdinalIgnoreCase));
     }
 
     [HttpPut("{scenarioId}")]

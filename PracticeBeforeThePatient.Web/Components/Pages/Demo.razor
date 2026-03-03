@@ -4,6 +4,7 @@
 @using PracticeBeforeThePatient.Web.Services
 @inject ApiClient Api
 @inject IJSRuntime JS
+@inject NavigationManager Nav
 
 <PageTitle>Demo</PageTitle>
 
@@ -89,7 +90,10 @@
             {
                 await JS.InvokeVoidAsync("pbpTheme.setTheme", _themeToApply);
             }
-            SetStatus("Mock user updated.", true);
+
+            // Reload current page so access-dependent UI updates immediately for the new mock user.
+            Nav.NavigateTo(Nav.Uri, forceLoad: true);
+            return;
         }
         finally
         {

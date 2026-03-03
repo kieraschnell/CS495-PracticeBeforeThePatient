@@ -13,7 +13,8 @@ public partial class Simulation : ComponentBase
     protected bool _isLoadingScenario;
     protected string? _errorMessage;
 
-    protected List<string> AvailableScenarioIds { get; set; } = new();
+    protected List<ScenarioSelectionOption> AvailableScenarios { get; set; } = new();
+    protected string SelectedScenarioOptionId { get; set; } = "";
     protected string SelectedScenarioId { get; set; } = "";
 
     protected bool IsScenarioMenuOpen { get; set; }
@@ -51,6 +52,14 @@ public partial class Simulation : ComponentBase
         !string.IsNullOrWhiteSpace(ReasoningText);
 
     protected bool CanContinue => HasSubmittedThisStep && !IsComplete;
+    private HashSet<string> AvailableScenarioIdSet =>
+        AvailableScenarios
+            .Select(x => x.ScenarioId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    private HashSet<string> AvailableScenarioOptionIdSet =>
+        AvailableScenarios
+            .Select(x => x.OptionId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     protected override async Task OnInitializedAsync()
     {
@@ -67,27 +76,53 @@ public partial class Simulation : ComponentBase
                 return;
             }
 
-            AvailableScenarioIds = (access.AllowedScenarioIds ?? new List<string>())
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            AvailableScenarios = (access.AllowedScenarioOptions ?? new List<ApiClient.AllowedScenarioOption>())
+                .Where(x => !string.IsNullOrWhiteSpace(x.AssignmentId) && !string.IsNullOrWhiteSpace(x.ScenarioId))
+                .Select(x => new ScenarioSelectionOption
+                {
+                    OptionId = x.AssignmentId.Trim(),
+                    ScenarioId = x.ScenarioId.Trim(),
+                    DisplayName = string.IsNullOrWhiteSpace(x.Label) ? x.ScenarioId.Trim() : x.Label.Trim(),
+                    DueAtUtc = x.DueAtUtc,
+                    IsSubmitted = x.IsSubmitted
+                })
+                .OrderBy(x => x.DueAtUtc ?? DateTimeOffset.MaxValue)
+                .ThenBy(x => x.DisplayName, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            if (AvailableScenarioIds.Count == 0)
+            if (AvailableScenarios.Count == 0)
+            {
+                AvailableScenarios = (access.AllowedScenarioIds ?? new List<string>())
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => new ScenarioSelectionOption
+                    {
+                        OptionId = x.Trim(),
+                        ScenarioId = x.Trim(),
+                        DisplayName = x.Trim(),
+                        DueAtUtc = null,
+                        IsSubmitted = false
+                    })
+                    .ToList();
+            }
+
+            if (AvailableScenarios.Count == 0)
             {
                 _errorMessage = access.IsAdmin
                     ? "No scenarios are available right now."
-                    : "You do not have access to any scenarios right now.";
-
+                    : "No scenarios are available right now.";
                 _isLoading = false;
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(SelectedScenarioId) || !AvailableScenarioIds.Contains(SelectedScenarioId, StringComparer.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(SelectedScenarioOptionId) || !AvailableScenarioOptionIdSet.Contains(SelectedScenarioOptionId))
             {
-                SelectedScenarioId = AvailableScenarioIds[0];
+                SelectedScenarioOptionId = AvailableScenarios[0].OptionId;
             }
 
+            var selectedOption = GetSelectedScenarioOption();
+            SelectedScenarioId = selectedOption?.ScenarioId ?? "";
             await LoadScenarioAsync(SelectedScenarioId);
         }
         catch (Exception ex)
@@ -100,16 +135,45 @@ public partial class Simulation : ComponentBase
         }
     }
 
+    protected string GetSelectedScenarioDisplayName()
+    {
+        var selected = GetSelectedScenarioOption();
+        return selected?.DisplayName ?? (_scenario?.Title ?? SelectedScenarioId);
+    }
+
+    protected string GetActiveScenarioSubtitle()
+    {
+        if (_scenario is null)
+        {
+            return "Make the next best decision at each step";
+        }
+
+        var selected = GetSelectedScenarioOption();
+        if (selected is null)
+        {
+            return "Make the next best decision at each step";
+        }
+
+        if (string.Equals(selected.DisplayName, selected.ScenarioId, StringComparison.OrdinalIgnoreCase))
+        {
+            return "Make the next best decision at each step";
+        }
+
+        return $"{selected.DisplayName} · {_scenario.Title}";
+    }
+
     protected async Task OnScenarioChanged()
     {
         IsScenarioMenuOpen = false;
 
-        if (!AvailableScenarioIds.Contains(SelectedScenarioId, StringComparer.OrdinalIgnoreCase))
+        if (!AvailableScenarioOptionIdSet.Contains(SelectedScenarioOptionId))
         {
             _errorMessage = "That scenario is not available to you.";
             return;
         }
 
+        var selected = GetSelectedScenarioOption();
+        SelectedScenarioId = selected?.ScenarioId ?? "";
         await LoadScenarioAsync(SelectedScenarioId);
     }
 
@@ -126,7 +190,7 @@ public partial class Simulation : ComponentBase
             return;
         }
 
-        if (!AvailableScenarioIds.Contains(scenarioId, StringComparer.OrdinalIgnoreCase))
+        if (!AvailableScenarioIdSet.Contains(scenarioId))
         {
             _errorMessage = "That scenario is not available to you.";
             return;
@@ -320,6 +384,28 @@ public partial class Simulation : ComponentBase
     protected void CloseScenarioMenu()
     {
         IsScenarioMenuOpen = false;
+    }
+
+    protected string GetScenarioOptionLabel(ScenarioSelectionOption option)
+    {
+        return option.IsSubmitted
+            ? $"{option.DisplayName} (Done)"
+            : $"{option.DisplayName} (Not done)";
+    }
+
+    private ScenarioSelectionOption? GetSelectedScenarioOption()
+    {
+        return AvailableScenarios
+            .FirstOrDefault(x => string.Equals(x.OptionId, SelectedScenarioOptionId, StringComparison.OrdinalIgnoreCase));
+    }
+
+    protected sealed class ScenarioSelectionOption
+    {
+        public string OptionId { get; set; } = "";
+        public string ScenarioId { get; set; } = "";
+        public string DisplayName { get; set; } = "";
+        public DateTimeOffset? DueAtUtc { get; set; }
+        public bool IsSubmitted { get; set; }
     }
 
     protected sealed class StudentStepRecord

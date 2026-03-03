@@ -26,19 +26,19 @@
             <div class="simHeaderText">
                 <div class="simBadge">Active Scenario</div>
                 <div class="simTitle">@_scenario.Title</div>
-                <div class="simSubtitle">Make the next best decision at each step</div>
+                <div class="simSubtitle">@GetActiveScenarioSubtitle()</div>
             </div>
 
-        @if (AvailableScenarioIds.Count > 1)
+        @if (AvailableScenarios.Count > 1)
         {
             <div class="scenarioBar">
                 <select class="scenarioInlineSelect"
-                        @bind="SelectedScenarioId"
+                        @bind="SelectedScenarioOptionId"
                         @bind:after="OnScenarioChanged"
                         disabled="@_isLoadingScenario">
-                    @foreach (var id in AvailableScenarioIds)
+                    @foreach (var option in AvailableScenarios)
                     {
-                        <option value="@id">@id</option>
+                        <option value="@option.OptionId">@GetScenarioOptionLabel(option)</option>
                     }
                 </select>
             </div>

@@ -282,6 +282,29 @@ public sealed class ClassRosterStore
         }
     }
 
+    public async Task<bool> UpdateAssignmentDueAtAsync(string classId, string assignmentId, DateTimeOffset? dueAtUtc)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var all = await ReadUnlockedAsync();
+            var roster = all.FirstOrDefault(x => x.Id == classId);
+            if (roster is null) return false;
+
+            var assignment = roster.Assignments.FirstOrDefault(x => x.Id == assignmentId);
+            if (assignment is null) return false;
+
+            assignment.DueAtUtc = dueAtUtc?.ToUniversalTime();
+
+            await WriteUnlockedAsync(all);
+            return true;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
     public async Task<bool> GradeAssignmentAsync(
         string classId,
         string assignmentId,
