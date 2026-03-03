@@ -8,6 +8,13 @@
 
 <PageTitle>Assignment Grading</PageTitle>
 
+@if (!string.IsNullOrWhiteSpace(_message))
+{
+    <div @key="_messageVersion" class="saveMessage overlayToast @_messageKind" role="status" aria-live="polite">
+        @_message
+    </div>
+}
+
 @if (_isLoading)
 {
     <div class="card">
@@ -54,12 +61,6 @@
                 </div>
             </div>
 
-            <div class="bannerSlot">
-                <div class="saveMessage @_messageKind classMessage @(string.IsNullOrWhiteSpace(_message) ? "bannerHidden" : "")">
-                    @(string.IsNullOrWhiteSpace(_message) ? "\u00A0" : _message)
-                </div>
-            </div>
-
             <div class="gradeInputRow">
                 <div>
                     <label class="editorLabel">Grade (0-100)</label>
@@ -97,12 +98,6 @@
             </div>
 
             <a class="secondaryBtn" href="class-management">Back to Class Management</a>
-        </div>
-
-        <div class="bannerSlot">
-            <div class="saveMessage @_messageKind classMessage @(string.IsNullOrWhiteSpace(_message) ? "bannerHidden" : "")">
-                @(string.IsNullOrWhiteSpace(_message) ? "\u00A0" : _message)
-            </div>
         </div>
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))

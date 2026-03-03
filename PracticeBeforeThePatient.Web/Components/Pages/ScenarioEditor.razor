@@ -3,6 +3,13 @@
 
 <PageTitle>Scenario Editor</PageTitle>
 
+@if (!string.IsNullOrWhiteSpace(_saveMessage))
+{
+    <div @key="_saveMessageVersion" class="saveMessage overlayToast @(_saveSuccess ? "success" : "error")" role="status" aria-live="polite">
+        @_saveMessage
+    </div>
+}
+
 <div class="simShell">
 
     @if (_isLoading)
@@ -51,12 +58,6 @@
                         <button class="primaryBtn" @onclick="SaveScenario" disabled="@_isSaving">
                             @(_isSaving ? "Saving..." : "Save Changes")
                         </button>
-                    </div>
-
-                    <div class="bannerSlot">
-                        <div class="saveMessage @(_saveSuccess ? "success" : "error") @(string.IsNullOrWhiteSpace(_saveMessage) ? "bannerHidden" : "")">
-                            @(string.IsNullOrWhiteSpace(_saveMessage) ? "\u00A0" : _saveMessage)
-                        </div>
                     </div>
 
                     <div class="divider"></div>

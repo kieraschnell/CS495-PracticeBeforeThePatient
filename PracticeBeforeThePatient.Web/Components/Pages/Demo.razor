@@ -8,6 +8,13 @@
 
 <PageTitle>Demo</PageTitle>
 
+@if (!string.IsNullOrWhiteSpace(StatusMessage))
+{
+    <div @key="_statusVersion" class="saveMessage overlayToast @StatusKind" role="status" aria-live="polite">
+        @StatusMessage
+    </div>
+}
+
 <div class="simShell">
     <div class="card">
         <div class="sectionTitle">Demo</div>
@@ -18,12 +25,6 @@
         <div class="sectionTitle">Mock Login (Temporary)</div>
         <div class="narrLine">Current user: @CurrentUserLabel</div>
         <div class="narrLine">Role: @(IsAdmin ? "Admin" : "Student")</div>
-
-        <div class="bannerSlot">
-            <div class="saveMessage @StatusKind @(string.IsNullOrWhiteSpace(StatusMessage) ? "bannerHidden" : "")">
-                @(string.IsNullOrWhiteSpace(StatusMessage) ? "\u00A0" : StatusMessage)
-            </div>
-        </div>
 
         <div class="createRow">
             <input class="editorInput"

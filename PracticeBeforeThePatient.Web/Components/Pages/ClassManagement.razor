@@ -7,6 +7,13 @@
 
 <PageTitle>Class Management</PageTitle>
 
+@if (!string.IsNullOrWhiteSpace(_message))
+{
+    <div @key="_messageVersion" class="saveMessage overlayToast @_messageKind" role="status" aria-live="polite">
+        @_message
+    </div>
+}
+
 @if (!_isAdminLoaded)
 {
     <div class="card">
@@ -33,12 +40,6 @@
             <div class="simSubtitle">Create classes, assign scenarios, and open grading pages</div>
         </div>
         <button class="primaryBtn" type="button" @onclick="OpenAddClassModal">Add class</button>
-    </div>
-
-    <div class="bannerSlot">
-        <div class="saveMessage @_messageKind classMessage @(string.IsNullOrWhiteSpace(_message) ? "bannerHidden" : "")">
-            @(string.IsNullOrWhiteSpace(_message) ? "\u00A0" : _message)
-        </div>
     </div>
 
     <div class="card" @onclick="CloseMenu">

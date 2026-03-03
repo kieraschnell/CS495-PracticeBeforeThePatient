@@ -13,7 +13,7 @@
         "Name": "HW 1",
         "ScenarioId": "generatedScenario1",
         "AssignedAtUtc": "2026-03-03T05:50:08.8711425+00:00",
-        "DueAtUtc": "2026-03-02T05:59:00+00:00",
+        "DueAtUtc": "2026-03-12T05:59:00+00:00",
         "Submissions": [
           {
             "StudentEmail": "test@test.com",
@@ -21,7 +21,7 @@
             "SubmissionText": "Scenario: generatedScenario1\nCompleted At (UTC): 2026-03-03T05:53:03.1113484\u002B00:00\nSummary: Encounter complete.\n\nStep 1\nStudent Choice: A. Start immediate cold-water immersion, remove equipment, assign one person to call EMS and one to monitor vitals.\nReasoning: cscvferfcw\nRecommended: A. Start immediate cold-water immersion, remove equipment, assign one person to call EMS and one to monitor vitals.\nRecommended Why: Correct. Cool first, transport second for exertional heat stroke.\nResult: Correct. Cool first, transport second for exertional heat stroke.\n\nStep 2\nStudent Choice: B. Stop immersion early and switch to passive cooling only.\nReasoning: rwfwe\nRecommended: A. Continue immersion until under 39.0 C, provide oxygen, prepare IV access, and continue monitoring.\nRecommended Why: Correct. Continue active cooling and supportive care.\nResult: Suboptimal. Stopping early can lead to rebound hyperthermia.",
             "Grade": 50,
             "GradeFeedback": "fine",
-            "GradedAtUtc": "2026-03-03T06:00:26.8796678+00:00",
+            "GradedAtUtc": "2026-03-03T20:08:44.2106543+00:00",
             "GradedByEmail": "admin@test.com"
           },
           {
@@ -30,7 +30,7 @@
             "SubmissionText": "",
             "Grade": 0,
             "GradeFeedback": "not done!",
-            "GradedAtUtc": "2026-03-03T06:00:13.2768068+00:00",
+            "GradedAtUtc": "2026-03-03T20:08:39.7520973+00:00",
             "GradedByEmail": "admin@test.com"
           }
         ]
@@ -40,16 +40,25 @@
         "Name": "HW 2",
         "ScenarioId": "generatedScenario2",
         "AssignedAtUtc": "2026-03-03T05:50:18.4464938+00:00",
-        "DueAtUtc": "2026-03-03T05:59:00+00:00",
+        "DueAtUtc": "2026-03-20T05:59:00+00:00",
         "Submissions": [
           {
             "StudentEmail": "test@test.com",
             "SubmittedAtUtc": "2026-03-03T05:53:38.8246129+00:00",
             "SubmissionText": "Scenario: generatedScenario2\nCompleted At (UTC): 2026-03-03T05:53:38.8182682\u002B00:00\nSummary: Encounter complete.\n\nStep 1\nStudent Choice: A. Give IM epinephrine immediately, call EMS, and position supine with legs elevated.\nReasoning: efcwefcw\nRecommended: A. Give IM epinephrine immediately, call EMS, and position supine with legs elevated.\nRecommended Why: Correct. Epinephrine is first-line and time critical.\nResult: Correct. Epinephrine is first-line and time critical.\n\nStep 2\nStudent Choice: B. Stop interventions and discharge to family because symptoms improved.\nReasoning: fewfw\nRecommended: A. Prepare IV access, continue monitoring, and be ready for repeat IM epinephrine if symptoms persist.\nRecommended Why: Correct. Continue active management and handoff planning.\nResult: Unsafe. Biphasic or recurrent reactions can occur.",
-            "Grade": null,
-            "GradeFeedback": "",
-            "GradedAtUtc": null,
-            "GradedByEmail": ""
+            "Grade": 50,
+            "GradeFeedback": "Unsafe option chosen",
+            "GradedAtUtc": "2026-03-03T20:06:20.8646236+00:00",
+            "GradedByEmail": "admin@test.com"
+          },
+          {
+            "StudentEmail": "test2@test.com",
+            "SubmittedAtUtc": null,
+            "SubmissionText": "",
+            "Grade": 0,
+            "GradeFeedback": "Not done",
+            "GradedAtUtc": "2026-03-03T20:06:01.8689955+00:00",
+            "GradedByEmail": "admin@test.com"
           }
         ]
       }
