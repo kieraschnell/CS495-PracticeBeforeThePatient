@@ -6,6 +6,9 @@ namespace PracticeBeforeThePatient.Web.Components.Pages;
 
 public partial class Simulation : ComponentBase
 {
+    [SupplyParameterFromQuery(Name = "assignment")]
+    public string? RequestedAssignmentOptionId { get; set; }
+
     [Inject] private ApiClient ApiClient { get; set; } = default!;
 
     protected Scenario? _scenario;
@@ -87,7 +90,11 @@ public partial class Simulation : ComponentBase
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(SelectedScenarioOptionId) || !AvailableScenarioOptionIdSet.Contains(SelectedScenarioOptionId))
+            if (!string.IsNullOrWhiteSpace(RequestedAssignmentOptionId) && AvailableScenarioOptionIdSet.Contains(RequestedAssignmentOptionId))
+            {
+                SelectedScenarioOptionId = RequestedAssignmentOptionId;
+            }
+            else if (string.IsNullOrWhiteSpace(SelectedScenarioOptionId) || !AvailableScenarioOptionIdSet.Contains(SelectedScenarioOptionId))
             {
                 SelectedScenarioOptionId = AvailableScenarios[0].OptionId;
             }
@@ -361,8 +368,11 @@ public partial class Simulation : ComponentBase
 
     private void ApplyAccessOptions(ApiClient.AccessResponse access)
     {
+        var nowUtc = DateTimeOffset.UtcNow;
+
         AvailableScenarios = (access.AllowedScenarioOptions ?? new List<ApiClient.AllowedScenarioOption>())
             .Where(x => !string.IsNullOrWhiteSpace(x.AssignmentId) && !string.IsNullOrWhiteSpace(x.ScenarioId))
+            .Where(x => !x.DueAtUtc.HasValue || x.DueAtUtc.Value >= nowUtc)
             .Select(x => new ScenarioSelectionOption
             {
                 OptionId = x.AssignmentId.Trim(),
@@ -375,7 +385,7 @@ public partial class Simulation : ComponentBase
             .ThenBy(x => x.DisplayName, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        if (AvailableScenarios.Count == 0)
+        if (AvailableScenarios.Count == 0 && access.IsAdmin)
         {
             AvailableScenarios = (access.AllowedScenarioIds ?? new List<string>())
                 .Where(x => !string.IsNullOrWhiteSpace(x))

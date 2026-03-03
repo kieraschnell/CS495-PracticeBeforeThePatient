@@ -1153,6 +1153,10 @@ textarea:focus {
   gap: 12px;
 }
 
+.gradesSingleColumn {
+  grid-template-columns: 1fr;
+}
+
 .gradeCard {
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -1167,6 +1171,13 @@ textarea:focus {
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
+}
+
+.gradeItemHeaderLine {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .gradeStatus {

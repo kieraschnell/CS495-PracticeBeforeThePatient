@@ -157,13 +157,6 @@ public sealed class AccessController : ControllerBase
             .Where(x => !string.IsNullOrWhiteSpace(x.ScenarioId))
             .ToList();
 
-        var filteredScenarioIds = allowedAssignments
-            .Select(x => x.ScenarioId)
-            .Where(id => allScenarios.Contains(id, StringComparer.OrdinalIgnoreCase))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
         var filteredOptions = memberClasses
             .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
             .Select(a =>
@@ -189,6 +182,12 @@ public sealed class AccessController : ControllerBase
                 allScenarios.Contains(x.ScenarioId, StringComparer.OrdinalIgnoreCase))
             .OrderBy(x => x.DueAtUtc ?? DateTimeOffset.MaxValue)
             .ThenBy(x => x.Label, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var filteredScenarioIds = filteredOptions
+            .Select(x => x.ScenarioId)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         return new AccessResponse

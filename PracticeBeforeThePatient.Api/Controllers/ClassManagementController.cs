@@ -262,4 +262,64 @@ public sealed class ClassesController : ControllerBase
         if (!ok) return BadRequest("Invalid class, assignment, or student.");
         return NoContent();
     }
+
+    public sealed class StudentGradeDto
+    {
+        public string ClassId { get; set; } = "";
+        public string ClassName { get; set; } = "";
+        public string AssignmentId { get; set; } = "";
+        public string AssignmentName { get; set; } = "";
+        public string ScenarioId { get; set; } = "";
+        public DateTimeOffset AssignedAtUtc { get; set; }
+        public DateTimeOffset? DueAtUtc { get; set; }
+        public DateTimeOffset? SubmittedAtUtc { get; set; }
+        public string SubmissionText { get; set; } = "";
+        public decimal? Grade { get; set; }
+        public string GradeFeedback { get; set; } = "";
+        public DateTimeOffset? GradedAtUtc { get; set; }
+        public string GradedByEmail { get; set; } = "";
+    }
+
+    [HttpGet("me/grades")]
+    public async Task<ActionResult<List<StudentGradeDto>>> GetMyGrades()
+    {
+        var email = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return Ok(new List<StudentGradeDto>());
+        }
+
+        var all = await _store.GetAllAsync();
+
+        var grades = all
+            .Where(c => c.Students.Any(s => string.Equals(s, email, StringComparison.OrdinalIgnoreCase)))
+            .SelectMany(c => (c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
+                .Select(a =>
+                {
+                    var submission = (a.Submissions ?? new List<ClassRosterStore.AssignmentSubmission>())
+                        .FirstOrDefault(s => string.Equals(s.StudentEmail, email, StringComparison.OrdinalIgnoreCase));
+
+                    return new StudentGradeDto
+                    {
+                        ClassId = c.Id,
+                        ClassName = c.Name,
+                        AssignmentId = a.Id,
+                        AssignmentName = a.Name,
+                        ScenarioId = a.ScenarioId,
+                        AssignedAtUtc = a.AssignedAtUtc,
+                        DueAtUtc = a.DueAtUtc,
+                        SubmittedAtUtc = submission?.SubmittedAtUtc,
+                        SubmissionText = submission?.SubmissionText ?? "",
+                        Grade = submission?.Grade,
+                        GradeFeedback = submission?.GradeFeedback ?? "",
+                        GradedAtUtc = submission?.GradedAtUtc,
+                        GradedByEmail = submission?.GradedByEmail ?? ""
+                    };
+                }))
+            .OrderBy(x => x.DueAtUtc ?? DateTimeOffset.MaxValue)
+            .ThenBy(x => x.AssignmentName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return grades;
+    }
 }
