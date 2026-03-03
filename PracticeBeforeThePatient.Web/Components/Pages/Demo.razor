@@ -19,10 +19,11 @@
         <div class="narrLine">Current user: @CurrentUserLabel</div>
         <div class="narrLine">Role: @(IsAdmin ? "Admin" : "Student")</div>
 
-        @if (!string.IsNullOrWhiteSpace(StatusMessage))
-        {
-            <div class="saveMessage @StatusKind">@StatusMessage</div>
-        }
+        <div class="bannerSlot">
+            <div class="saveMessage @StatusKind @(string.IsNullOrWhiteSpace(StatusMessage) ? "bannerHidden" : "")">
+                @(string.IsNullOrWhiteSpace(StatusMessage) ? "\u00A0" : StatusMessage)
+            </div>
+        </div>
 
         <div class="createRow">
             <input class="editorInput"
@@ -42,6 +43,7 @@
     private bool IsSaving { get; set; }
     private string StatusMessage { get; set; } = "";
     private string StatusKind { get; set; } = "success";
+    private int _statusVersion;
     private string? _themeToApply;
 
     protected override async Task OnInitializedAsync()
@@ -122,6 +124,20 @@
     {
         StatusMessage = message;
         StatusKind = ok ? "success" : "error";
+        var version = ++_statusVersion;
+        _ = ClearStatusLater(version);
+    }
+
+    private async Task ClearStatusLater(int version)
+    {
+        await Task.Delay(3000);
+        if (version != _statusVersion)
+        {
+            return;
+        }
+
+        StatusMessage = "";
+        await InvokeAsync(StateHasChanged);
     }
 
     private static string? NormalizeTheme(string? theme)

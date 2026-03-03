@@ -10,10 +10,11 @@
     <div class="card">
         <div class="sectionTitle">Settings</div>
 
-        @if (!string.IsNullOrWhiteSpace(_message))
-        {
-            <div class="saveMessage @_messageKind">@_message</div>
-        }
+        <div class="bannerSlot">
+            <div class="saveMessage @_messageKind @(string.IsNullOrWhiteSpace(_message) ? "bannerHidden" : "")">
+                @(string.IsNullOrWhiteSpace(_message) ? "\u00A0" : _message)
+            </div>
+        </div>
 
         <div class="settingsRow">
             <div>
@@ -33,6 +34,7 @@
     private bool _isDarkMode;
     private string _message = "";
     private string _messageKind = "success";
+    private int _messageVersion;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -85,5 +87,19 @@
     {
         _message = text;
         _messageKind = ok ? "success" : "error";
+        var version = ++_messageVersion;
+        _ = ClearMessageLater(version);
+    }
+
+    private async Task ClearMessageLater(int version)
+    {
+        await Task.Delay(3000);
+        if (version != _messageVersion)
+        {
+            return;
+        }
+
+        _message = "";
+        await InvokeAsync(StateHasChanged);
     }
 }

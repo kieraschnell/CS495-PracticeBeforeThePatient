@@ -76,36 +76,7 @@ public partial class Simulation : ComponentBase
                 return;
             }
 
-            AvailableScenarios = (access.AllowedScenarioOptions ?? new List<ApiClient.AllowedScenarioOption>())
-                .Where(x => !string.IsNullOrWhiteSpace(x.AssignmentId) && !string.IsNullOrWhiteSpace(x.ScenarioId))
-                .Select(x => new ScenarioSelectionOption
-                {
-                    OptionId = x.AssignmentId.Trim(),
-                    ScenarioId = x.ScenarioId.Trim(),
-                    DisplayName = string.IsNullOrWhiteSpace(x.Label) ? x.ScenarioId.Trim() : x.Label.Trim(),
-                    DueAtUtc = x.DueAtUtc,
-                    IsSubmitted = x.IsSubmitted
-                })
-                .OrderBy(x => x.DueAtUtc ?? DateTimeOffset.MaxValue)
-                .ThenBy(x => x.DisplayName, StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            if (AvailableScenarios.Count == 0)
-            {
-                AvailableScenarios = (access.AllowedScenarioIds ?? new List<string>())
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
-                    .Select(x => new ScenarioSelectionOption
-                    {
-                        OptionId = x.Trim(),
-                        ScenarioId = x.Trim(),
-                        DisplayName = x.Trim(),
-                        DueAtUtc = null,
-                        IsSubmitted = false
-                    })
-                    .ToList();
-            }
+            ApplyAccessOptions(access);
 
             if (AvailableScenarios.Count == 0)
             {
@@ -350,6 +321,8 @@ public partial class Simulation : ComponentBase
         AssignmentSubmissionStatus = result.UpdatedAssignments > 0
             ? $"Assignment submission saved for {result.UpdatedAssignments} class assignment(s)."
             : "No class assignments were linked to this scenario.";
+
+        await RefreshScenarioOptionsAsync();
     }
 
     private string BuildSubmissionText()
@@ -384,6 +357,64 @@ public partial class Simulation : ComponentBase
     protected void CloseScenarioMenu()
     {
         IsScenarioMenuOpen = false;
+    }
+
+    private void ApplyAccessOptions(ApiClient.AccessResponse access)
+    {
+        AvailableScenarios = (access.AllowedScenarioOptions ?? new List<ApiClient.AllowedScenarioOption>())
+            .Where(x => !string.IsNullOrWhiteSpace(x.AssignmentId) && !string.IsNullOrWhiteSpace(x.ScenarioId))
+            .Select(x => new ScenarioSelectionOption
+            {
+                OptionId = x.AssignmentId.Trim(),
+                ScenarioId = x.ScenarioId.Trim(),
+                DisplayName = string.IsNullOrWhiteSpace(x.Label) ? x.ScenarioId.Trim() : x.Label.Trim(),
+                DueAtUtc = x.DueAtUtc,
+                IsSubmitted = x.IsSubmitted
+            })
+            .OrderBy(x => x.DueAtUtc ?? DateTimeOffset.MaxValue)
+            .ThenBy(x => x.DisplayName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (AvailableScenarios.Count == 0)
+        {
+            AvailableScenarios = (access.AllowedScenarioIds ?? new List<string>())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .Select(x => new ScenarioSelectionOption
+                {
+                    OptionId = x.Trim(),
+                    ScenarioId = x.Trim(),
+                    DisplayName = x.Trim(),
+                    DueAtUtc = null,
+                    IsSubmitted = false
+                })
+                .ToList();
+        }
+    }
+
+    private async Task RefreshScenarioOptionsAsync()
+    {
+        var access = await ApiClient.GetAccessAsync();
+        if (access is null)
+        {
+            return;
+        }
+
+        var previousOptionId = SelectedScenarioOptionId;
+        ApplyAccessOptions(access);
+
+        if (!string.IsNullOrWhiteSpace(previousOptionId) && AvailableScenarios.Any(x => string.Equals(x.OptionId, previousOptionId, StringComparison.OrdinalIgnoreCase)))
+        {
+            SelectedScenarioOptionId = previousOptionId;
+            return;
+        }
+
+        if (AvailableScenarios.Count > 0)
+        {
+            SelectedScenarioOptionId = AvailableScenarios[0].OptionId;
+            SelectedScenarioId = AvailableScenarios[0].ScenarioId;
+        }
     }
 
     protected string GetScenarioOptionLabel(ScenarioSelectionOption option)

@@ -35,10 +35,11 @@
         <button class="primaryBtn" type="button" @onclick="OpenAddClassModal">Add class</button>
     </div>
 
-    @if (!string.IsNullOrWhiteSpace(_message))
-    {
-        <div class="saveMessage @_messageKind classMessage">@_message</div>
-    }
+    <div class="bannerSlot">
+        <div class="saveMessage @_messageKind classMessage @(string.IsNullOrWhiteSpace(_message) ? "bannerHidden" : "")">
+            @(string.IsNullOrWhiteSpace(_message) ? "\u00A0" : _message)
+        </div>
+    </div>
 
     <div class="card" @onclick="CloseMenu">
         <div class="sectionTitle">Classes</div>
@@ -300,6 +301,7 @@
 
     private string _message = "";
     private string _messageKind = "success";
+    private int _messageVersion;
 
     private bool _menuOpen;
 
@@ -388,12 +390,18 @@
         _message = text;
         _messageKind = ok ? "success" : "error";
         StateHasChanged();
-        _ = ClearMessageLater();
+        var version = ++_messageVersion;
+        _ = ClearMessageLater(version);
     }
 
-    private async Task ClearMessageLater()
+    private async Task ClearMessageLater(int version)
     {
         await Task.Delay(3000);
+        if (version != _messageVersion)
+        {
+            return;
+        }
+
         _message = "";
         await InvokeAsync(StateHasChanged);
     }

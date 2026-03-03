@@ -421,6 +421,21 @@ code {
   margin-top: 10px;
 }
 
+.bannerSlot {
+  min-height: 56px;
+  margin-bottom: 12px;
+}
+
+.bannerSlot .saveMessage {
+  margin-top: 0;
+}
+
+.saveMessage.bannerHidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .saveMessage.success {
   background: rgba(34, 197, 94, 0.1);
   color: rgb(21, 128, 61);

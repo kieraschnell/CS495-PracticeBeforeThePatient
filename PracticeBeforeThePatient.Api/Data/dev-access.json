@@ -4,6 +4,7 @@
     "admin@test.com"
   ],
   "ThemeByEmail": {
-    "admin@test.com": "light"
+    "admin@test.com": "light",
+    "test3@test.com": "dark"
   }
 }

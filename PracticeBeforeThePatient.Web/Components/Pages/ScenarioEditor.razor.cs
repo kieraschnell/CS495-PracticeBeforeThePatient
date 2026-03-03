@@ -14,6 +14,7 @@ public partial class ScenarioEditor : ComponentBase
     protected string? _errorMessage;
     protected string? _saveMessage;
     protected bool _saveSuccess;
+    private int _saveMessageVersion;
 
     protected Scenario? _scenario;
     protected List<string> AvailableScenarioIds { get; set; } = new();
@@ -94,7 +95,7 @@ public partial class ScenarioEditor : ComponentBase
         if (!string.IsNullOrWhiteSpace(validationError))
         {
             _saveSuccess = false;
-            _saveMessage = $"Validation failed: {validationError}";
+            SetSaveMessage($"Validation failed: {validationError}", false);
             return;
         }
 
@@ -104,8 +105,7 @@ public partial class ScenarioEditor : ComponentBase
 
         var success = await ApiClient.UpdateScenarioAsync(SelectedScenarioId, _scenario);
 
-        _saveSuccess = success;
-        _saveMessage = success ? "Scenario saved successfully!" : "Failed to save scenario.";
+        SetSaveMessage(success ? "Scenario saved successfully!" : "Failed to save scenario.", success);
         _isSaving = false;
 
         StateHasChanged();
@@ -153,5 +153,25 @@ public partial class ScenarioEditor : ComponentBase
         }
 
         return null;
+    }
+
+    private void SetSaveMessage(string message, bool success)
+    {
+        _saveSuccess = success;
+        _saveMessage = message;
+        var version = ++_saveMessageVersion;
+        _ = ClearSaveMessageLater(version);
+    }
+
+    private async Task ClearSaveMessageLater(int version)
+    {
+        await Task.Delay(3000);
+        if (version != _saveMessageVersion)
+        {
+            return;
+        }
+
+        _saveMessage = null;
+        await InvokeAsync(StateHasChanged);
     }
 }

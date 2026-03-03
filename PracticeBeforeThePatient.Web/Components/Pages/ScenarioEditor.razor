@@ -53,12 +53,11 @@
                         </button>
                     </div>
 
-                    @if (!string.IsNullOrWhiteSpace(_saveMessage))
-                    {
-                        <div class="saveMessage @(_saveSuccess ? "success" : "error")">
-                            @_saveMessage
+                    <div class="bannerSlot">
+                        <div class="saveMessage @(_saveSuccess ? "success" : "error") @(string.IsNullOrWhiteSpace(_saveMessage) ? "bannerHidden" : "")">
+                            @(string.IsNullOrWhiteSpace(_saveMessage) ? "\u00A0" : _saveMessage)
                         </div>
-                    }
+                    </div>
 
                     <div class="divider"></div>
 

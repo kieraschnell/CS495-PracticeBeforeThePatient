@@ -54,10 +54,11 @@
                 </div>
             </div>
 
-            @if (!string.IsNullOrWhiteSpace(_message))
-            {
-                <div class="saveMessage @_messageKind classMessage">@_message</div>
-            }
+            <div class="bannerSlot">
+                <div class="saveMessage @_messageKind classMessage @(string.IsNullOrWhiteSpace(_message) ? "bannerHidden" : "")">
+                    @(string.IsNullOrWhiteSpace(_message) ? "\u00A0" : _message)
+                </div>
+            </div>
 
             <div class="gradeInputRow">
                 <div>
@@ -98,10 +99,11 @@
             <a class="secondaryBtn" href="class-management">Back to Class Management</a>
         </div>
 
-        @if (!string.IsNullOrWhiteSpace(_message))
-        {
-            <div class="saveMessage @_messageKind classMessage">@_message</div>
-        }
+        <div class="bannerSlot">
+            <div class="saveMessage @_messageKind classMessage @(string.IsNullOrWhiteSpace(_message) ? "bannerHidden" : "")">
+                @(string.IsNullOrWhiteSpace(_message) ? "\u00A0" : _message)
+            </div>
+        </div>
 
         @if (!string.IsNullOrWhiteSpace(_errorMessage))
         {
@@ -218,6 +220,7 @@
 
     private string _message = "";
     private string _messageKind = "success";
+    private int _messageVersion;
     private string _errorMessage = "";
     private string _headerSubtitle = "Grade student submissions for this assignment";
 
@@ -423,6 +426,20 @@
     {
         _message = text;
         _messageKind = ok ? "success" : "error";
+        var version = ++_messageVersion;
+        _ = ClearMessageLater(version);
+    }
+
+    private async Task ClearMessageLater(int version)
+    {
+        await Task.Delay(3000);
+        if (version != _messageVersion)
+        {
+            return;
+        }
+
+        _message = "";
+        await InvokeAsync(StateHasChanged);
     }
 
     private static string FormatDueAtCst(DateTimeOffset? dueAtUtc)

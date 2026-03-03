@@ -89,6 +89,7 @@ public sealed class AccessController : ControllerBase
         var email = (await _devAccess.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
         var isAdmin = await _devAccess.IsAdminAsync();
         var theme = await _devAccess.GetThemeForCurrentEmailAsync();
+        var nowUtc = DateTimeOffset.UtcNow;
 
         if (isAdmin)
         {
@@ -152,6 +153,7 @@ public sealed class AccessController : ControllerBase
                 DueAtUtc = a.DueAtUtc,
                 AssignedAtUtc = a.AssignedAtUtc
             })
+            .Where(x => !x.DueAtUtc.HasValue || x.DueAtUtc.Value >= nowUtc)
             .Where(x => !string.IsNullOrWhiteSpace(x.ScenarioId))
             .ToList();
 
@@ -180,6 +182,7 @@ public sealed class AccessController : ControllerBase
                     IsSubmitted = submission?.SubmittedAtUtc.HasValue == true
                 };
             })
+            .Where(x => !x.DueAtUtc.HasValue || x.DueAtUtc.Value >= nowUtc)
             .Where(x =>
                 !string.IsNullOrWhiteSpace(x.AssignmentId) &&
                 !string.IsNullOrWhiteSpace(x.ScenarioId) &&

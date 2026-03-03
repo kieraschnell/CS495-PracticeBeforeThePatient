@@ -115,9 +115,11 @@ public class ScenariosController : ControllerBase
             }
 
             var classRosters = await _classes.GetAllAsync();
+            var nowUtc = DateTimeOffset.UtcNow;
             var allowedScenarioIds = classRosters
                 .Where(c => c.Students.Any(s => string.Equals(s, email, StringComparison.OrdinalIgnoreCase)))
                 .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
+                .Where(a => !a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc)
                 .Select(a => (a.ScenarioId ?? "").Trim())
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -152,9 +154,11 @@ public class ScenariosController : ControllerBase
         }
 
         var classRosters = await _classes.GetAllAsync();
+        var nowUtc = DateTimeOffset.UtcNow;
         return classRosters
             .Where(c => c.Students.Any(s => string.Equals(s, email, StringComparison.OrdinalIgnoreCase)))
             .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
+            .Where(a => !a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc)
             .Any(a => string.Equals(a.ScenarioId, scenarioId, StringComparison.OrdinalIgnoreCase));
     }
 
