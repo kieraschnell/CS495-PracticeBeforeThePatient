@@ -113,6 +113,11 @@
                 {
                     <div class="sectionTitle">Visit Summary</div>
 
+                    @if (!string.IsNullOrWhiteSpace(AssignmentSubmissionStatus))
+                    {
+                        <div class="infoMessage">@AssignmentSubmissionStatus</div>
+                    }
+
                     <div class="summaryBlock">
                         <div class="summaryLabel">What happened</div>
                         <div class="summaryText">@EndSummary</div>

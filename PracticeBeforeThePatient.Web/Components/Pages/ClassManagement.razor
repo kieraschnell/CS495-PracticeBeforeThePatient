@@ -1,5 +1,7 @@
 @page "/class-management"
 @rendermode InteractiveServer
+@using System.Net.Http.Json
+@using System.Globalization
 @using PracticeBeforeThePatient.Web.Services
 @inject ApiClient Api
 
@@ -28,7 +30,7 @@
         <div class="simHeaderText">
             <div class="simBadge">Instructor</div>
             <div class="simTitle">Class Management</div>
-            <div class="simSubtitle">Create classes, add students, remove students</div>
+            <div class="simSubtitle">Create classes, assign scenarios, and open grading pages</div>
         </div>
     </div>
 
@@ -88,7 +90,7 @@
                 {
                     <div class="divider"></div>
 
-                    <div class="sectionTitle">Scenario Access</div>
+                    <div class="sectionTitle">Assignments</div>
 
                     @if (_isLoadingScenarios)
                     {
@@ -100,23 +102,75 @@
                     }
                     else
                     {
-                        <div class="scenarioAccessTop">
-                            <div class="scenarioAccessHint">
-                                Select which scenarios this class can use. If none are selected, all scenarios are allowed.
+                        <div class="assignmentCreateGrid">
+                            <div>
+                                <label class="editorLabel">Assignment name</label>
+                                <input class="editorInput"
+                                       type="text"
+                                       @bind="_assignmentName"
+                                       @bind:event="oninput"
+                                       placeholder="Example: Week 4 Chest Pain Case" />
                             </div>
-                            <button class="secondaryBtn" @onclick="SaveScenarioAccessAsync" disabled="@(_selectedClass is null)">Save access</button>
+                            <div>
+                                <label class="editorLabel">Scenario</label>
+                                <select class="editorInput" @bind="_assignmentScenarioId">
+                                    <option value="">Select</option>
+                                    @foreach (var id in _allScenarioIds)
+                                    {
+                                        <option value="@id">@id</option>
+                                    }
+                                </select>
+                            </div>
+                            <div>
+                                <label class="editorLabel">Due date (optional)</label>
+                                <input class="editorInput"
+                                       type="date"
+                                       value="@_assignmentDate"
+                                       @onchange="OnAssignmentDateChanged" />
+                            </div>
+                            <div>
+                                <label class="editorLabel">Due time (optional)</label>
+                                <input class="editorInput"
+                                       type="time"
+                                       step="60"
+                                       value="@_assignmentTime"
+                                       @onchange="OnAssignmentTimeChanged"
+                                       />
+                            </div>
+                            <div class="assignmentCreateAction">
+                                <label class="editorLabel">&nbsp;</label>
+                                <button class="primaryBtn" @onclick="CreateAssignmentAsync" disabled="@(!CanAssignScenario)">Assign scenario</button>
+                            </div>
                         </div>
 
-                        <div class="scenarioAccessGrid">
-                            @foreach (var id in _allScenarioIds)
-                            {
-                                var on = _allowedScenarioIds.Contains(id, StringComparer.OrdinalIgnoreCase);
-                                <label class="scenarioAccessItem">
-                                    <input type="checkbox" checked="@on" @onchange="(e) => ToggleScenario(id, e)" />
-                                    <span class="scenarioAccessText">@id</span>
-                                </label>
-                            }
-                        </div>
+                        @if (_assignments.Count == 0)
+                        {
+                            <div class="infoMessage">No assignments yet for this class</div>
+                        }
+                        else
+                        {
+                            <div class="assignmentList">
+                                @foreach (var a in _assignments)
+                                {
+                                    var submitted = a.Submissions.Count(x => x.SubmittedAtUtc.HasValue);
+                                    var total = _selectedClass.Students.Count;
+                                    <div class="assignmentItem">
+                                        <div class="assignmentInfo">
+                                            <div class="assignmentTitle">@a.Name</div>
+                                            <div class="assignmentMeta">Scenario: @a.ScenarioId</div>
+                                            <div class="assignmentMeta">
+                                                Due: @(a.DueAtUtc.HasValue ? a.DueAtUtc.Value.ToLocalTime().ToString("g") : "No due date")
+                                            </div>
+                                            <div class="assignmentMeta">Submitted: @submitted / @total</div>
+                                        </div>
+                                        <div class="assignmentActions">
+                                            <a class="secondaryBtn" href="@($"assignment-grading/{_selectedClass.Id}/{a.Id}")">Grade</a>
+                                            <button class="deleteBtn" @onclick="() => DeleteAssignmentAsync(a.Id)">Delete</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
                     }
 
                     <div class="divider"></div>
@@ -139,17 +193,17 @@
 
                     <div class="classMgmtRosterHeader">
                         <div class="panel-title">Roster</div>
-                        <div class="classMgmtCount">@_selectedClass.Students.Count student(s)</div>
+                        <div class="classMgmtCount">@_selectedClass!.Students.Count student(s)</div>
                     </div>
 
-                    @if (_selectedClass.Students.Count == 0)
+                    @if (_selectedClass!.Students.Count == 0)
                     {
                         <div class="infoMessage">No students yet, add one using the email field above</div>
                     }
                     else
                     {
                         <div class="classMgmtRoster">
-                            @foreach (var email in _selectedClass.Students.OrderBy(x => x))
+                            @foreach (var email in _selectedClass!.Students.OrderBy(x => x))
                             {
                                 <div class="classMgmtStudent">
                                     <div class="classMgmtStudentEmail">@email</div>
@@ -186,7 +240,15 @@
 
     private bool _isLoadingScenarios;
     private List<string> _allScenarioIds = new();
-    private HashSet<string> _allowedScenarioIds = new(StringComparer.OrdinalIgnoreCase);
+
+    private List<ClassAssignmentDto> _assignments = new();
+    private string _assignmentName = "";
+    private string _assignmentScenarioId = "";
+    private string _assignmentDate = "";
+    private string _assignmentTime = "";
+    private bool CanAssignScenario =>
+        !string.IsNullOrWhiteSpace(_assignmentName) &&
+        !string.IsNullOrWhiteSpace(_assignmentScenarioId);
 
     private bool _isAdminLoaded;
     private bool _isAdmin;
@@ -203,7 +265,6 @@
         }
     }
 
-
     private async Task SetModeAsync(ActionMode mode)
     {
         _mode = mode;
@@ -215,7 +276,7 @@
             _selectedClass = null;
             _emailToAdd = "";
             _allScenarioIds = new List<string>();
-            _allowedScenarioIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            ResetAssignmentState();
             return;
         }
 
@@ -223,12 +284,13 @@
 
         if (_selectedClass is not null)
         {
-            await ReloadScenarioAccessAsync();
+            await ReloadAvailableScenariosAsync();
+            await ReloadAssignmentsAsync();
         }
         else
         {
             _allScenarioIds = new List<string>();
-            _allowedScenarioIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            ResetAssignmentState();
         }
     }
 
@@ -272,6 +334,16 @@
         _emailToAdd = (e.Value?.ToString() ?? "").Trim();
     }
 
+    private void OnAssignmentDateChanged(ChangeEventArgs e)
+    {
+        _assignmentDate = (e.Value?.ToString() ?? "").Trim();
+    }
+
+    private void OnAssignmentTimeChanged(ChangeEventArgs e)
+    {
+        _assignmentTime = (e.Value?.ToString() ?? "").Trim();
+    }
+
     private async Task OnNewClassNameKeyDown(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
@@ -304,12 +376,11 @@
         }
     }
 
-    private async Task ReloadScenarioAccessAsync()
+    private async Task ReloadAvailableScenariosAsync()
     {
         if (_selectedClass is null)
         {
             _allScenarioIds = new List<string>();
-            _allowedScenarioIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             return;
         }
 
@@ -322,14 +393,15 @@
                 .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            var allowed = await Api.Http.GetFromJsonAsync<List<string>>($"api/classes/{_selectedClass.Id}/scenarios");
-            _allowedScenarioIds = new HashSet<string>(allowed ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
+            if (string.IsNullOrWhiteSpace(_assignmentScenarioId) && _allScenarioIds.Count > 0)
+            {
+                _assignmentScenarioId = _allScenarioIds[0];
+            }
         }
         catch
         {
             _allScenarioIds = new List<string>();
-            _allowedScenarioIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            SetMessage("Could not load scenario access from the API", false);
+            SetMessage("Could not load scenarios from the API", false);
         }
         finally
         {
@@ -337,45 +409,163 @@
         }
     }
 
-    private void ToggleScenario(string id, ChangeEventArgs e)
+    private async Task ReloadAssignmentsAsync()
     {
-        var on = e.Value is bool b && b;
-
-        if (on)
+        if (_selectedClass is null)
         {
-            _allowedScenarioIds.Add(id);
+            ResetAssignmentState();
+            return;
         }
-        else
+
+        try
         {
-            _allowedScenarioIds.Remove(id);
+            var assignments = await Api.Http.GetFromJsonAsync<List<ClassAssignmentDto>>($"api/classes/{_selectedClass.Id}/assignments");
+            _assignments = (assignments ?? new List<ClassAssignmentDto>())
+                .OrderBy(x => x.DueAtUtc ?? DateTimeOffset.MaxValue)
+                .ThenBy(x => x.ScenarioId, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+        catch
+        {
+            ResetAssignmentState();
+            SetMessage("Could not load assignments from the API", false);
         }
     }
 
-    private async Task SaveScenarioAccessAsync()
+    private void ResetAssignmentState()
+    {
+        _assignments = new List<ClassAssignmentDto>();
+        _assignmentName = "";
+        _assignmentScenarioId = "";
+        _assignmentDate = "";
+        _assignmentTime = "";
+    }
+
+    private async Task CreateAssignmentAsync()
+    {
+        if (_selectedClass is null)
+        {
+            SetMessage("Select a class first", false);
+            return;
+        }
+
+        var assignmentName = (_assignmentName ?? "").Trim();
+        var assignmentScenarioId = (_assignmentScenarioId ?? "").Trim();
+        var assignmentDate = (_assignmentDate ?? "").Trim();
+        var assignmentTime = (_assignmentTime ?? "").Trim();
+
+        if (string.IsNullOrWhiteSpace(assignmentName))
+        {
+            SetMessage("Enter an assignment name", false);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(assignmentScenarioId))
+        {
+            SetMessage("Select a scenario to assign", false);
+            return;
+        }
+
+        DateTimeOffset? dueAtUtc = null;
+        if (!string.IsNullOrWhiteSpace(assignmentDate) || !string.IsNullOrWhiteSpace(assignmentTime))
+        {
+            if (string.IsNullOrWhiteSpace(assignmentDate))
+            {
+                SetMessage("Select a due date when entering a due time", false);
+                return;
+            }
+
+            if (!DateOnly.TryParse(assignmentDate, out var dueDate))
+            {
+                SetMessage("Invalid due date", false);
+                return;
+            }
+
+            TimeOnly dueTime;
+            if (string.IsNullOrWhiteSpace(assignmentTime))
+            {
+                // If only date is provided, default to end-of-day local time.
+                dueTime = new TimeOnly(23, 59);
+            }
+            else
+            {
+                var parsed =
+                    TimeOnly.TryParseExact(
+                        assignmentTime,
+                        "HH:mm",
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.None,
+                        out dueTime)
+                    || TimeOnly.TryParse(
+                        assignmentTime,
+                        CultureInfo.CurrentCulture,
+                        DateTimeStyles.None,
+                        out dueTime)
+                    || TimeOnly.TryParse(
+                        assignmentTime,
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.None,
+                        out dueTime);
+
+                if (!parsed)
+                {
+                    SetMessage("Invalid due time.", false);
+                    return;
+                }
+            }
+
+            var localDue = dueDate.ToDateTime(dueTime);
+            dueAtUtc = new DateTimeOffset(localDue, TimeZoneInfo.Local.GetUtcOffset(localDue)).ToUniversalTime();
+        }
+
+        try
+        {
+            var resp = await Api.Http.PostAsJsonAsync($"api/classes/{_selectedClass.Id}/assignments", new CreateAssignmentRequest
+            {
+                Name = assignmentName,
+                ScenarioId = assignmentScenarioId,
+                DueAtUtc = dueAtUtc
+            });
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                SetMessage($"Assign failed {((int)resp.StatusCode)} {body}", false);
+                return;
+            }
+
+            _assignmentName = "";
+            _assignmentDate = "";
+            _assignmentTime = "";
+            SetMessage("Scenario assigned", true);
+            await ReloadAssignmentsAsync();
+        }
+        catch
+        {
+            SetMessage("Could not create assignment", false);
+        }
+    }
+
+    private async Task DeleteAssignmentAsync(string assignmentId)
     {
         if (_selectedClass is null) return;
 
         try
         {
-            var payload = new SetScenarioAccessRequest
-            {
-                ScenarioIds = _allowedScenarioIds.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList()
-            };
-
-            var resp = await Api.Http.PutAsJsonAsync($"api/classes/{_selectedClass.Id}/scenarios", payload);
-
+            var resp = await Api.Http.DeleteAsync($"api/classes/{_selectedClass.Id}/assignments/{assignmentId}");
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync();
-                SetMessage($"Save failed {((int)resp.StatusCode)} {body}", false);
+                SetMessage($"Delete assignment failed {((int)resp.StatusCode)} {body}", false);
                 return;
             }
 
-            SetMessage("Scenario access saved", true);
+            SetMessage("Assignment deleted", true);
+            await ReloadAssignmentsAsync();
         }
         catch
         {
-            SetMessage("Could not save scenario access", false);
+            SetMessage("Could not delete assignment", false);
         }
     }
 
@@ -436,7 +626,7 @@
             _selectedClass = null;
             _emailToAdd = "";
             _allScenarioIds = new List<string>();
-            _allowedScenarioIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            ResetAssignmentState();
 
             SetMessage("Class deleted", true);
 
@@ -455,7 +645,8 @@
         _menuOpen = false;
 
         await ReloadClassesAsync();
-        await ReloadScenarioAccessAsync();
+        await ReloadAvailableScenariosAsync();
+        await ReloadAssignmentsAsync();
     }
 
     private async Task AddStudentAsync()
@@ -486,6 +677,7 @@
             _emailToAdd = "";
             SetMessage("Student added", true);
             await ReloadClassesAsync();
+            await ReloadAssignmentsAsync();
         }
         catch
         {
@@ -514,6 +706,7 @@
 
             SetMessage("Student removed", true);
             await ReloadClassesAsync();
+            await ReloadAssignmentsAsync();
         }
         catch
         {
@@ -541,6 +734,27 @@
         public List<string> Students { get; set; } = new();
     }
 
+    private sealed class AssignmentSubmissionDto
+    {
+        public string StudentEmail { get; set; } = "";
+        public DateTimeOffset? SubmittedAtUtc { get; set; }
+        public string SubmissionText { get; set; } = "";
+        public decimal? Grade { get; set; }
+        public string GradeFeedback { get; set; } = "";
+        public DateTimeOffset? GradedAtUtc { get; set; }
+        public string GradedByEmail { get; set; } = "";
+    }
+
+    private sealed class ClassAssignmentDto
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string ScenarioId { get; set; } = "";
+        public DateTimeOffset AssignedAtUtc { get; set; }
+        public DateTimeOffset? DueAtUtc { get; set; }
+        public List<AssignmentSubmissionDto> Submissions { get; set; } = new();
+    }
+
     private sealed class CreateClassRequest
     {
         public string Name { get; set; } = "";
@@ -551,8 +765,11 @@
         public string Email { get; set; } = "";
     }
 
-    private sealed class SetScenarioAccessRequest
+    private sealed class CreateAssignmentRequest
     {
-        public List<string> ScenarioIds { get; set; } = new();
+        public string Name { get; set; } = "";
+        public string ScenarioId { get; set; } = "";
+        public DateTimeOffset? DueAtUtc { get; set; }
     }
+
 }

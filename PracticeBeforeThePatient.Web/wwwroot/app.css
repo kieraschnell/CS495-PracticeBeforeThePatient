@@ -984,6 +984,105 @@ textarea:focus {
   margin-bottom: 16px;
 }
 
+.assignmentCreateGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.assignmentCreateAction {
+  min-width: 160px;
+}
+
+.assignmentList {
+  display: grid;
+  gap: 10px;
+}
+
+.assignmentItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.assignmentItem.selected {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand-soft);
+}
+
+.assignmentInfo {
+  flex: 1;
+}
+
+.assignmentActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.assignmentTitle {
+  font-weight: 800;
+}
+
+.assignmentMeta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.gradeList {
+  display: grid;
+  gap: 12px;
+}
+
+.gradeCard {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.gradeStudentRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.gradeStatus {
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.gradeStatus.done {
+  color: #14532d;
+  border-color: #14532d;
+  background: #eaf7ef;
+}
+
+.gradeStatus.pending {
+  color: #7c2d12;
+  border-color: #7c2d12;
+  background: #fff4db;
+}
+
+.gradeInputRow {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
 .actionChips {
   display: flex;
   gap: 10px;
@@ -1119,6 +1218,11 @@ textarea:focus {
   }
 
   .classMgmtAddRow {
+    grid-template-columns: 1fr;
+  }
+
+  .assignmentCreateGrid,
+  .gradeInputRow {
     grid-template-columns: 1fr;
   }
 }

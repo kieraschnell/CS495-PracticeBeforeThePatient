@@ -109,28 +109,141 @@ public sealed class ClassesController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("{classId}/scenarios")]
-    public async Task<ActionResult<List<string>>> GetScenarioAccess(string classId)
+    public sealed class AssignmentSubmissionDto
+    {
+        public string StudentEmail { get; set; } = "";
+        public DateTimeOffset? SubmittedAtUtc { get; set; }
+        public string SubmissionText { get; set; } = "";
+        public decimal? Grade { get; set; }
+        public string GradeFeedback { get; set; } = "";
+        public DateTimeOffset? GradedAtUtc { get; set; }
+        public string GradedByEmail { get; set; } = "";
+    }
+
+    public sealed class AssignmentDto
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string ScenarioId { get; set; } = "";
+        public DateTimeOffset AssignedAtUtc { get; set; }
+        public DateTimeOffset? DueAtUtc { get; set; }
+        public List<AssignmentSubmissionDto> Submissions { get; set; } = new();
+    }
+
+    [HttpGet("{classId}/assignments")]
+    public async Task<ActionResult<List<AssignmentDto>>> GetAssignments(string classId)
     {
         if (!await RequireAdmin()) return Forbid();
 
-        var allowed = await _store.GetAllowedScenarioIdsAsync(classId);
-        if (allowed is null) return NotFound();
-        return allowed;
+        var assignments = await _store.GetAssignmentsAsync(classId);
+        if (assignments is null) return NotFound();
+
+        return assignments
+            .OrderBy(x => x.DueAtUtc ?? DateTimeOffset.MaxValue)
+            .ThenBy(x => x.ScenarioId, StringComparer.OrdinalIgnoreCase)
+            .Select(a => new AssignmentDto
+            {
+                Id = a.Id,
+                Name = a.Name,
+                ScenarioId = a.ScenarioId,
+                AssignedAtUtc = a.AssignedAtUtc,
+                DueAtUtc = a.DueAtUtc,
+                Submissions = a.Submissions
+                    .OrderBy(x => x.StudentEmail, StringComparer.OrdinalIgnoreCase)
+                    .Select(s => new AssignmentSubmissionDto
+                    {
+                        StudentEmail = s.StudentEmail,
+                        SubmittedAtUtc = s.SubmittedAtUtc,
+                        SubmissionText = s.SubmissionText,
+                        Grade = s.Grade,
+                        GradeFeedback = s.GradeFeedback,
+                        GradedAtUtc = s.GradedAtUtc,
+                        GradedByEmail = s.GradedByEmail
+                    })
+                    .ToList()
+            })
+            .ToList();
     }
 
-    public sealed class SetScenarioAccessRequest
+    public sealed class CreateAssignmentRequest
     {
-        public List<string> ScenarioIds { get; set; } = new();
+        public string Name { get; set; } = "";
+        public string ScenarioId { get; set; } = "";
+        public DateTimeOffset? DueAtUtc { get; set; }
     }
 
-    [HttpPut("{classId}/scenarios")]
-    public async Task<IActionResult> SetScenarioAccess(string classId, [FromBody] SetScenarioAccessRequest req)
+    [HttpPost("{classId}/assignments")]
+    public async Task<ActionResult<AssignmentDto>> CreateAssignment(string classId, [FromBody] CreateAssignmentRequest req)
     {
         if (!await RequireAdmin()) return Forbid();
 
-        var ok = await _store.SetAllowedScenarioIdsAsync(classId, req.ScenarioIds ?? new List<string>());
-        if (!ok) return BadRequest("Invalid class id or scenario ids.");
+        if (string.IsNullOrWhiteSpace(req.Name))
+        {
+            return BadRequest("Assignment name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(req.ScenarioId))
+        {
+            return BadRequest("Scenario id is required.");
+        }
+
+        var created = await _store.CreateAssignmentAsync(classId, req.Name, req.ScenarioId, req.DueAtUtc);
+        if (created is null) return BadRequest("Invalid class id or scenario id.");
+
+        return new AssignmentDto
+        {
+            Id = created.Id,
+            Name = created.Name,
+            ScenarioId = created.ScenarioId,
+            AssignedAtUtc = created.AssignedAtUtc,
+            DueAtUtc = created.DueAtUtc,
+            Submissions = new List<AssignmentSubmissionDto>()
+        };
+    }
+
+    [HttpDelete("{classId}/assignments/{assignmentId}")]
+    public async Task<IActionResult> DeleteAssignment(string classId, string assignmentId)
+    {
+        if (!await RequireAdmin()) return Forbid();
+
+        var ok = await _store.DeleteAssignmentAsync(classId, assignmentId);
+        if (!ok) return NotFound();
+
+        return NoContent();
+    }
+
+    public sealed class GradeAssignmentRequest
+    {
+        public string StudentEmail { get; set; } = "";
+        public decimal? Grade { get; set; }
+        public string Feedback { get; set; } = "";
+    }
+
+    [HttpPut("{classId}/assignments/{assignmentId}/grades")]
+    public async Task<IActionResult> GradeAssignment(string classId, string assignmentId, [FromBody] GradeAssignmentRequest req)
+    {
+        if (!await RequireAdmin()) return Forbid();
+
+        if (string.IsNullOrWhiteSpace(req.StudentEmail))
+        {
+            return BadRequest("Student email is required.");
+        }
+
+        if (req.Grade is < 0 or > 100)
+        {
+            return BadRequest("Grade must be between 0 and 100.");
+        }
+
+        var grader = await _access.GetCurrentEmailAsync();
+        var ok = await _store.GradeAssignmentAsync(
+            classId,
+            assignmentId,
+            req.StudentEmail,
+            req.Grade,
+            req.Feedback ?? "",
+            grader);
+
+        if (!ok) return BadRequest("Invalid class, assignment, or student.");
         return NoContent();
     }
 }

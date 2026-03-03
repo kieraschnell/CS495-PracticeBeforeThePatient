@@ -124,4 +124,38 @@ public class ApiClient
             return false;
         }
     }
+
+    public sealed class SubmitScenarioRequest
+    {
+        public string ScenarioId { get; set; } = "";
+        public string SubmissionText { get; set; } = "";
+    }
+
+    public sealed class SubmitScenarioResponse
+    {
+        public int UpdatedAssignments { get; set; }
+    }
+
+    public async Task<SubmitScenarioResponse?> SubmitScenarioAsync(string scenarioId, string submissionText)
+    {
+        try
+        {
+            var resp = await _httpClient.PostAsJsonAsync("api/assignments/submit-scenario", new SubmitScenarioRequest
+            {
+                ScenarioId = scenarioId ?? "",
+                SubmissionText = submissionText ?? ""
+            });
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await resp.Content.ReadFromJsonAsync<SubmitScenarioResponse>();
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }

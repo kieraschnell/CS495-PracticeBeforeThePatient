@@ -1,0 +1,359 @@
+@page "/assignment-grading/{ClassId}/{AssignmentId}"
+@rendermode InteractiveServer
+@using System.Net.Http.Json
+@using PracticeBeforeThePatient.Web.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<PageTitle>Assignment Grading</PageTitle>
+
+@if (_isLoading)
+{
+    <div class="card">
+        <div class="sectionTitle">Loading</div>
+        <div class="narrLine">Loading assignment and submissions</div>
+    </div>
+    return;
+}
+
+@if (!_isAdmin)
+{
+    <div class="card">
+        <div class="sectionTitle">Not available</div>
+        <div class="narrLine">This page is only available to admins</div>
+    </div>
+    return;
+}
+
+<div class="simShell">
+    <div class="simHeaderRow">
+        <div class="simHeaderText">
+            <div class="simBadge">Instructor</div>
+            <div class="simTitle">Assignment Grading</div>
+            <div class="simSubtitle">@_headerSubtitle</div>
+        </div>
+
+        <a class="secondaryBtn" href="class-management">Back to Class Management</a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <div class="saveMessage @_messageKind classMessage">@_message</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="card">
+            <div class="sectionTitle">Error</div>
+            <div class="narrLine">@_errorMessage</div>
+        </div>
+    }
+    else if (_selectedClass is not null && _selectedAssignment is not null)
+    {
+        <div class="card">
+            <div class="sectionTitle">Assignment</div>
+
+            <div class="assignmentMeta"><strong>Class:</strong> @_selectedClass.Name</div>
+            <div class="assignmentMeta"><strong>Name:</strong> @_selectedAssignment.Name</div>
+            <div class="assignmentMeta"><strong>Scenario:</strong> @_selectedAssignment.ScenarioId</div>
+            <div class="assignmentMeta">
+                <strong>Due:</strong> @(_selectedAssignment.DueAtUtc.HasValue ? _selectedAssignment.DueAtUtc.Value.ToLocalTime().ToString("g") : "No due date")
+            </div>
+
+            @if (_assignments.Count > 1)
+            {
+                <div class="divider"></div>
+                <label class="editorLabel">Switch assignment</label>
+                <select class="editorInput" value="@_selectedAssignment.Id" @onchange="OnAssignmentChanged">
+                    @foreach (var a in _assignments)
+                    {
+                        <option value="@a.Id">@a.Name · @a.ScenarioId · @(a.DueAtUtc.HasValue ? a.DueAtUtc.Value.ToLocalTime().ToString("g") : "No due date")</option>
+                    }
+                </select>
+            }
+
+            <div class="divider"></div>
+            <div class="sectionTitle">Grade Students</div>
+
+            @if (_selectedClass.Students.Count == 0)
+            {
+                <div class="warningMessage">This class has no students.</div>
+            }
+            else
+            {
+                <div class="gradeList">
+                    @foreach (var email in _selectedClass.Students.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
+                    {
+                        var submission = GetSubmissionForStudent(email);
+                        var hasSubmission = submission?.SubmittedAtUtc is not null;
+
+                        <div class="gradeCard">
+                            <div class="gradeStudentRow">
+                                <div class="classMgmtStudentEmail">@email</div>
+                                <div class="gradeStatus @(hasSubmission ? "done" : "pending")">
+                                    @(hasSubmission
+                                        ? $"Submitted {submission!.SubmittedAtUtc!.Value.ToLocalTime():g}"
+                                        : "Not submitted")
+                                </div>
+                            </div>
+
+                            @if (hasSubmission && !string.IsNullOrWhiteSpace(submission!.SubmissionText))
+                            {
+                                <label class="editorLabel">Submission</label>
+                                <textarea rows="6" readonly>@submission.SubmissionText</textarea>
+                            }
+
+                            <div class="gradeInputRow">
+                                <div>
+                                    <label class="editorLabel">Grade (0-100)</label>
+                                    <input class="editorInput"
+                                           type="number"
+                                           min="0"
+                                           max="100"
+                                           step="0.1"
+                                           value="@GetGradeInput(email)"
+                                           @oninput="(e) => SetGradeInput(email, e)" />
+                                </div>
+                                <div>
+                                    <label class="editorLabel">Feedback</label>
+                                    <textarea rows="3"
+                                              @bind="@_feedbackInputs[email]"
+                                              @bind:event="oninput"
+                                              placeholder="Optional feedback to student"></textarea>
+                                </div>
+                            </div>
+
+                            <button class="primaryBtn" @onclick="() => SaveGradeAsync(email)" disabled="@_isSavingGrade">Save grade</button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string ClassId { get; set; } = "";
+    [Parameter] public string AssignmentId { get; set; } = "";
+
+    private bool _isLoading = true;
+    private bool _isAdmin;
+    private bool _isSavingGrade;
+
+    private string _message = "";
+    private string _messageKind = "success";
+    private string _errorMessage = "";
+    private string _headerSubtitle = "Grade student submissions for this assignment";
+
+    private ClassRosterDto? _selectedClass;
+    private ClassAssignmentDto? _selectedAssignment;
+    private List<ClassAssignmentDto> _assignments = new();
+
+    private readonly Dictionary<string, string> _gradeInputs = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _feedbackInputs = new(StringComparer.OrdinalIgnoreCase);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+        _errorMessage = "";
+
+        try
+        {
+            var access = await Api.GetAccessAsync();
+            _isAdmin = access?.IsAdmin == true;
+
+            if (!_isAdmin)
+            {
+                return;
+            }
+
+            await LoadClassAndAssignmentAsync();
+        }
+        catch
+        {
+            _errorMessage = "Could not load grading data.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadClassAndAssignmentAsync()
+    {
+        var classes = await Api.Http.GetFromJsonAsync<List<ClassRosterDto>>("api/classes") ?? new List<ClassRosterDto>();
+        _selectedClass = classes.FirstOrDefault(x => x.Id == ClassId);
+
+        if (_selectedClass is null)
+        {
+            _errorMessage = "Class not found.";
+            return;
+        }
+
+        _assignments = await Api.Http.GetFromJsonAsync<List<ClassAssignmentDto>>($"api/classes/{_selectedClass.Id}/assignments") ?? new List<ClassAssignmentDto>();
+        _selectedAssignment = _assignments.FirstOrDefault(x => x.Id == AssignmentId);
+
+        if (_selectedAssignment is null)
+        {
+            _errorMessage = "Assignment not found for this class.";
+            return;
+        }
+
+        _headerSubtitle = $"{_selectedClass.Name} · {_selectedAssignment.Name}";
+        SeedGradeInputs();
+    }
+
+    private void OnAssignmentChanged(ChangeEventArgs e)
+    {
+        var selectedId = e.Value?.ToString() ?? "";
+        if (string.IsNullOrWhiteSpace(selectedId) || _selectedClass is null)
+        {
+            return;
+        }
+
+        Nav.NavigateTo($"assignment-grading/{_selectedClass.Id}/{selectedId}");
+    }
+
+    private void SeedGradeInputs()
+    {
+        _gradeInputs.Clear();
+        _feedbackInputs.Clear();
+
+        if (_selectedClass is null)
+        {
+            return;
+        }
+
+        foreach (var email in _selectedClass.Students)
+        {
+            var submission = GetSubmissionForStudent(email);
+            _gradeInputs[email] = submission?.Grade?.ToString("0.##") ?? "";
+            _feedbackInputs[email] = submission?.GradeFeedback ?? "";
+        }
+    }
+
+    private AssignmentSubmissionDto? GetSubmissionForStudent(string email)
+    {
+        return _selectedAssignment?.Submissions.FirstOrDefault(x => string.Equals(x.StudentEmail, email, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string GetGradeInput(string email)
+    {
+        if (_gradeInputs.TryGetValue(email, out var value))
+        {
+            return value;
+        }
+
+        _gradeInputs[email] = "";
+        return "";
+    }
+
+    private void SetGradeInput(string email, ChangeEventArgs e)
+    {
+        _gradeInputs[email] = (e.Value?.ToString() ?? "").Trim();
+    }
+
+    private async Task SaveGradeAsync(string studentEmail)
+    {
+        if (_selectedClass is null || _selectedAssignment is null)
+        {
+            SetMessage("Assignment not loaded", false);
+            return;
+        }
+
+        var gradeText = GetGradeInput(studentEmail);
+        decimal? grade = null;
+
+        if (!string.IsNullOrWhiteSpace(gradeText))
+        {
+            if (!decimal.TryParse(gradeText, out var parsed))
+            {
+                SetMessage("Grade must be a number", false);
+                return;
+            }
+
+            if (parsed < 0m || parsed > 100m)
+            {
+                SetMessage("Grade must be between 0 and 100", false);
+                return;
+            }
+
+            grade = parsed;
+        }
+
+        _isSavingGrade = true;
+
+        try
+        {
+            var feedback = _feedbackInputs.TryGetValue(studentEmail, out var f) ? f : "";
+
+            var resp = await Api.Http.PutAsJsonAsync(
+                $"api/classes/{_selectedClass.Id}/assignments/{_selectedAssignment.Id}/grades",
+                new GradeAssignmentRequest
+                {
+                    StudentEmail = studentEmail,
+                    Grade = grade,
+                    Feedback = feedback
+                });
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                SetMessage($"Save grade failed {((int)resp.StatusCode)} {body}", false);
+                return;
+            }
+
+            SetMessage("Grade saved", true);
+            await LoadClassAndAssignmentAsync();
+        }
+        catch
+        {
+            SetMessage("Could not save grade", false);
+        }
+        finally
+        {
+            _isSavingGrade = false;
+        }
+    }
+
+    private void SetMessage(string text, bool ok)
+    {
+        _message = text;
+        _messageKind = ok ? "success" : "error";
+    }
+
+    private sealed class ClassRosterDto
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public List<string> Students { get; set; } = new();
+    }
+
+    private sealed class AssignmentSubmissionDto
+    {
+        public string StudentEmail { get; set; } = "";
+        public DateTimeOffset? SubmittedAtUtc { get; set; }
+        public string SubmissionText { get; set; } = "";
+        public decimal? Grade { get; set; }
+        public string GradeFeedback { get; set; } = "";
+        public DateTimeOffset? GradedAtUtc { get; set; }
+        public string GradedByEmail { get; set; } = "";
+    }
+
+    private sealed class ClassAssignmentDto
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string ScenarioId { get; set; } = "";
+        public DateTimeOffset AssignedAtUtc { get; set; }
+        public DateTimeOffset? DueAtUtc { get; set; }
+        public List<AssignmentSubmissionDto> Submissions { get; set; } = new();
+    }
+
+    private sealed class GradeAssignmentRequest
+    {
+        public string StudentEmail { get; set; } = "";
+        public decimal? Grade { get; set; }
+        public string Feedback { get; set; } = "";
+    }
+}

@@ -120,21 +120,9 @@ public sealed class AccessController : ControllerBase
             };
         }
 
-        var anyAll = memberClasses.Any(c => c.AllowedScenarioIds is null || c.AllowedScenarioIds.Count == 0);
-
-        if (anyAll)
-        {
-            return new AccessResponse
-            {
-                Email = email,
-                IsAdmin = false,
-                AllowedScenarioIds = allScenarios,
-                Theme = theme
-            };
-        }
-
         var allowed = memberClasses
-            .SelectMany(c => c.AllowedScenarioIds ?? new List<string>())
+            .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
+            .Select(a => a.ScenarioId)
             .Select(x => (x ?? "").Trim())
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase)

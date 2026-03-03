@@ -31,6 +31,7 @@ public partial class Simulation : ComponentBase
     protected string EndSummary { get; set; } = "";
 
     protected List<ComparisonRow> ComparisonRows { get; set; } = new();
+    protected string AssignmentSubmissionStatus { get; set; } = "";
 
     private readonly List<StudentStepRecord> _studentHistory = new();
     private Choice? _selectedChoice;
@@ -170,6 +171,7 @@ public partial class Simulation : ComponentBase
         LastResponseText = "";
         _pendingNode = null;
         _selectedChoice = null;
+        AssignmentSubmissionStatus = "";
 
         if (_scenario?.Root != null)
         {
@@ -211,11 +213,11 @@ public partial class Simulation : ComponentBase
         HasSubmittedThisStep = true;
     }
 
-    protected void Continue()
+    protected async Task Continue()
     {
         if (_pendingNode == null || _pendingNode.Type == "outcome")
         {
-            FinishScenario("Encounter complete.");
+            await FinishScenarioAsync("Encounter complete.");
             return;
         }
 
@@ -230,11 +232,12 @@ public partial class Simulation : ComponentBase
         _decisionCount++;
     }
 
-    private void FinishScenario(string summary)
+    private async Task FinishScenarioAsync(string summary)
     {
         IsComplete = true;
         EndSummary = summary;
         BuildComparison();
+        await SaveAssignmentSubmissionAsync();
     }
 
     private void AddNarrationFromNode(Node node)
@@ -261,6 +264,51 @@ public partial class Simulation : ComponentBase
                 Result = record.ChosenChoice.Feedback ?? ""
             });
         }
+    }
+
+    private async Task SaveAssignmentSubmissionAsync()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedScenarioId))
+        {
+            AssignmentSubmissionStatus = "";
+            return;
+        }
+
+        var submissionText = BuildSubmissionText();
+        var result = await ApiClient.SubmitScenarioAsync(SelectedScenarioId, submissionText);
+
+        if (result is null)
+        {
+            AssignmentSubmissionStatus = "Could not save assignment submission.";
+            return;
+        }
+
+        AssignmentSubmissionStatus = result.UpdatedAssignments > 0
+            ? $"Assignment submission saved for {result.UpdatedAssignments} class assignment(s)."
+            : "No class assignments were linked to this scenario.";
+    }
+
+    private string BuildSubmissionText()
+    {
+        var lines = new List<string>
+        {
+            $"Scenario: {SelectedScenarioId}",
+            $"Completed At (UTC): {DateTimeOffset.UtcNow:O}",
+            $"Summary: {EndSummary}"
+        };
+
+        foreach (var row in ComparisonRows)
+        {
+            lines.Add("");
+            lines.Add(row.StepTitle);
+            lines.Add($"Student Choice: {row.StudentChoice}");
+            lines.Add($"Reasoning: {row.StudentReasoning}");
+            lines.Add($"Recommended: {row.RecommendedChoice}");
+            lines.Add($"Recommended Why: {row.RecommendedWhy}");
+            lines.Add($"Result: {row.Result}");
+        }
+
+        return string.Join(Environment.NewLine, lines);
     }
 
     protected void OpenScenarioMenu()

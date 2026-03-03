@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "Id": "cecfd1283025466491032f66067f350a",
+    "Name": "Test",
+    "Students": [
+      "test@test.com",
+      "test2@test.com"
+    ],
+    "AllowedScenarioIds": [],
+    "Assignments": [
+      {
+        "Id": "a9f1c3344be94d24ac7a345cd8b9e298",
+        "ScenarioId": "generatedScenario1",
+        "AssignedAtUtc": "2026-03-03T04:54:13.933045+00:00",
+        "DueAtUtc": null,
+        "Submissions": [
+          {
+            "StudentEmail": "test@test.com",
+            "SubmittedAtUtc": "2026-03-03T04:56:07.655585+00:00",
+            "SubmissionText": "Scenario: generatedScenario1\nCompleted At (UTC): 2026-03-03T04:56:07.6388270\u002B00:00\nSummary: Encounter complete.\n\nStep 1\nStudent Choice: A. Start immediate cold-water immersion, remove equipment, assign one person to call EMS and one to monitor vitals.\nReasoning: d\nRecommended: A. Start immediate cold-water immersion, remove equipment, assign one person to call EMS and one to monitor vitals.\nRecommended Why: Correct. Cool first, transport second for exertional heat stroke.\nResult: Correct. Cool first, transport second for exertional heat stroke.\n\nStep 2\nStudent Choice: B. Stop immersion early and switch to passive cooling only.\nReasoning: d\nRecommended: A. Continue immersion until under 39.0 C, provide oxygen, prepare IV access, and continue monitoring.\nRecommended Why: Correct. Continue active cooling and supportive care.\nResult: Suboptimal. Stopping early can lead to rebound hyperthermia.",
+            "Grade": null,
+            "GradeFeedback": "",
+            "GradedAtUtc": null,
+            "GradedByEmail": ""
+          }
+        ]
+      },
+      {
+        "Id": "95a26c57ac984f0086c278d4474e9396",
+        "ScenarioId": "generatedScenario2",
+        "AssignedAtUtc": "2026-03-03T04:55:49.727557+00:00",
+        "DueAtUtc": "2026-03-03T04:56:00+00:00",
+        "Submissions": []
+      }
+    ]
+  }
+]
