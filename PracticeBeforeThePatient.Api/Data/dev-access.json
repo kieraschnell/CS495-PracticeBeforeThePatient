@@ -1,10 +1,6 @@
 {
-  "CurrentEmail": "test3@test.com",
+  "CurrentEmail": "admin@test.com",
   "AdminEmails": [
     "admin@test.com"
-  ],
-  "ThemeByEmail": {
-    "admin@test.com": "light",
-    "test3@test.com": "dark"
-  }
+  ]
 }
