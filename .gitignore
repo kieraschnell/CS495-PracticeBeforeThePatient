@@ -18,6 +18,11 @@ obj/
 # Logs
 *.log
 
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
 # Publish output
 publish/
 
