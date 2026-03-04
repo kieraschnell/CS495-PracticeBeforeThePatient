@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using PracticeBeforeThePatient.Data;
 using PracticeBeforeThePatient.Services;
 
 namespace PracticeBeforeThePatient.Api.Controllers;
@@ -9,13 +11,13 @@ public sealed class AccessController : ControllerBase
 {
     private readonly DevAccessStore _devAccess;
     private readonly ClassRosterStore _classes;
-    private readonly IWebHostEnvironment _env;
+    private readonly AppDbContext _db;
 
-    public AccessController(DevAccessStore devAccess, ClassRosterStore classes, IWebHostEnvironment env)
+    public AccessController(DevAccessStore devAccess, ClassRosterStore classes, AppDbContext db)
     {
         _devAccess = devAccess;
         _classes = classes;
-        _env = env;
+        _db = db;
     }
 
     public sealed class AccessResponse
@@ -202,12 +204,9 @@ public sealed class AccessController : ControllerBase
 
     private List<string> GetAllScenarioIds()
     {
-        var path = Path.Combine(_env.ContentRootPath, "Data", "scenarios");
-        if (!Directory.Exists(path)) return new List<string>();
-
-        return [.. Directory.GetFiles(path, "*.json")
-            .Select(Path.GetFileNameWithoutExtension)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)];
+        return [.. _db.Scenarios
+            .Select(s => s.Id)
+            .OrderBy(x => x)
+            .ToList()];
     }
 }

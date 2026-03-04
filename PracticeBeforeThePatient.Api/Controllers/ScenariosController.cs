@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PracticeBeforeThePatient.Core.Models;
+using PracticeBeforeThePatient.Data;
+using PracticeBeforeThePatient.Data.Entities;
 using PracticeBeforeThePatient.Services;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -11,13 +14,15 @@ namespace PracticeBeforeThePatient.Api.Controllers;
 public class ScenariosController : ControllerBase
 {
     private static readonly Regex ScenarioIdPattern = new("^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
-    private readonly string _dataPath;
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+    private readonly AppDbContext _db;
     private readonly DevAccessStore _access;
     private readonly ClassRosterStore _classes;
 
-    public ScenariosController(IWebHostEnvironment env, DevAccessStore access, ClassRosterStore classes)
+    public ScenariosController(AppDbContext db, DevAccessStore access, ClassRosterStore classes)
     {
-        _dataPath = Path.Combine(env.ContentRootPath, "Data", "scenarios");
+        _db = db;
         _access = access;
         _classes = classes;
     }
@@ -38,9 +43,9 @@ public class ScenariosController : ControllerBase
             return Forbid();
         }
 
-        var filePath = Path.Combine(_dataPath, $"{scenarioId}.json");
+        var entity = await _db.Scenarios.AsNoTracking().FirstOrDefaultAsync(s => s.Id == scenarioId, ct);
 
-        if (!System.IO.File.Exists(filePath))
+        if (entity is null)
         {
             return NotFound(Problem(
                 title: "Scenario not found",
@@ -48,96 +53,78 @@ public class ScenariosController : ControllerBase
             ));
         }
 
-        try
-        {
-            var json = await System.IO.File.ReadAllTextAsync(filePath, ct);
-
-            var scenario = JsonSerializer.Deserialize<Scenario>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (scenario == null)
-            {
-                return StatusCode(500, Problem(
-                    title: "Scenario load failed",
-                    detail: "Scenario deserialized to null. Check the JSON format."
-                ));
-            }
-
-            return Ok(scenario);
-        }
-        catch (OperationCanceledException)
-        {
-            return StatusCode(499);
-        }
-        catch (JsonException ex)
-        {
-            return StatusCode(500, Problem(
-                title: "Invalid scenario JSON",
-                detail: ex.Message
-            ));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, Problem(
-                title: "Error loading scenario",
-                detail: ex.Message
-            ));
-        }
+        return Ok(ToModel(entity));
     }
 
     [HttpGet]
     public async Task<ActionResult<List<string>>> GetAvailableScenarios()
     {
-        try
+        var allScenarios = await _db.Scenarios
+            .Select(s => s.Id)
+            .ToListAsync();
+
+        if (await _access.IsAdminAsync())
         {
-            if (!Directory.Exists(_dataPath))
-            {
-                return Ok(new List<string>());
-            }
-
-            var allScenarios = Directory.GetFiles(_dataPath, "*.json")
-                .Select(Path.GetFileNameWithoutExtension)
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Select(x => x!)
-                .ToList()!;
-
-            if (await _access.IsAdminAsync())
-            {
-                return Ok(allScenarios);
-            }
-
-            var email = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                return Ok(new List<string>());
-            }
-
-            var classRosters = await _classes.GetAllAsync();
-            var nowUtc = DateTimeOffset.UtcNow;
-            var allowedScenarioIds = classRosters
-                .Where(c => c.Students.Any(s => string.Equals(s, email, StringComparison.OrdinalIgnoreCase)))
-                .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
-                .Where(a => !a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc)
-                .Select(a => (a.ScenarioId ?? "").Trim())
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            var filtered = allScenarios
-                .Where(id => allowedScenarioIds.Contains(id))
-                .ToList();
-
-            return Ok(filtered);
+            return Ok(allScenarios);
         }
-        catch (Exception ex)
+
+        var email = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(email))
         {
-            return StatusCode(500, Problem(
-                title: "Error retrieving scenarios",
-                detail: ex.Message
+            return Ok(new List<string>());
+        }
+
+        var classRosters = await _classes.GetAllAsync();
+        var nowUtc = DateTimeOffset.UtcNow;
+        var allowedScenarioIds = classRosters
+            .Where(c => c.Students.Any(s => string.Equals(s, email, StringComparison.OrdinalIgnoreCase)))
+            .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
+            .Where(a => !a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc)
+            .Select(a => (a.ScenarioId ?? "").Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var filtered = allScenarios
+            .Where(id => allowedScenarioIds.Contains(id))
+            .ToList();
+
+        return Ok(filtered);
+    }
+
+    [HttpPut("{scenarioId}")]
+    public async Task<IActionResult> UpdateScenario(string scenarioId, [FromBody] Scenario scenario, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(scenarioId) || !ScenarioIdPattern.IsMatch(scenarioId))
+        {
+            return BadRequest(Problem(
+                title: "Invalid scenario id",
+                detail: "Scenario id may only include letters, numbers, underscore, and hyphen."
             ));
         }
+
+        if (scenario is null)
+        {
+            return BadRequest(Problem(
+                title: "Invalid scenario data",
+                detail: "Scenario cannot be null."
+            ));
+        }
+
+        var entity = await _db.Scenarios.FirstOrDefaultAsync(s => s.Id == scenarioId, ct);
+
+        if (entity is null)
+        {
+            _db.Scenarios.Add(ToEntity(scenarioId, scenario));
+        }
+        else
+        {
+            entity.Title = scenario.Title ?? scenarioId;
+            entity.NodesJson = JsonSerializer.Serialize(scenario.Root ?? new Node(), JsonOptions);
+        }
+
+        await _db.SaveChangesAsync(ct);
+        return Ok(new { message = "Scenario saved successfully" });
     }
 
     private async Task<bool> CanCurrentUserAccessScenarioAsync(string scenarioId)
@@ -162,53 +149,23 @@ public class ScenariosController : ControllerBase
             .Any(a => string.Equals(a.ScenarioId, scenarioId, StringComparison.OrdinalIgnoreCase));
     }
 
-    [HttpPut("{scenarioId}")]
-    public async Task<IActionResult> UpdateScenario(string scenarioId, [FromBody] Scenario scenario, CancellationToken ct)
+    private static Scenario ToModel(ScenarioEntity entity)
     {
-        if (string.IsNullOrWhiteSpace(scenarioId) || !ScenarioIdPattern.IsMatch(scenarioId))
+        return new Scenario
         {
-            return BadRequest(Problem(
-                title: "Invalid scenario id",
-                detail: "Scenario id may only include letters, numbers, underscore, and hyphen."
-            ));
-        }
+            Id = entity.Id,
+            Title = entity.Title,
+            Root = JsonSerializer.Deserialize<Node>(entity.NodesJson ?? "{}", JsonOptions) ?? new()
+        };
+    }
 
-        if (scenario == null)
+    private static ScenarioEntity ToEntity(string id, Scenario model)
+    {
+        return new ScenarioEntity
         {
-            return BadRequest(Problem(
-                title: "Invalid scenario data",
-                detail: "Scenario cannot be null."
-            ));
-        }
-
-        try
-        {
-            if (!Directory.Exists(_dataPath))
-            {
-                Directory.CreateDirectory(_dataPath);
-            }
-
-            var filePath = Path.Combine(_dataPath, $"{scenarioId}.json");
-
-            var json = JsonSerializer.Serialize(scenario, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-
-            await System.IO.File.WriteAllTextAsync(filePath, json, ct);
-
-            return Ok(new { message = "Scenario saved successfully" });
-        }
-        catch (OperationCanceledException)
-        {
-            return StatusCode(499);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, Problem(
-                title: "Error saving scenario",
-                detail: ex.Message
-            ));
-        }
+            Id = id,
+            Title = model.Title ?? id,
+            NodesJson = JsonSerializer.Serialize(model.Root ?? new Node(), JsonOptions)
+        };
     }
 }
