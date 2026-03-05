@@ -15,6 +15,7 @@ An interactive medical training simulation platform built with .NET 9. Instructo
 - [API Documentation](#api-documentation)
 - [Project Structure](#project-structure)
 - [Configuration](#configuration)
+- [Database Schema](#database-schema)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
@@ -98,6 +99,75 @@ The API exposes interactive documentation via **Swagger / OpenAPI**.
 | `GET /api/classes` | List class rosters (admin) |
 
 For the full, up-to-date endpoint list, visit the [Swagger UI](#accessing-the-application) while the API is running.
+
+---
+
+## Database Schema
+
+```mermaid
+erDiagram
+
+    USERS {
+        int id PK
+        string sso_subject UK
+        string email
+        string name
+        string role "instructor | student"
+    }
+
+    COURSES {
+        int id PK
+        string title
+        string course_code
+    }
+
+    COURSE_INSTRUCTORS {
+        int id PK
+        int course_id FK
+        int instructor_id FK
+    }
+
+    ENROLLMENTS {
+        int id PK
+        int course_id FK
+        int student_id FK
+    }
+
+    SCENARIOS {
+        int id PK
+        int created_by FK
+        string title
+        string description
+        json nodes_json
+        timestamp created_at
+    }
+
+    COURSE_SCENARIOS {
+        int id PK
+        int course_id FK
+        int scenario_id FK
+    }
+
+    SUBMISSIONS {
+        int id PK
+        int student_id FK
+        int scenario_id FK
+        int course_id FK
+        json answers_json
+        decimal grade "nullable"
+    }
+
+    USERS ||--o{ COURSE_INSTRUCTORS : "instructs"
+    COURSES ||--o{ COURSE_INSTRUCTORS : "has"
+    USERS ||--o{ ENROLLMENTS : "enrolled in"
+    COURSES ||--o{ ENROLLMENTS : "has"
+    USERS ||--o{ SCENARIOS : "created by"
+    COURSES ||--o{ COURSE_SCENARIOS : "has"
+    SCENARIOS ||--o{ COURSE_SCENARIOS : "assigned to"
+    USERS ||--o{ SUBMISSIONS : "submits"
+    SCENARIOS ||--o{ SUBMISSIONS : "used in"
+    COURSES ||--o{ SUBMISSIONS : "scoped to"
+```
 
 ---
 
