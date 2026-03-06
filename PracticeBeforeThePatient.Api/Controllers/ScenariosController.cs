@@ -111,6 +111,18 @@ public class ScenariosController : ControllerBase
             ));
         }
 
+        try
+        {
+            _ = JsonSerializer.Serialize(scenario.Root ?? new Node(), JsonOptions);
+        }
+        catch (Exception)
+        {
+            return BadRequest(Problem(
+                title: "Invalid scenario data",
+                detail: "Scenario root node could not be serialized."
+            ));
+        }
+
         var entity = await _db.Scenarios.FirstOrDefaultAsync(s => s.Id == scenarioId, ct);
 
         if (entity is null)
@@ -119,7 +131,15 @@ public class ScenariosController : ControllerBase
         }
         else
         {
+            entity.CreatedBy = string.IsNullOrWhiteSpace(scenario.CreatedBy)
+                ? entity.CreatedBy
+                : scenario.CreatedBy;
             entity.Title = scenario.Title ?? scenarioId;
+            entity.Description = scenario.Description ?? "";
+            if (scenario.CreatedAt != default)
+            {
+                entity.CreatedAt = scenario.CreatedAt;
+            }
             entity.NodesJson = JsonSerializer.Serialize(scenario.Root ?? new Node(), JsonOptions);
         }
 
@@ -154,7 +174,10 @@ public class ScenariosController : ControllerBase
         return new Scenario
         {
             Id = entity.Id,
+            CreatedBy = entity.CreatedBy,
             Title = entity.Title,
+            Description = entity.Description,
+            CreatedAt = entity.CreatedAt,
             Root = JsonSerializer.Deserialize<Node>(entity.NodesJson ?? "{}", JsonOptions) ?? new()
         };
     }
@@ -164,8 +187,11 @@ public class ScenariosController : ControllerBase
         return new ScenarioEntity
         {
             Id = id,
+            CreatedBy = string.IsNullOrWhiteSpace(model.CreatedBy) ? "admin@ua.edu" : model.CreatedBy,
             Title = model.Title ?? id,
-            NodesJson = JsonSerializer.Serialize(model.Root ?? new Node(), JsonOptions)
+            Description = model.Description ?? "",
+            NodesJson = JsonSerializer.Serialize(model.Root ?? new Node(), JsonOptions),
+            CreatedAt = model.CreatedAt == default ? DateTime.UtcNow : model.CreatedAt
         };
     }
 }

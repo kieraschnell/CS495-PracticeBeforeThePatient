@@ -54,6 +54,7 @@ using (var scope = app.Services.CreateScope())
             foreach (var file in Directory.GetFiles(scenariosDir, "*.json"))
             {
                 var id = Path.GetFileNameWithoutExtension(file) ?? "";
+                var createdBy = "admin@ua.edu";
                 var json = File.ReadAllText(file);
                 var parsed = JsonSerializer.Deserialize<Scenario>(json, jsonOptions);
                 var rootJson = JsonSerializer.Serialize(parsed?.Root ?? new Node(), jsonOptions);
@@ -61,8 +62,11 @@ using (var scope = app.Services.CreateScope())
                 db.Scenarios.Add(new ScenarioEntity
                 {
                     Id = id,
+                    CreatedBy = string.IsNullOrWhiteSpace(parsed?.CreatedBy) ? createdBy : parsed.CreatedBy,
                     Title = parsed?.Title ?? id,
-                    NodesJson = rootJson
+                    Description = parsed?.Description ?? "",
+                    NodesJson = rootJson,
+                    CreatedAt = parsed?.CreatedAt ?? DateTime.UtcNow
                 });
             }
             db.SaveChanges();
