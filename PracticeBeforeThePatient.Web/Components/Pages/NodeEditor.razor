@@ -9,11 +9,11 @@
      @onfocusin="SelectThisNode">
     <div class="nodeHeader" @onclick="OnHeaderClicked">
         <div class="nodeHeaderLeft">
-            <button class="expandBtn @(IsExpanded ? "expanded" : "")" type="button">
+            <button class="expandBtn @(IsExpanded ? "expanded" : "")" type="button" title="@(IsExpanded ? "Collapse" : "Expand")">
                 >
             </button>
             <div class="nodeTitle">@Path</div>
-            <span class="nodeBadge">@Node.Type</span>
+            <span class="nodeBadge" title="@(Node.Type == "mcq" ? "Multiple Choice Question" : (Node.Type == "outcome" ? "Outcome" : ""))">@Node.Type</span>
         </div>
     </div>
 
