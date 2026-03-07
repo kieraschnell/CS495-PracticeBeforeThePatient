@@ -72,6 +72,41 @@ using (var scope = app.Services.CreateScope())
             db.SaveChanges();
         }
     }
+
+    if (!db.Users.Any())
+    {
+        db.Users.AddRange(
+            new UserEntity
+            {
+                SsoSubject = "admin-sso-001",
+                Email = "admin@ua.edu",
+                Name = "Admin Instructor",
+                Role = "instructor"
+            },
+            new UserEntity
+            {
+                SsoSubject = "instructor-sso-002",
+                Email = "instructor@ua.edu",
+                Name = "Jane Doe",
+                Role = "instructor"
+            },
+            new UserEntity
+            {
+                SsoSubject = "student-sso-003",
+                Email = "student1@ua.edu",
+                Name = "Alice Smith",
+                Role = "student"
+            },
+            new UserEntity
+            {
+                SsoSubject = "student-sso-004",
+                Email = "student2@ua.edu",
+                Name = "Bob Johnson",
+                Role = "student"
+            }
+        );
+        db.SaveChanges();
+    }
 }
 
 if (app.Environment.IsDevelopment())

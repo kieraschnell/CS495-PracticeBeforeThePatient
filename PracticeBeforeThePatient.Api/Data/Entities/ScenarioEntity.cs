@@ -1,5 +1,3 @@
-using Microsoft.VisualBasic;
-
 namespace PracticeBeforeThePatient.Data.Entities;
 
 public class ScenarioEntity
@@ -9,6 +7,5 @@ public class ScenarioEntity
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
     public string NodesJson { get; set; } = "{}";
-    public DateTime CreatedAt { get; set; } = DateAndTime.Now;
-
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
