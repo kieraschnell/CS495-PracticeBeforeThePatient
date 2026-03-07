@@ -1,4 +1,5 @@
-using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using PracticeBeforeThePatient.Data;
 
 namespace PracticeBeforeThePatient.Services;
 
@@ -6,159 +7,80 @@ public sealed class DevAccessStore
 {
     public const string LightTheme = "light";
     public const string DarkTheme = "dark";
+    private const string DefaultEmail = "admin@ua.edu";
 
-    private readonly string _path;
-    private readonly SemaphoreSlim _gate = new(1, 1);
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly Lock _lock = new();
 
-    public DevAccessStore(IWebHostEnvironment env)
+    private string _currentEmail = DefaultEmail;
+    private readonly Dictionary<string, string> _themeByEmail = new(StringComparer.OrdinalIgnoreCase);
+
+    public DevAccessStore(IServiceScopeFactory scopeFactory)
     {
-        var dataDir = Path.Combine(env.ContentRootPath, "Data");
-        Directory.CreateDirectory(dataDir);
-        _path = Path.Combine(dataDir, "dev-access.json");
+        _scopeFactory = scopeFactory;
     }
 
-    public sealed class DevAccessConfig
+    public Task<string> GetCurrentEmailAsync()
     {
-        public string CurrentEmail { get; set; } = "";
-        public List<string> AdminEmails { get; set; } = new();
-        public Dictionary<string, string> ThemeByEmail { get; set; } = new();
-    }
-
-    public async Task<DevAccessConfig> GetAsync()
-    {
-        await _gate.WaitAsync();
-        try
+        lock (_lock)
         {
-            return await ReadUnlockedAsync();
+            return Task.FromResult(_currentEmail);
         }
-        finally
-        {
-            _gate.Release();
-        }
-    }
-
-    public async Task<string> GetCurrentEmailAsync()
-    {
-        var cfg = await GetAsync();
-        return cfg.CurrentEmail;
     }
 
     public async Task<bool> IsAdminAsync()
     {
-        var cfg = await GetAsync();
-        if (string.IsNullOrWhiteSpace(cfg.CurrentEmail)) return false;
-        return cfg.AdminEmails.Contains(cfg.CurrentEmail, StringComparer.OrdinalIgnoreCase);
-    }
-
-    public async Task SetCurrentEmailAsync(string email)
-    {
-        await _gate.WaitAsync();
-        try
+        string email;
+        lock (_lock)
         {
-            var cfg = await ReadUnlockedAsync();
-            cfg.CurrentEmail = (email ?? "").Trim().ToLowerInvariant();
-            await WriteUnlockedAsync(cfg);
+            email = _currentEmail;
         }
-        finally
+
+        if (string.IsNullOrWhiteSpace(email)) return false;
+
+        using var scope = _scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        return user is not null && string.Equals(user.Role, "instructor", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public Task SetCurrentEmailAsync(string email)
+    {
+        lock (_lock)
         {
-            _gate.Release();
+            _currentEmail = (email ?? "").Trim().ToLowerInvariant();
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task<string> GetThemeForCurrentEmailAsync()
+    {
+        lock (_lock)
+        {
+            return Task.FromResult(GetThemeForEmail(_currentEmail));
         }
     }
 
-    public async Task<string> GetThemeForCurrentEmailAsync()
+    public Task<bool> SetThemeForCurrentEmailAsync(string theme)
     {
-        var cfg = await GetAsync();
-        return GetThemeForEmail(cfg, cfg.CurrentEmail);
-    }
-
-    public async Task<bool> SetThemeForCurrentEmailAsync(string theme)
-    {
-        await _gate.WaitAsync();
-        try
+        lock (_lock)
         {
-            var cfg = await ReadUnlockedAsync();
-            var email = (cfg.CurrentEmail ?? "").Trim().ToLowerInvariant();
+            var email = _currentEmail.Trim().ToLowerInvariant();
             if (string.IsNullOrWhiteSpace(email))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
-            cfg.ThemeByEmail[email] = NormalizeTheme(theme);
-            await WriteUnlockedAsync(cfg);
-            return true;
-        }
-        finally
-        {
-            _gate.Release();
+            _themeByEmail[email] = NormalizeTheme(theme);
+            return Task.FromResult(true);
         }
     }
 
-    private async Task<DevAccessConfig> ReadUnlockedAsync()
-    {
-        if (!File.Exists(_path))
-        {
-            var seed = new DevAccessConfig
-            {
-                CurrentEmail = "student@ua.edu",
-                AdminEmails = new List<string> { "admin@ua.edu" }
-            };
-
-            await WriteUnlockedAsync(seed);
-            return seed;
-        }
-
-        var json = await File.ReadAllTextAsync(_path);
-
-        var cfg = JsonSerializer.Deserialize<DevAccessConfig>(json, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        }) ?? new DevAccessConfig();
-
-        cfg.AdminEmails ??= new List<string>();
-        cfg.CurrentEmail ??= "";
-        cfg.ThemeByEmail ??= new Dictionary<string, string>();
-
-        cfg.CurrentEmail = cfg.CurrentEmail.Trim().ToLowerInvariant();
-        cfg.AdminEmails = cfg.AdminEmails
-            .Select(x => (x ?? "").Trim().ToLowerInvariant())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        cfg.ThemeByEmail = cfg.ThemeByEmail
-            .Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key))
-            .ToDictionary(
-                kvp => (kvp.Key ?? "").Trim().ToLowerInvariant(),
-                kvp => NormalizeTheme(kvp.Value),
-                StringComparer.OrdinalIgnoreCase);
-
-        return cfg;
-    }
-
-    private async Task WriteUnlockedAsync(DevAccessConfig cfg)
-    {
-        var json = JsonSerializer.Serialize(cfg, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
-
-        await File.WriteAllTextAsync(_path, json);
-    }
-
-    private static string GetThemeForEmail(DevAccessConfig cfg, string email)
+    private string GetThemeForEmail(string email)
     {
         var normalized = (email ?? "").Trim().ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return LightTheme;
-        }
-
-        if (cfg.ThemeByEmail.TryGetValue(normalized, out var theme))
-        {
-            return NormalizeTheme(theme);
-        }
-
-        return LightTheme;
+        if (string.IsNullOrWhiteSpace(normalized)) return LightTheme;
+        return _themeByEmail.TryGetValue(normalized, out var theme) ? NormalizeTheme(theme) : LightTheme;
     }
 
     private static string NormalizeTheme(string theme)
