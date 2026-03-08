@@ -107,6 +107,23 @@ using (var scope = app.Services.CreateScope())
         );
         db.SaveChanges();
     }
+
+    if (!db.Courses.Any())
+    {
+        db.Courses.AddRange(
+            new CourseEntity
+            {
+                Title = "Intro to Computer Science",
+                CourseCode = "CS 100"
+            },
+            new CourseEntity
+            {
+                Title = "Programming Fundamentals",
+                CourseCode = "CS 101"
+            }
+        );
+        db.SaveChanges();
+    }
 }
 
 if (app.Environment.IsDevelopment())
