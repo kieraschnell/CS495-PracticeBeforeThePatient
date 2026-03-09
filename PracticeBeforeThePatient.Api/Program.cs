@@ -124,6 +124,69 @@ using (var scope = app.Services.CreateScope())
         );
         db.SaveChanges();
     }
+
+    if (!db.CourseInstructors.Any())
+    {
+        var adminUser = db.Users.First(u => u.Email == "admin@ua.edu");
+        var cs100 = db.Courses.First(c => c.CourseCode == "CS 100");
+        var cs101 = db.Courses.First(c => c.CourseCode == "CS 101");
+
+        db.CourseInstructors.AddRange(
+            new CourseInstructorEntity { CourseId = cs100.Id, InstructorId = adminUser.Id },
+            new CourseInstructorEntity { CourseId = cs101.Id, InstructorId = adminUser.Id }
+        );
+        db.SaveChanges();
+    }
+
+    if (!db.Enrollments.Any())
+    {
+        var alice = db.Users.First(u => u.Email == "student1@ua.edu");
+        var bob = db.Users.First(u => u.Email == "student2@ua.edu");
+        var cs100 = db.Courses.First(c => c.CourseCode == "CS 100");
+        var cs101 = db.Courses.First(c => c.CourseCode == "CS 101");
+
+        db.Enrollments.AddRange(
+            new EnrollmentEntity { CourseId = cs100.Id, StudentId = alice.Id },
+            new EnrollmentEntity { CourseId = cs100.Id, StudentId = bob.Id },
+            new EnrollmentEntity { CourseId = cs101.Id, StudentId = alice.Id }
+        );
+        db.SaveChanges();
+    }
+
+    if (!db.CourseScenarios.Any())
+    {
+        var cs100 = db.Courses.First(c => c.CourseCode == "CS 100");
+        var cs101 = db.Courses.First(c => c.CourseCode == "CS 101");
+        var scenarioIds = db.Scenarios.Select(s => s.Id).ToList();
+
+        foreach (var scenarioId in scenarioIds)
+        {
+            db.CourseScenarios.Add(new CourseScenarioEntity { CourseId = cs100.Id, ScenarioId = scenarioId });
+        }
+
+        if (scenarioIds.Count > 0)
+        {
+            db.CourseScenarios.Add(new CourseScenarioEntity { CourseId = cs101.Id, ScenarioId = scenarioIds[0] });
+        }
+        db.SaveChanges();
+    }
+
+    if (!db.Submissions.Any())
+    {
+        var alice = db.Users.First(u => u.Email == "student1@ua.edu");
+        var cs100 = db.Courses.First(c => c.CourseCode == "CS 100");
+        var scenarioId = db.Scenarios.Select(s => s.Id).First();
+
+        db.Submissions.Add(new SubmissionEntity
+        {
+            StudentId = alice.Id,
+            ScenarioId = scenarioId,
+            CourseId = cs100.Id,
+            AnswersJson = "{}",
+            Grade = 85m
+        });
+        db.SaveChanges();
+    }
 }
 
 if (app.Environment.IsDevelopment())
