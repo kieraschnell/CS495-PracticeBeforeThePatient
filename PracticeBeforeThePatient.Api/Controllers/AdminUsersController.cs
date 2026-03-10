@@ -114,4 +114,29 @@ public sealed class AdminUsersController : ControllerBase
             Role = DevAccessStore.NormalizeRole(existing.Role)
         };
     }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> RemoveElevatedAccess(int id)
+    {
+        if (!await _access.IsAdminAsync())
+        {
+            return Forbid();
+        }
+
+        var existing = await _db.Users.FirstOrDefaultAsync(x => x.Id == id);
+        if (existing is null)
+        {
+            return NotFound();
+        }
+
+        var currentEmail = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
+        if (string.Equals(existing.Email, currentEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest("You cannot remove your own admin access.");
+        }
+
+        existing.Role = DevAccessStore.StudentRole;
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
 }

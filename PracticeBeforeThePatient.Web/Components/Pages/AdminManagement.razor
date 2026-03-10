@@ -38,34 +38,7 @@
             <div class="simTitle">Admin Management</div>
             <div class="simSubtitle">Grant teacher privileges, create additional admins, and review elevated access</div>
         </div>
-    </div>
-
-    <div class="card adminSectionCard">
-        <div class="sectionTitle">Add or update access</div>
-
-        <div class="adminAccessGrid">
-            <div>
-                <label class="editorLabel">Email</label>
-                <input class="editorInput"
-                       value="@_email"
-                       @oninput="e => _email = (e.Value?.ToString() ?? string.Empty).Trim()"
-                       placeholder="teacher@ua.edu" />
-            </div>
-
-            <div>
-                <label class="editorLabel">Role</label>
-                <select class="editorInput" @bind="_role">
-                    <option value="teacher">Teacher</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
-
-            <div class="adminAccessActions">
-                <button class="primaryBtn" type="button" @onclick="SaveUserAsync" disabled="@_isSavingUser">Save access</button>
-            </div>
-        </div>
-
-        <div class="createHint adminAccessHint">Students are added to classes from the Class Management page.</div>
+        <button class="primaryBtn" type="button" @onclick="OpenAddAccessModal">Add teacher/admin</button>
     </div>
 
     <div class="card adminSectionCard">
@@ -93,6 +66,12 @@
                         <div class="adminUserActions">
                             <span class="adminRoleChip @GetRoleChipClass(user.Role)">@FormatRole(user.Role)</span>
                             <button class="secondaryBtn" type="button" @onclick="() => EditUser(user)">Edit</button>
+                            <button class="deleteBtn"
+                                    type="button"
+                                    @onclick="() => RemoveAccessAsync(user)"
+                                    disabled="@IsCurrentUser(user)">
+                                Remove
+                            </button>
                         </div>
                     </div>
                 }
@@ -101,11 +80,50 @@
     </div>
 </div>
 
+@if (_isAccessModalOpen)
+{
+    <div class="classMgmtModalBackdrop" @onclick="CloseAccessModal">
+        <div class="classMgmtModalCard classMgmtModalCardNarrow" @onclick:stopPropagation="true">
+            <div class="classMgmtModalTop">
+                <div class="sectionTitle">@(_isEditingUser ? "Edit access" : "Add teacher/admin")</div>
+                <button class="secondaryBtn" type="button" @onclick="CloseAccessModal" disabled="@_isSavingUser">Cancel</button>
+            </div>
+
+            <div class="createArea">
+                <label class="editorLabel">Email</label>
+                <div class="createRow">
+                    <input class="editorInput"
+                           value="@_email"
+                           @oninput="OnEmailChanged"
+                           placeholder="teacher@ua.edu" />
+                </div>
+
+                <label class="editorLabel adminModalLabel">Role</label>
+                <select class="editorInput" @bind="_role">
+                    <option value="teacher">Teacher</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <div class="assignmentModalActions">
+                    <button class="primaryBtn" type="button" @onclick="SaveUserAsync" disabled="@_isSavingUser || string.IsNullOrWhiteSpace(_email)">
+                        @(_isEditingUser ? "Save access" : "Add access")
+                    </button>
+                </div>
+
+                <div class="createHint">Students are added to classes from the Class Management page.</div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private bool _isAdminLoaded;
     private bool _isAdmin;
     private bool _isLoadingUsers;
     private bool _isSavingUser;
+    private string _currentEmail = "";
+    private bool _isAccessModalOpen;
+    private bool _isEditingUser;
     private readonly List<AdminUserDto> _users = new();
     private IEnumerable<AdminUserDto> _elevatedUsers => _users.Where(x =>
         string.Equals(x.Role, "teacher", StringComparison.OrdinalIgnoreCase) ||
@@ -120,6 +138,7 @@
     {
         var access = await Api.GetAccessAsync();
         _isAdmin = access?.IsAdmin == true;
+        _currentEmail = (access?.Email ?? "").Trim();
         _isAdminLoaded = true;
 
         if (_isAdmin)
@@ -168,6 +187,8 @@
 
             _email = "";
             _role = "teacher";
+            _isEditingUser = false;
+            _isAccessModalOpen = false;
             SetMessage("Teacher/admin access updated.", true);
             await ReloadUsersAsync();
         }
@@ -185,6 +206,60 @@
     {
         _email = user.Email;
         _role = user.Role;
+        _isEditingUser = true;
+        _isAccessModalOpen = true;
+    }
+
+    private void OpenAddAccessModal()
+    {
+        _email = "";
+        _role = "teacher";
+        _isEditingUser = false;
+        _isAccessModalOpen = true;
+    }
+
+    private void CloseAccessModal()
+    {
+        if (_isSavingUser)
+        {
+            return;
+        }
+
+        _email = "";
+        _role = "teacher";
+        _isEditingUser = false;
+        _isAccessModalOpen = false;
+    }
+
+    private void OnEmailChanged(ChangeEventArgs e)
+    {
+        _email = (e.Value?.ToString() ?? string.Empty).Trim();
+    }
+
+    private async Task RemoveAccessAsync(AdminUserDto user)
+    {
+        try
+        {
+            var response = await Api.Http.DeleteAsync($"api/admin/users/{user.Id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                SetMessage($"Could not remove access. {body}", false);
+                return;
+            }
+
+            SetMessage("Elevated access removed.", true);
+            await ReloadUsersAsync();
+        }
+        catch
+        {
+            SetMessage("Could not remove access.", false);
+        }
+    }
+
+    private bool IsCurrentUser(AdminUserDto user)
+    {
+        return string.Equals(user.Email, _currentEmail, StringComparison.OrdinalIgnoreCase);
     }
 
     private void SetMessage(string text, bool ok)

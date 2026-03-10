@@ -515,21 +515,12 @@ code {
   padding: 22px 24px;
 }
 
-.adminAccessGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.9fr) auto;
-  gap: 16px;
-  align-items: end;
-}
+.adminInfoLine {
+  border-bottom: 0;
+  padding-bottom: 0;
+ }
 
-.adminAccessActions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: end;
-  height: 100%;
-}
-
-.adminAccessHint {
+.adminModalLabel {
   margin-top: 14px;
 }
 
@@ -1496,14 +1487,6 @@ html[data-theme="dark"] .submissionModePage {
 
   .assignmentModalForm {
     grid-template-columns: 1fr;
-  }
-
-  .adminAccessGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .adminAccessActions {
-    justify-content: flex-start;
   }
 
   .classMgmtModalBackdrop {
