@@ -16,17 +16,14 @@
 }
 
 <div class="simShell">
-    <div class="card">
-        <div class="sectionTitle">Demo</div>
-        <div class="narrLine">A demo video will go here.</div>
-
-        <div class="divider"></div>
-
+    <div class="card demoCard">
         <div class="sectionTitle">Mock Login (Temporary)</div>
-        <div class="narrLine">Current user: @CurrentUserLabel</div>
-        <div class="narrLine">Role: @(IsAdmin ? "Admin" : "Student")</div>
+        <div class="demoMeta">
+            <div class="demoMetaRow">Current user: @CurrentUserLabel</div>
+            <div class="demoMetaRow">Role: @(IsAdmin ? "Admin" : "Student")</div>
+        </div>
 
-        <div class="createRow">
+        <div class="createRow demoLoginRow">
             <input class="editorInput"
                    value="@EmailInput"
                    @oninput="OnEmailInput"

@@ -12,7 +12,21 @@
 
 <div class="simShell">
 
-    @if (_isLoading)
+    @if (_isLoadingAccess)
+    {
+        <div class="card">
+            <div class="sectionTitle">Loading</div>
+            <div class="narrLine">Checking access</div>
+        </div>
+    }
+    else if (!_isTeacher)
+    {
+        <div class="card">
+            <div class="sectionTitle">Not available</div>
+            <div class="narrLine">This page is only available to teachers and admins</div>
+        </div>
+    }
+    else if (_isLoading)
     {
         <div class="card">
             <div class="sectionTitle">Loading</div>

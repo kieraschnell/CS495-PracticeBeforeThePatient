@@ -23,6 +23,8 @@ public sealed class AccessController : ControllerBase
     public sealed class AccessResponse
     {
         public string Email { get; set; } = "";
+        public string Role { get; set; } = DevAccessStore.StudentRole;
+        public bool IsTeacher { get; set; }
         public bool IsAdmin { get; set; }
         public List<string> AllowedScenarioIds { get; set; } = new();
         public List<AllowedScenarioOptionDto> AllowedScenarioOptions { get; set; } = new();
@@ -89,17 +91,21 @@ public sealed class AccessController : ControllerBase
     private async Task<AccessResponse> BuildAccessResponseAsync()
     {
         var email = (await _devAccess.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
+        var role = await _devAccess.GetCurrentRoleAsync();
+        var isTeacher = await _devAccess.IsTeacherAsync();
         var isAdmin = await _devAccess.IsAdminAsync();
         var theme = await _devAccess.GetThemeForCurrentEmailAsync();
         var nowUtc = DateTimeOffset.UtcNow;
 
-        if (isAdmin)
+        if (isTeacher)
         {
             var allScenarioIds = GetAllScenarioIds();
             return new AccessResponse
             {
                 Email = email,
-                IsAdmin = true,
+                Role = role,
+                IsTeacher = true,
+                IsAdmin = isAdmin,
                 AllowedScenarioIds = allScenarioIds,
                 AllowedScenarioOptions = allScenarioIds
                     .Select(id => new AllowedScenarioOptionDto
@@ -120,6 +126,8 @@ public sealed class AccessController : ControllerBase
             return new AccessResponse
             {
                 Email = "",
+                Role = DevAccessStore.StudentRole,
+                IsTeacher = false,
                 IsAdmin = false,
                 AllowedScenarioIds = new List<string>(),
                 AllowedScenarioOptions = new List<AllowedScenarioOptionDto>(),
@@ -139,6 +147,8 @@ public sealed class AccessController : ControllerBase
             return new AccessResponse
             {
                 Email = email,
+                Role = role,
+                IsTeacher = false,
                 IsAdmin = false,
                 AllowedScenarioIds = new List<string>(),
                 AllowedScenarioOptions = new List<AllowedScenarioOptionDto>(),
@@ -195,6 +205,8 @@ public sealed class AccessController : ControllerBase
         return new AccessResponse
         {
             Email = email,
+            Role = role,
+            IsTeacher = false,
             IsAdmin = false,
             AllowedScenarioIds = filteredScenarioIds,
             AllowedScenarioOptions = filteredOptions,

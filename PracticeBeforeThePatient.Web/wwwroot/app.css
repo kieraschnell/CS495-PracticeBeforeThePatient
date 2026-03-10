@@ -501,6 +501,107 @@ code {
   border-color: rgba(0, 0, 0, 0.22);
 }
 
+.adminUserList {
+  display: grid;
+  gap: 12px;
+}
+
+.adminShell {
+  display: grid;
+  gap: 18px;
+}
+
+.adminSectionCard {
+  padding: 22px 24px;
+}
+
+.adminAccessGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.9fr) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.adminAccessActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: end;
+  height: 100%;
+}
+
+.adminAccessHint {
+  margin-top: 14px;
+}
+
+.adminUserItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.adminUserActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adminRoleChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 84px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.adminRoleChipAdmin {
+  background: rgba(158, 27, 50, 0.12);
+  color: #7d1427;
+  border-color: rgba(158, 27, 50, 0.22);
+}
+
+.adminRoleChipTeacher {
+  background: rgba(0, 0, 0, 0.08);
+  color: #111;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.adminRoleChipStudent {
+  background: rgba(59, 130, 246, 0.1);
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.18);
+}
+
+.demoCard {
+  padding: 24px;
+}
+
+.demoMeta {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  margin-bottom: 18px;
+}
+
+.demoMetaRow {
+  padding: 0 0 10px;
+  font-size: 18px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.demoLoginRow {
+  align-items: center;
+}
+
 /* Simulation controls */
 
 .prompt {
@@ -1395,6 +1496,14 @@ html[data-theme="dark"] .submissionModePage {
 
   .assignmentModalForm {
     grid-template-columns: 1fr;
+  }
+
+  .adminAccessGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminAccessActions {
+    justify-content: flex-start;
   }
 
   .classMgmtModalBackdrop {

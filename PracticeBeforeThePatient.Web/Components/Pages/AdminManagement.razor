@@ -1,0 +1,243 @@
+@page "/admin-management"
+@rendermode InteractiveServer
+@using System.Net.Http.Json
+@using PracticeBeforeThePatient.Web.Services
+@inject ApiClient Api
+
+<PageTitle>Admin Management</PageTitle>
+
+@if (!string.IsNullOrWhiteSpace(_message))
+{
+    <div @key="_messageVersion" class="saveMessage overlayToast @_messageKind" role="status" aria-live="polite">
+        @_message
+    </div>
+}
+
+@if (!_isAdminLoaded)
+{
+    <div class="card">
+        <div class="sectionTitle">Loading</div>
+        <div class="narrLine">Checking access</div>
+    </div>
+    return;
+}
+
+@if (!_isAdmin)
+{
+    <div class="card">
+        <div class="sectionTitle">Not available</div>
+        <div class="narrLine">This page is only available to admins</div>
+    </div>
+    return;
+}
+
+<div class="simShell adminShell">
+    <div class="simHeaderRow">
+        <div class="simHeaderText">
+            <div class="simBadge">Admin</div>
+            <div class="simTitle">Admin Management</div>
+            <div class="simSubtitle">Grant teacher privileges, create additional admins, and review elevated access</div>
+        </div>
+    </div>
+
+    <div class="card adminSectionCard">
+        <div class="sectionTitle">Add or update access</div>
+
+        <div class="adminAccessGrid">
+            <div>
+                <label class="editorLabel">Email</label>
+                <input class="editorInput"
+                       value="@_email"
+                       @oninput="e => _email = (e.Value?.ToString() ?? string.Empty).Trim()"
+                       placeholder="teacher@ua.edu" />
+            </div>
+
+            <div>
+                <label class="editorLabel">Role</label>
+                <select class="editorInput" @bind="_role">
+                    <option value="teacher">Teacher</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+
+            <div class="adminAccessActions">
+                <button class="primaryBtn" type="button" @onclick="SaveUserAsync" disabled="@_isSavingUser">Save access</button>
+            </div>
+        </div>
+
+        <div class="createHint adminAccessHint">Students are added to classes from the Class Management page.</div>
+    </div>
+
+    <div class="card adminSectionCard">
+        <div class="sectionTitle">Elevated access</div>
+
+        @if (_isLoadingUsers)
+        {
+            <div class="infoMessage">Loading users</div>
+        }
+        else if (!_elevatedUsers.Any())
+        {
+            <div class="infoMessage">No teachers or admins found</div>
+        }
+        else
+        {
+            <div class="adminUserList">
+                @foreach (var user in _elevatedUsers)
+                {
+                    <div class="adminUserItem">
+                        <div>
+                            <div class="assignmentTitle">@user.Email</div>
+                            <div class="assignmentMeta">@(!string.IsNullOrWhiteSpace(user.Name) ? user.Name : "No name set")</div>
+                        </div>
+
+                        <div class="adminUserActions">
+                            <span class="adminRoleChip @GetRoleChipClass(user.Role)">@FormatRole(user.Role)</span>
+                            <button class="secondaryBtn" type="button" @onclick="() => EditUser(user)">Edit</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private bool _isAdminLoaded;
+    private bool _isAdmin;
+    private bool _isLoadingUsers;
+    private bool _isSavingUser;
+    private readonly List<AdminUserDto> _users = new();
+    private IEnumerable<AdminUserDto> _elevatedUsers => _users.Where(x =>
+        string.Equals(x.Role, "teacher", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(x.Role, "admin", StringComparison.OrdinalIgnoreCase));
+    private string _email = "";
+    private string _role = "teacher";
+    private string _message = "";
+    private string _messageKind = "success";
+    private int _messageVersion;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var access = await Api.GetAccessAsync();
+        _isAdmin = access?.IsAdmin == true;
+        _isAdminLoaded = true;
+
+        if (_isAdmin)
+        {
+            await ReloadUsersAsync();
+        }
+    }
+
+    private async Task ReloadUsersAsync()
+    {
+        _isLoadingUsers = true;
+        try
+        {
+            var users = await Api.Http.GetFromJsonAsync<List<AdminUserDto>>("api/admin/users");
+            _users.Clear();
+            _users.AddRange((users ?? new List<AdminUserDto>())
+                .OrderBy(x => x.Email, StringComparer.OrdinalIgnoreCase));
+        }
+        catch
+        {
+            SetMessage("Could not load users from the API.", false);
+        }
+        finally
+        {
+            _isLoadingUsers = false;
+        }
+    }
+
+    private async Task SaveUserAsync()
+    {
+        _isSavingUser = true;
+        try
+        {
+            var response = await Api.Http.PostAsJsonAsync("api/admin/users", new AdminUserRequest
+            {
+                Email = _email,
+                Role = _role
+            });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                SetMessage($"Could not save access. {body}", false);
+                return;
+            }
+
+            _email = "";
+            _role = "teacher";
+            SetMessage("Teacher/admin access updated.", true);
+            await ReloadUsersAsync();
+        }
+        catch
+        {
+            SetMessage("Could not save user access.", false);
+        }
+        finally
+        {
+            _isSavingUser = false;
+        }
+    }
+
+    private void EditUser(AdminUserDto user)
+    {
+        _email = user.Email;
+        _role = user.Role;
+    }
+
+    private void SetMessage(string text, bool ok)
+    {
+        _message = text;
+        _messageKind = ok ? "success" : "error";
+        var version = ++_messageVersion;
+        _ = ClearMessageLater(version);
+    }
+
+    private async Task ClearMessageLater(int version)
+    {
+        await Task.Delay(3000);
+        if (version != _messageVersion)
+        {
+            return;
+        }
+
+        _message = "";
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private static string FormatRole(string role)
+    {
+        return role switch
+        {
+            "admin" => "Admin",
+            "teacher" => "Teacher",
+            _ => "Student"
+        };
+    }
+
+    private static string GetRoleChipClass(string role)
+    {
+        return role switch
+        {
+            "admin" => "adminRoleChipAdmin",
+            "teacher" => "adminRoleChipTeacher",
+            _ => "adminRoleChipStudent"
+        };
+    }
+
+    private sealed class AdminUserDto
+    {
+        public int Id { get; set; }
+        public string Email { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Role { get; set; } = "student";
+    }
+
+    private sealed class AdminUserRequest
+    {
+        public string Email { get; set; } = "";
+        public string Role { get; set; } = "teacher";
+    }
+}

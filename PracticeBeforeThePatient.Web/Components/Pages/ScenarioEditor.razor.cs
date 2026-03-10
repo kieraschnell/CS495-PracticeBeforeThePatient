@@ -8,6 +8,8 @@ public partial class ScenarioEditor : ComponentBase
 {
     [Inject] private ApiClient ApiClient { get; set; } = default!;
 
+    protected bool _isLoadingAccess = true;
+    protected bool _isTeacher;
     protected bool _isLoading = true;
     protected bool _isLoadingScenario;
     protected bool _isSaving;
@@ -23,6 +25,16 @@ public partial class ScenarioEditor : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        var access = await ApiClient.GetAccessAsync();
+        _isTeacher = access?.IsTeacher == true;
+        _isLoadingAccess = false;
+
+        if (!_isTeacher)
+        {
+            _isLoading = false;
+            return;
+        }
+
         await LoadAvailableScenarios();
         _isLoading = false;
     }

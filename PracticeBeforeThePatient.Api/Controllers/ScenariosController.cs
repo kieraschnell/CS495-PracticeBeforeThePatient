@@ -63,7 +63,7 @@ public class ScenariosController : ControllerBase
             .Select(s => s.Id)
             .ToListAsync();
 
-        if (await _access.IsAdminAsync())
+        if (await _access.IsTeacherAsync())
         {
             return Ok(allScenarios);
         }
@@ -111,6 +111,11 @@ public class ScenariosController : ControllerBase
             ));
         }
 
+        if (!await _access.IsTeacherAsync())
+        {
+            return Forbid();
+        }
+
         try
         {
             _ = JsonSerializer.Serialize(scenario.Root ?? new Node(), JsonOptions);
@@ -149,7 +154,7 @@ public class ScenariosController : ControllerBase
 
     private async Task<bool> CanCurrentUserAccessScenarioAsync(string scenarioId)
     {
-        if (await _access.IsAdminAsync())
+        if (await _access.IsTeacherAsync())
         {
             return true;
         }

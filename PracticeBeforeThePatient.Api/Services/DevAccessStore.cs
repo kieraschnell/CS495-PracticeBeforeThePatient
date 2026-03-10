@@ -7,6 +7,9 @@ public sealed class DevAccessStore
 {
     public const string LightTheme = "light";
     public const string DarkTheme = "dark";
+    public const string StudentRole = "student";
+    public const string TeacherRole = "teacher";
+    public const string AdminRole = "admin";
     private const string DefaultEmail = "admin@ua.edu";
 
     private readonly IServiceScopeFactory _scopeFactory;
@@ -28,7 +31,7 @@ public sealed class DevAccessStore
         }
     }
 
-    public async Task<bool> IsAdminAsync()
+    public async Task<string> GetCurrentRoleAsync()
     {
         string email;
         lock (_lock)
@@ -36,12 +39,25 @@ public sealed class DevAccessStore
             email = _currentEmail;
         }
 
-        if (string.IsNullOrWhiteSpace(email)) return false;
+        if (string.IsNullOrWhiteSpace(email)) return StudentRole;
 
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
-        return user is not null && string.Equals(user.Role, "instructor", StringComparison.OrdinalIgnoreCase);
+        return NormalizeRole(user?.Role);
+    }
+
+    public async Task<bool> IsTeacherAsync()
+    {
+        var role = await GetCurrentRoleAsync();
+        return string.Equals(role, TeacherRole, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(role, AdminRole, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public async Task<bool> IsAdminAsync()
+    {
+        var role = await GetCurrentRoleAsync();
+        return string.Equals(role, AdminRole, StringComparison.OrdinalIgnoreCase);
     }
 
     public Task SetCurrentEmailAsync(string email)
@@ -86,5 +102,21 @@ public sealed class DevAccessStore
     private static string NormalizeTheme(string theme)
     {
         return string.Equals(theme, DarkTheme, StringComparison.OrdinalIgnoreCase) ? DarkTheme : LightTheme;
+    }
+
+    public static string NormalizeRole(string? role)
+    {
+        if (string.Equals(role, AdminRole, StringComparison.OrdinalIgnoreCase))
+        {
+            return AdminRole;
+        }
+
+        if (string.Equals(role, TeacherRole, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(role, "instructor", StringComparison.OrdinalIgnoreCase))
+        {
+            return TeacherRole;
+        }
+
+        return StudentRole;
     }
 }

@@ -17,6 +17,8 @@ public class ApiClient
     public sealed class AccessResponse
     {
         public string Email { get; set; } = "";
+        public string Role { get; set; } = "student";
+        public bool IsTeacher { get; set; }
         public bool IsAdmin { get; set; }
         public List<string> AllowedScenarioIds { get; set; } = new();
         public List<AllowedScenarioOption> AllowedScenarioOptions { get; set; } = new();

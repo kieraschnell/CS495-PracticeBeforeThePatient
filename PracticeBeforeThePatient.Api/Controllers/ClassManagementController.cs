@@ -16,9 +16,9 @@ public sealed class ClassesController : ControllerBase
         _access = access;
     }
 
-    private async Task<bool> RequireAdmin()
+    private async Task<bool> RequireTeacher()
     {
-        return await _access.IsAdminAsync();
+        return await _access.IsTeacherAsync();
     }
 
     public sealed class ClassRosterDto
@@ -31,7 +31,7 @@ public sealed class ClassesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<ClassRosterDto>>> GetAll()
     {
-        if (!await RequireAdmin()) return Forbid();
+        if (!await RequireTeacher()) return Forbid();
 
         var all = await _store.GetAllAsync();
 
@@ -54,7 +54,7 @@ public sealed class ClassesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ClassRosterDto>> Create([FromBody] CreateClassRequest req)
     {
-        if (!await RequireAdmin()) return Forbid();
+        if (!await RequireTeacher()) return Forbid();
 
         if (string.IsNullOrWhiteSpace(req.Name))
         {
@@ -84,7 +84,7 @@ public sealed class ClassesController : ControllerBase
     [HttpPost("{classId}/students")]
     public async Task<IActionResult> AddStudent(string classId, [FromBody] StudentRequest req)
     {
-        if (!await RequireAdmin()) return Forbid();
+        if (!await RequireTeacher()) return Forbid();
 
         var ok = await _store.AddStudentAsync(classId, req.Email ?? "");
         if (!ok) return BadRequest();
@@ -94,7 +94,7 @@ public sealed class ClassesController : ControllerBase
     [HttpDelete("{classId}/students")]
     public async Task<IActionResult> RemoveStudent(string classId, [FromBody] StudentRequest req)
     {
-        if (!await RequireAdmin()) return Forbid();
+        if (!await RequireTeacher()) return Forbid();
 
         await _store.RemoveStudentAsync(classId, req.Email ?? "");
         return NoContent();
@@ -103,7 +103,7 @@ public sealed class ClassesController : ControllerBase
     [HttpDelete("{classId}")]
     public async Task<IActionResult> Delete(string classId)
     {
-        if (!await RequireAdmin()) return Forbid();
+        if (!await RequireTeacher()) return Forbid();
 
         await _store.DeleteClassAsync(classId);
         return NoContent();
@@ -133,7 +133,7 @@ public sealed class ClassesController : ControllerBase
     [HttpGet("{classId}/assignments")]
     public async Task<ActionResult<List<AssignmentDto>>> GetAssignments(string classId)
     {
-        if (!await RequireAdmin()) return Forbid();
+        if (!await RequireTeacher()) return Forbid();
 
         var assignments = await _store.GetAssignmentsAsync(classId);
         if (assignments is null) return NotFound();
@@ -175,7 +175,7 @@ public sealed class ClassesController : ControllerBase
     [HttpPost("{classId}/assignments")]
     public async Task<ActionResult<AssignmentDto>> CreateAssignment(string classId, [FromBody] CreateAssignmentRequest req)
     {
-        if (!await RequireAdmin()) return Forbid();
+        if (!await RequireTeacher()) return Forbid();
 
         if (string.IsNullOrWhiteSpace(req.Name))
         {
@@ -204,7 +204,7 @@ public sealed class ClassesController : ControllerBase
     [HttpDelete("{classId}/assignments/{assignmentId}")]
     public async Task<IActionResult> DeleteAssignment(string classId, string assignmentId)
     {
-        if (!await RequireAdmin()) return Forbid();
+        if (!await RequireTeacher()) return Forbid();
 
         var ok = await _store.DeleteAssignmentAsync(classId, assignmentId);
         if (!ok) return NotFound();
@@ -220,7 +220,7 @@ public sealed class ClassesController : ControllerBase
     [HttpPut("{classId}/assignments/{assignmentId}/due")]
     public async Task<IActionResult> UpdateAssignmentDue(string classId, string assignmentId, [FromBody] UpdateAssignmentDueRequest req)
     {
-        if (!await RequireAdmin()) return Forbid();
+        if (!await RequireTeacher()) return Forbid();
 
         var ok = await _store.UpdateAssignmentDueAtAsync(classId, assignmentId, req.DueAtUtc);
         if (!ok) return NotFound();
@@ -238,7 +238,7 @@ public sealed class ClassesController : ControllerBase
     [HttpPut("{classId}/assignments/{assignmentId}/grades")]
     public async Task<IActionResult> GradeAssignment(string classId, string assignmentId, [FromBody] GradeAssignmentRequest req)
     {
-        if (!await RequireAdmin()) return Forbid();
+        if (!await RequireTeacher()) return Forbid();
 
         if (string.IsNullOrWhiteSpace(req.StudentEmail))
         {

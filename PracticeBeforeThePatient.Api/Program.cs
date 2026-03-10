@@ -80,15 +80,15 @@ using (var scope = app.Services.CreateScope())
             {
                 SsoSubject = "admin-sso-001",
                 Email = "admin@ua.edu",
-                Name = "Admin Instructor",
-                Role = "instructor"
+                Name = "Platform Admin",
+                Role = DevAccessStore.AdminRole
             },
             new UserEntity
             {
                 SsoSubject = "instructor-sso-002",
                 Email = "instructor@ua.edu",
                 Name = "Jane Doe",
-                Role = "instructor"
+                Role = DevAccessStore.TeacherRole
             },
             new UserEntity
             {
@@ -105,6 +105,28 @@ using (var scope = app.Services.CreateScope())
                 Role = "student"
             }
         );
+        db.SaveChanges();
+    }
+
+    var existingUsers = db.Users.ToList();
+    var rolesChanged = false;
+    foreach (var user in existingUsers)
+    {
+        var normalizedRole = DevAccessStore.NormalizeRole(user.Role);
+        if (string.Equals(user.Email, "admin@ua.edu", StringComparison.OrdinalIgnoreCase))
+        {
+            normalizedRole = DevAccessStore.AdminRole;
+        }
+
+        if (!string.Equals(user.Role, normalizedRole, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Role = normalizedRole;
+            rolesChanged = true;
+        }
+    }
+
+    if (rolesChanged)
+    {
         db.SaveChanges();
     }
 

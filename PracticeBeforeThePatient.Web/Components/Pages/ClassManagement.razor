@@ -14,7 +14,7 @@
     </div>
 }
 
-@if (!_isAdminLoaded)
+@if (!_isTeacherLoaded)
 {
     <div class="card">
         <div class="sectionTitle">Loading</div>
@@ -23,11 +23,11 @@
     return;
 }
 
-@if (!_isAdmin)
+@if (!_isTeacher)
 {
     <div class="card">
         <div class="sectionTitle">Not available</div>
-        <div class="narrLine">This page is only available to admins</div>
+        <div class="narrLine">This page is only available to teachers and admins</div>
     </div>
     return;
 }
@@ -35,7 +35,7 @@
 <div class="simShell">
     <div class="simHeaderRow">
         <div class="simHeaderText">
-            <div class="simBadge">Instructor</div>
+            <div class="simBadge">Teacher</div>
             <div class="simTitle">Class Management</div>
             <div class="simSubtitle">Create classes, assign scenarios, and open grading pages</div>
         </div>
@@ -324,16 +324,16 @@
         !string.IsNullOrWhiteSpace(_assignmentName) &&
         !string.IsNullOrWhiteSpace(_assignmentScenarioId);
 
-    private bool _isAdminLoaded;
-    private bool _isAdmin;
+    private bool _isTeacherLoaded;
+    private bool _isTeacher;
 
     protected override async Task OnInitializedAsync()
     {
         var access = await Api.GetAccessAsync();
-        _isAdmin = access?.IsAdmin == true;
-        _isAdminLoaded = true;
+        _isTeacher = access?.IsTeacher == true;
+        _isTeacherLoaded = true;
 
-        if (_isAdmin)
+        if (_isTeacher)
         {
             await ReloadClassesAsync();
             if (_classes.Count > 0)
