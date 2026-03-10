@@ -20,7 +20,7 @@
         <div class="sectionTitle">Mock Login (Temporary)</div>
         <div class="demoMeta">
             <div class="demoMetaRow">Current user: @CurrentUserLabel</div>
-            <div class="demoMetaRow">Role: @(IsAdmin ? "Admin" : "Student")</div>
+            <div class="demoMetaRow">Role: @RoleLabel</div>
         </div>
 
         <div class="createRow demoLoginRow">
@@ -28,7 +28,7 @@
                    value="@EmailInput"
                    @oninput="OnEmailInput"
                    @onkeydown="OnEmailInputKeyDown"
-                   placeholder="student@ua.edu (blank clears user)" />
+                   placeholder="admin@ua.edu, instructor@ua.edu, student1@ua.edu" />
             <button class="primaryBtn" @onclick="ApplyUserAsync" disabled="@IsSaving">Apply</button>
         </div>
     </div>
@@ -37,7 +37,7 @@
 @code {
     private string EmailInput { get; set; } = "";
     private string CurrentUserLabel { get; set; } = "(none)";
-    private bool IsAdmin { get; set; }
+    private string RoleLabel { get; set; } = "Student";
     private bool IsSaving { get; set; }
     private string StatusMessage { get; set; } = "";
     private string StatusKind { get; set; } = "success";
@@ -83,7 +83,7 @@
             }
 
             CurrentUserLabel = string.IsNullOrWhiteSpace(access.Email) ? "(none)" : access.Email;
-            IsAdmin = access.IsAdmin;
+            RoleLabel = FormatRole(access.Role);
             EmailInput = access.Email ?? "";
             _themeToApply = NormalizeTheme(access.Theme);
             if (!string.IsNullOrWhiteSpace(_themeToApply))
@@ -113,9 +113,19 @@
     {
         var access = await Api.GetAccessAsync();
         CurrentUserLabel = string.IsNullOrWhiteSpace(access?.Email) ? "(none)" : access!.Email;
-        IsAdmin = access?.IsAdmin == true;
+        RoleLabel = FormatRole(access?.Role);
         EmailInput = access?.Email ?? "";
         _themeToApply = NormalizeTheme(access?.Theme);
+    }
+
+    private static string FormatRole(string? role)
+    {
+        return role?.Trim().ToLowerInvariant() switch
+        {
+            "admin" => "Admin",
+            "teacher" => "Teacher",
+            _ => "Student"
+        };
     }
 
     private void SetStatus(string message, bool ok)

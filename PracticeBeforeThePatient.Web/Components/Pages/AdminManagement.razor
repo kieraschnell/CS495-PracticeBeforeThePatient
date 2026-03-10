@@ -68,7 +68,7 @@
                             <button class="secondaryBtn" type="button" @onclick="() => EditUser(user)">Edit</button>
                             <button class="deleteBtn"
                                     type="button"
-                                    @onclick="() => RemoveAccessAsync(user)"
+                                    @onclick="() => ConfirmRemoveAccess(user)"
                                     disabled="@IsCurrentUser(user)">
                                 Remove
                             </button>
@@ -93,8 +93,8 @@
                 <label class="editorLabel">Email</label>
                 <div class="createRow">
                     <input class="editorInput"
-                           value="@_email"
-                           @oninput="OnEmailChanged"
+                           @bind="_email"
+                           @bind:event="oninput"
                            placeholder="teacher@ua.edu" />
                 </div>
 
@@ -105,7 +105,7 @@
                 </select>
 
                 <div class="assignmentModalActions">
-                    <button class="primaryBtn" type="button" @onclick="SaveUserAsync" disabled="@_isSavingUser || string.IsNullOrWhiteSpace(_email)">
+                    <button class="primaryBtn" type="button" @onclick="SaveUserAsync" disabled="@_isSavingUser">
                         @(_isEditingUser ? "Save access" : "Add access")
                     </button>
                 </div>
@@ -116,14 +116,38 @@
     </div>
 }
 
+@if (_pendingRemovalUser is not null)
+{
+    <div class="classMgmtModalBackdrop" @onclick="CloseRemoveModal">
+        <div class="classMgmtModalCard classMgmtModalCardNarrow" @onclick:stopPropagation="true">
+            <div class="classMgmtModalTop">
+                <div class="sectionTitle">Remove access</div>
+                <button class="secondaryBtn" type="button" @onclick="CloseRemoveModal" disabled="@_isRemovingUser">Cancel</button>
+            </div>
+
+            <div class="narrLine adminConfirmText">
+                Are you sure you want to remove teacher/admin access for @_pendingRemovalUser.Email?
+            </div>
+
+            <div class="assignmentModalActions">
+                <button class="deleteBtn" type="button" @onclick="RemoveConfirmedAccessAsync" disabled="@_isRemovingUser">
+                    Remove access
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private bool _isAdminLoaded;
     private bool _isAdmin;
     private bool _isLoadingUsers;
     private bool _isSavingUser;
+    private bool _isRemovingUser;
     private string _currentEmail = "";
     private bool _isAccessModalOpen;
     private bool _isEditingUser;
+    private AdminUserDto? _pendingRemovalUser;
     private readonly List<AdminUserDto> _users = new();
     private IEnumerable<AdminUserDto> _elevatedUsers => _users.Where(x =>
         string.Equals(x.Role, "teacher", StringComparison.OrdinalIgnoreCase) ||
@@ -169,6 +193,12 @@
 
     private async Task SaveUserAsync()
     {
+        if (string.IsNullOrWhiteSpace(_email))
+        {
+            SetMessage("Enter an email address.", false);
+            return;
+        }
+
         _isSavingUser = true;
         try
         {
@@ -231,16 +261,32 @@
         _isAccessModalOpen = false;
     }
 
-    private void OnEmailChanged(ChangeEventArgs e)
+    private void ConfirmRemoveAccess(AdminUserDto user)
     {
-        _email = (e.Value?.ToString() ?? string.Empty).Trim();
+        _pendingRemovalUser = user;
     }
 
-    private async Task RemoveAccessAsync(AdminUserDto user)
+    private void CloseRemoveModal()
     {
+        if (_isRemovingUser)
+        {
+            return;
+        }
+
+        _pendingRemovalUser = null;
+    }
+
+    private async Task RemoveConfirmedAccessAsync()
+    {
+        if (_pendingRemovalUser is null)
+        {
+            return;
+        }
+
+        _isRemovingUser = true;
         try
         {
-            var response = await Api.Http.DeleteAsync($"api/admin/users/{user.Id}");
+            var response = await Api.Http.DeleteAsync($"api/admin/users/{_pendingRemovalUser.Id}");
             if (!response.IsSuccessStatusCode)
             {
                 var body = await response.Content.ReadAsStringAsync();
@@ -248,12 +294,17 @@
                 return;
             }
 
+            _pendingRemovalUser = null;
             SetMessage("Elevated access removed.", true);
             await ReloadUsersAsync();
         }
         catch
         {
             SetMessage("Could not remove access.", false);
+        }
+        finally
+        {
+            _isRemovingUser = false;
         }
     }
 

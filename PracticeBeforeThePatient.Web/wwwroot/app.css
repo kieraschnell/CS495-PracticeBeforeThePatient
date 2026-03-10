@@ -524,6 +524,12 @@ code {
   margin-top: 14px;
 }
 
+.adminConfirmText {
+  padding-top: 4px;
+  padding-bottom: 14px;
+  line-height: 1.5;
+}
+
 .adminUserItem {
   display: flex;
   justify-content: space-between;

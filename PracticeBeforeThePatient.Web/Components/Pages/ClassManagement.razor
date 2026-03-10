@@ -111,18 +111,40 @@
 
                 <div class="divider"></div>
 
-                <div class="sectionTitle">Manage Students</div>
+                <div class="assignmentTopRow">
+                    <div class="sectionTitle">Manage Teachers</div>
+                    <button class="secondaryBtn" type="button" @onclick="OpenAddTeacherModal">Add teacher</button>
+                </div>
 
-                <div class="classMgmtAddRow">
-                    <div class="classMgmtAddInput">
-                        <label class="editorLabel">Student email</label>
-                        <input class="editorInput" value="@_emailToAdd" @oninput="OnEmailInput" @onkeydown="OnAddStudentKeyDown" placeholder="student@ua.edu" />
-                    </div>
+                <div class="divider"></div>
 
-                    <div class="classMgmtAddBtn">
-                        <label class="editorLabel">&nbsp;</label>
-                        <button class="primaryBtn" @onclick="AddStudentAsync" disabled="@string.IsNullOrWhiteSpace(_emailToAdd)">Add student</button>
+                <div class="classMgmtRosterHeader">
+                    <div class="panel-title">Teachers</div>
+                    <div class="classMgmtCount">@_selectedClass!.Teachers.Count teacher(s)</div>
+                </div>
+
+                @if (_selectedClass!.Teachers.Count == 0)
+                {
+                    <div class="infoMessage">No teachers yet</div>
+                }
+                else
+                {
+                    <div class="classMgmtRoster">
+                        @foreach (var email in _selectedClass!.Teachers.OrderBy(x => x))
+                        {
+                            <div class="classMgmtStudent">
+                                <div class="classMgmtStudentEmail">@email</div>
+                                <button class="deleteBtn" @onclick="() => RemoveTeacherAsync(email)" disabled="@IsCurrentTeacher(email)">Remove</button>
+                            </div>
+                        }
                     </div>
+                }
+
+                <div class="divider"></div>
+
+                <div class="assignmentTopRow">
+                    <div class="sectionTitle">Manage Students</div>
+                    <button class="secondaryBtn" type="button" @onclick="OpenAddStudentModal">Add student</button>
                 </div>
 
                 <div class="divider"></div>
@@ -134,7 +156,7 @@
 
                 @if (_selectedClass!.Students.Count == 0)
                 {
-                    <div class="infoMessage">No students yet, add one using the email field above</div>
+                    <div class="infoMessage">No students yet</div>
                 }
                 else
                 {
@@ -173,6 +195,56 @@
                     <button class="primaryBtn" type="button" @onclick="CreateClassAsync" disabled="@string.IsNullOrWhiteSpace(_newClassName)">Create</button>
                 </div>
                 <div class="createHint">Class names must be unique</div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (_selectedClass is not null && _isAddTeacherModalOpen)
+{
+    <div class="classMgmtModalBackdrop" @onclick="CloseAddTeacherModal">
+        <div class="classMgmtModalCard classMgmtModalCardNarrow" @onclick:stopPropagation="true">
+            <div class="classMgmtModalTop">
+                <div class="sectionTitle">Add teacher</div>
+                <button class="secondaryBtn" type="button" @onclick="CloseAddTeacherModal">Cancel</button>
+            </div>
+
+            <div class="createArea">
+                <label class="editorLabel">Teacher email</label>
+                <div class="createRow">
+                    <input class="editorInput"
+                           value="@_teacherEmailToAdd"
+                           @oninput="OnTeacherEmailInput"
+                           @onkeydown="OnAddTeacherKeyDown"
+                           placeholder="teacher@ua.edu" />
+                    <button class="primaryBtn" type="button" @onclick="AddTeacherAsync" disabled="@string.IsNullOrWhiteSpace(_teacherEmailToAdd)">Add</button>
+                </div>
+                <div class="createHint">Adds a teacher to this class only</div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (_selectedClass is not null && _isAddStudentModalOpen)
+{
+    <div class="classMgmtModalBackdrop" @onclick="CloseAddStudentModal">
+        <div class="classMgmtModalCard classMgmtModalCardNarrow" @onclick:stopPropagation="true">
+            <div class="classMgmtModalTop">
+                <div class="sectionTitle">Add student</div>
+                <button class="secondaryBtn" type="button" @onclick="CloseAddStudentModal">Cancel</button>
+            </div>
+
+            <div class="createArea">
+                <label class="editorLabel">Student email</label>
+                <div class="createRow">
+                    <input class="editorInput"
+                           value="@_emailToAdd"
+                           @oninput="OnEmailInput"
+                           @onkeydown="OnAddStudentKeyDown"
+                           placeholder="student@ua.edu" />
+                    <button class="primaryBtn" type="button" @onclick="AddStudentAsync" disabled="@string.IsNullOrWhiteSpace(_emailToAdd)">Add</button>
+                </div>
+                <div class="createHint">Adds a student roster entry for this class</div>
             </div>
         </div>
     </div>
@@ -296,9 +368,13 @@
     private List<ClassRosterDto> _classes = new();
     private string _newClassName = "";
     private bool _isAddClassModalOpen;
+    private bool _isAddTeacherModalOpen;
+    private bool _isAddStudentModalOpen;
     private string _selectedClassId = "";
     private ClassRosterDto? _selectedClass;
     private string _emailToAdd = "";
+    private string _teacherEmailToAdd = "";
+    private string _currentEmail = "";
 
     private string _message = "";
     private string _messageKind = "success";
@@ -331,6 +407,7 @@
     {
         var access = await Api.GetAccessAsync();
         _isTeacher = access?.IsTeacher == true;
+        _currentEmail = (access?.Email ?? "").Trim().ToLowerInvariant();
         _isTeacherLoaded = true;
 
         if (_isTeacher)
@@ -350,6 +427,8 @@
     {
         _isAddClassModalOpen = true;
         _isAddAssignmentModalOpen = false;
+        _isAddTeacherModalOpen = false;
+        _isAddStudentModalOpen = false;
         CancelDueEditor();
     }
 
@@ -378,12 +457,44 @@
         await ReloadAvailableScenariosAsync();
         _isAddAssignmentModalOpen = true;
         _isAddClassModalOpen = false;
+        _isAddTeacherModalOpen = false;
+        _isAddStudentModalOpen = false;
         CancelDueEditor();
     }
 
     private void CloseAddAssignmentModal()
     {
         _isAddAssignmentModalOpen = false;
+    }
+
+    private void OpenAddTeacherModal()
+    {
+        _teacherEmailToAdd = "";
+        _isAddTeacherModalOpen = true;
+        _isAddStudentModalOpen = false;
+        _isAddAssignmentModalOpen = false;
+        _isAddClassModalOpen = false;
+        CancelDueEditor();
+    }
+
+    private void CloseAddTeacherModal()
+    {
+        _isAddTeacherModalOpen = false;
+    }
+
+    private void OpenAddStudentModal()
+    {
+        _emailToAdd = "";
+        _isAddStudentModalOpen = true;
+        _isAddTeacherModalOpen = false;
+        _isAddAssignmentModalOpen = false;
+        _isAddClassModalOpen = false;
+        CancelDueEditor();
+    }
+
+    private void CloseAddStudentModal()
+    {
+        _isAddStudentModalOpen = false;
     }
 
     private void SetMessage(string text, bool ok)
@@ -417,6 +528,11 @@
         _emailToAdd = (e.Value?.ToString() ?? "").Trim();
     }
 
+    private void OnTeacherEmailInput(ChangeEventArgs e)
+    {
+        _teacherEmailToAdd = (e.Value?.ToString() ?? "").Trim();
+    }
+
     private void OnAssignmentDateChanged(ChangeEventArgs e)
     {
         _assignmentDate = (e.Value?.ToString() ?? "").Trim();
@@ -440,6 +556,14 @@
         if (e.Key == "Enter")
         {
             await AddStudentAsync();
+        }
+    }
+
+    private async Task OnAddTeacherKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await AddTeacherAsync();
         }
     }
 
@@ -523,6 +647,8 @@
         _assignmentDate = "";
         _assignmentTime = "";
         _isAddAssignmentModalOpen = false;
+        _isAddTeacherModalOpen = false;
+        _isAddStudentModalOpen = false;
         CancelDueEditor();
     }
 
@@ -817,8 +943,11 @@
             _selectedClassId = "";
             _selectedClass = null;
             _emailToAdd = "";
+            _teacherEmailToAdd = "";
             _allScenarioIds = new List<string>();
             _isAddClassModalOpen = false;
+            _isAddTeacherModalOpen = false;
+            _isAddStudentModalOpen = false;
             _isAddAssignmentModalOpen = false;
             ResetAssignmentState();
 
@@ -843,8 +972,11 @@
     {
         _selectedClassId = e.Value?.ToString() ?? "";
         _emailToAdd = "";
+        _teacherEmailToAdd = "";
         _menuOpen = false;
         _isAddClassModalOpen = false;
+        _isAddTeacherModalOpen = false;
+        _isAddStudentModalOpen = false;
         _isAddAssignmentModalOpen = false;
         CancelDueEditor();
 
@@ -879,6 +1011,7 @@
             }
 
             _emailToAdd = "";
+            _isAddStudentModalOpen = false;
             SetMessage("Student added", true);
             await ReloadClassesAsync();
             await ReloadAssignmentsAsync();
@@ -887,6 +1020,75 @@
         {
             SetMessage("Could not add student", false);
         }
+    }
+
+    private async Task AddTeacherAsync()
+    {
+        if (_selectedClass is null)
+        {
+            SetMessage("Select a class first", false);
+            return;
+        }
+
+        var email = _teacherEmailToAdd.Trim().ToLowerInvariant();
+        if (!LooksLikeEmail(email))
+        {
+            SetMessage("Enter a valid teacher email", false);
+            return;
+        }
+
+        try
+        {
+            var resp = await Api.Http.PostAsJsonAsync($"api/classes/{_selectedClass.Id}/teachers", new StudentRequest { Email = email });
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                SetMessage($"Add teacher failed {((int)resp.StatusCode)} {body}", false);
+                return;
+            }
+
+            _teacherEmailToAdd = "";
+            _isAddTeacherModalOpen = false;
+            SetMessage("Teacher added", true);
+            await ReloadClassesAsync();
+        }
+        catch
+        {
+            SetMessage("Could not add teacher", false);
+        }
+    }
+
+    private async Task RemoveTeacherAsync(string email)
+    {
+        if (_selectedClass is null) return;
+
+        try
+        {
+            var req = new HttpRequestMessage(HttpMethod.Delete, $"api/classes/{_selectedClass.Id}/teachers")
+            {
+                Content = JsonContent.Create(new StudentRequest { Email = email })
+            };
+
+            var resp = await Api.Http.SendAsync(req);
+            if (!resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                SetMessage($"Remove teacher failed {((int)resp.StatusCode)} {body}", false);
+                return;
+            }
+
+            SetMessage("Teacher removed", true);
+            await ReloadClassesAsync();
+        }
+        catch
+        {
+            SetMessage("Could not remove teacher", false);
+        }
+    }
+
+    private bool IsCurrentTeacher(string email)
+    {
+        return string.Equals((email ?? "").Trim(), _currentEmail, StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task RemoveStudentAsync(string email)
@@ -935,6 +1137,7 @@
     {
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";
+        public List<string> Teachers { get; set; } = new();
         public List<string> Students { get; set; } = new();
     }
 

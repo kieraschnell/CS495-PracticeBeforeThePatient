@@ -21,10 +21,29 @@ public sealed class ClassesController : ControllerBase
         return await _access.IsTeacherAsync();
     }
 
+    private async Task<bool> CanAccessClassAsync(string classId)
+    {
+        if (await _access.IsAdminAsync())
+        {
+            return true;
+        }
+
+        var currentEmail = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(currentEmail))
+        {
+            return false;
+        }
+
+        var all = await _store.GetAllAsync();
+        var roster = all.FirstOrDefault(x => string.Equals(x.Id, classId, StringComparison.Ordinal));
+        return roster is not null && roster.Teachers.Any(x => string.Equals(x, currentEmail, StringComparison.OrdinalIgnoreCase));
+    }
+
     public sealed class ClassRosterDto
     {
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";
+        public List<string> Teachers { get; set; } = new();
         public List<string> Students { get; set; } = new();
     }
 
@@ -34,6 +53,13 @@ public sealed class ClassesController : ControllerBase
         if (!await RequireTeacher()) return Forbid();
 
         var all = await _store.GetAllAsync();
+        if (!await _access.IsAdminAsync())
+        {
+            var currentEmail = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
+            all = all
+                .Where(x => x.Teachers.Any(t => string.Equals(t, currentEmail, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+        }
 
         return all
             .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
@@ -41,6 +67,7 @@ public sealed class ClassesController : ControllerBase
             {
                 Id = x.Id,
                 Name = x.Name,
+                Teachers = x.Teachers,
                 Students = x.Students
             })
             .ToList();
@@ -61,7 +88,7 @@ public sealed class ClassesController : ControllerBase
             return BadRequest("Class name cannot be empty.");
         }
 
-        var created = await _store.CreateClassAsync(req.Name);
+        var created = await _store.CreateClassAsync(req.Name, await _access.GetCurrentEmailAsync());
 
         if (created == null)
         {
@@ -72,6 +99,7 @@ public sealed class ClassesController : ControllerBase
         {
             Id = created.Id,
             Name = created.Name,
+            Teachers = created.Teachers,
             Students = created.Students
         };
     }
@@ -84,7 +112,7 @@ public sealed class ClassesController : ControllerBase
     [HttpPost("{classId}/students")]
     public async Task<IActionResult> AddStudent(string classId, [FromBody] StudentRequest req)
     {
-        if (!await RequireTeacher()) return Forbid();
+        if (!await CanAccessClassAsync(classId)) return Forbid();
 
         var ok = await _store.AddStudentAsync(classId, req.Email ?? "");
         if (!ok) return BadRequest();
@@ -94,7 +122,7 @@ public sealed class ClassesController : ControllerBase
     [HttpDelete("{classId}/students")]
     public async Task<IActionResult> RemoveStudent(string classId, [FromBody] StudentRequest req)
     {
-        if (!await RequireTeacher()) return Forbid();
+        if (!await CanAccessClassAsync(classId)) return Forbid();
 
         await _store.RemoveStudentAsync(classId, req.Email ?? "");
         return NoContent();
@@ -103,7 +131,7 @@ public sealed class ClassesController : ControllerBase
     [HttpDelete("{classId}")]
     public async Task<IActionResult> Delete(string classId)
     {
-        if (!await RequireTeacher()) return Forbid();
+        if (!await CanAccessClassAsync(classId)) return Forbid();
 
         await _store.DeleteClassAsync(classId);
         return NoContent();
@@ -133,7 +161,7 @@ public sealed class ClassesController : ControllerBase
     [HttpGet("{classId}/assignments")]
     public async Task<ActionResult<List<AssignmentDto>>> GetAssignments(string classId)
     {
-        if (!await RequireTeacher()) return Forbid();
+        if (!await CanAccessClassAsync(classId)) return Forbid();
 
         var assignments = await _store.GetAssignmentsAsync(classId);
         if (assignments is null) return NotFound();
@@ -175,7 +203,7 @@ public sealed class ClassesController : ControllerBase
     [HttpPost("{classId}/assignments")]
     public async Task<ActionResult<AssignmentDto>> CreateAssignment(string classId, [FromBody] CreateAssignmentRequest req)
     {
-        if (!await RequireTeacher()) return Forbid();
+        if (!await CanAccessClassAsync(classId)) return Forbid();
 
         if (string.IsNullOrWhiteSpace(req.Name))
         {
@@ -204,7 +232,7 @@ public sealed class ClassesController : ControllerBase
     [HttpDelete("{classId}/assignments/{assignmentId}")]
     public async Task<IActionResult> DeleteAssignment(string classId, string assignmentId)
     {
-        if (!await RequireTeacher()) return Forbid();
+        if (!await CanAccessClassAsync(classId)) return Forbid();
 
         var ok = await _store.DeleteAssignmentAsync(classId, assignmentId);
         if (!ok) return NotFound();
@@ -220,7 +248,7 @@ public sealed class ClassesController : ControllerBase
     [HttpPut("{classId}/assignments/{assignmentId}/due")]
     public async Task<IActionResult> UpdateAssignmentDue(string classId, string assignmentId, [FromBody] UpdateAssignmentDueRequest req)
     {
-        if (!await RequireTeacher()) return Forbid();
+        if (!await CanAccessClassAsync(classId)) return Forbid();
 
         var ok = await _store.UpdateAssignmentDueAtAsync(classId, assignmentId, req.DueAtUtc);
         if (!ok) return NotFound();
@@ -238,7 +266,7 @@ public sealed class ClassesController : ControllerBase
     [HttpPut("{classId}/assignments/{assignmentId}/grades")]
     public async Task<IActionResult> GradeAssignment(string classId, string assignmentId, [FromBody] GradeAssignmentRequest req)
     {
-        if (!await RequireTeacher()) return Forbid();
+        if (!await CanAccessClassAsync(classId)) return Forbid();
 
         if (string.IsNullOrWhiteSpace(req.StudentEmail))
         {
@@ -260,6 +288,32 @@ public sealed class ClassesController : ControllerBase
             grader);
 
         if (!ok) return BadRequest("Invalid class, assignment, or student.");
+        return NoContent();
+    }
+
+    [HttpPost("{classId}/teachers")]
+    public async Task<IActionResult> AddTeacher(string classId, [FromBody] StudentRequest req)
+    {
+        if (!await CanAccessClassAsync(classId)) return Forbid();
+
+        var ok = await _store.AddTeacherAsync(classId, req.Email ?? "");
+        if (!ok) return BadRequest();
+        return NoContent();
+    }
+
+    [HttpDelete("{classId}/teachers")]
+    public async Task<IActionResult> RemoveTeacher(string classId, [FromBody] StudentRequest req)
+    {
+        if (!await CanAccessClassAsync(classId)) return Forbid();
+
+        var email = (req.Email ?? "").Trim().ToLowerInvariant();
+        var currentEmail = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
+        if (string.Equals(email, currentEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest("You cannot remove yourself from the class.");
+        }
+
+        await _store.RemoveTeacherAsync(classId, email);
         return NoContent();
     }
 

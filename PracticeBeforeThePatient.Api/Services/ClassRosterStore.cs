@@ -21,6 +21,7 @@ public sealed class ClassRosterStore
     {
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";
+        public List<string> Teachers { get; set; } = new();
         public List<string> Students { get; set; } = new();
         public List<string> AllowedScenarioIds { get; set; } = new();
         public List<ClassAssignment> Assignments { get; set; } = new();
@@ -60,13 +61,14 @@ public sealed class ClassRosterStore
         }
     }
 
-    public async Task<ClassRoster?> CreateClassAsync(string name)
+    public async Task<ClassRoster?> CreateClassAsync(string name, string teacherEmail)
     {
         await _gate.WaitAsync();
         try
         {
             var all = await ReadUnlockedAsync();
             var normalized = name.Trim();
+            var normalizedTeacher = NormalizeEmail(teacherEmail);
 
             if (all.Any(x => string.Equals(x.Name, normalized, StringComparison.OrdinalIgnoreCase)))
             {
@@ -77,6 +79,7 @@ public sealed class ClassRosterStore
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Name = normalized,
+                Teachers = string.IsNullOrWhiteSpace(normalizedTeacher) ? new List<string>() : new List<string> { normalizedTeacher },
                 Students = new List<string>(),
                 AllowedScenarioIds = new List<string>(),
                 Assignments = new List<ClassAssignment>()
@@ -147,6 +150,52 @@ public sealed class ClassRosterStore
             var normalized = NormalizeEmail(email);
             roster.Students.RemoveAll(x => string.Equals(x, normalized, StringComparison.OrdinalIgnoreCase));
 
+            await WriteUnlockedAsync(all);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<bool> AddTeacherAsync(string classId, string email)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var all = await ReadUnlockedAsync();
+            var roster = all.FirstOrDefault(x => x.Id == classId);
+            if (roster is null) return false;
+
+            var normalized = NormalizeEmail(email);
+            if (string.IsNullOrWhiteSpace(normalized)) return false;
+
+            if (roster.Teachers.Any(x => string.Equals(x, normalized, StringComparison.OrdinalIgnoreCase)))
+            {
+                return false;
+            }
+
+            roster.Teachers.Add(normalized);
+            await WriteUnlockedAsync(all);
+            return true;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task RemoveTeacherAsync(string classId, string email)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var all = await ReadUnlockedAsync();
+            var roster = all.FirstOrDefault(x => x.Id == classId);
+            if (roster is null) return;
+
+            var normalized = NormalizeEmail(email);
+            roster.Teachers.RemoveAll(x => string.Equals(x, normalized, StringComparison.OrdinalIgnoreCase));
             await WriteUnlockedAsync(all);
         }
         finally
@@ -423,9 +472,21 @@ public sealed class ClassRosterStore
 
         foreach (var c in data)
         {
+            c.Teachers ??= new List<string>();
             c.Students ??= new List<string>();
             c.AllowedScenarioIds ??= new List<string>();
             c.Assignments ??= new List<ClassAssignment>();
+
+            c.Teachers = c.Teachers
+                .Select(NormalizeEmail)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (c.Teachers.Count == 0)
+            {
+                c.Teachers.Add("admin@ua.edu");
+            }
 
             c.Students = c.Students
                 .Select(NormalizeEmail)
