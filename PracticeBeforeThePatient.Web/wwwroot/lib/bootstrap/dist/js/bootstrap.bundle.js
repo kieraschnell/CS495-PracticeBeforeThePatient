@@ -2223,9 +2223,6 @@
         }
       } // $FlowFixMe[incompatible-cast]: force type refinement, we compare offsetParent with window above, but Flow doesn't detect it
 
-
-      offsetParent = offsetParent;
-
       if (placement === top || (placement === left || placement === right) && variation === end) {
         sideY = bottom;
         var offsetY = isFixed && offsetParent === win && win.visualViewport ? win.visualViewport.height : // $FlowFixMe[prop-missing]
@@ -2422,7 +2419,7 @@
       height = visualViewport.height;
       var layoutViewport = isLayoutViewport();
 
-      if (layoutViewport || !layoutViewport && strategy === 'fixed') {
+      if (layoutViewport || strategy === 'fixed') {
         x = visualViewport.offsetLeft;
         y = visualViewport.offsetTop;
       }
@@ -2694,10 +2691,6 @@
   }
 
   function computeAutoPlacement(state, options) {
-    if (options === void 0) {
-      options = {};
-    }
-
     var _options = options,
         placement = _options.placement,
         boundary = _options.boundary,
@@ -3168,10 +3161,6 @@
 
 
   function getCompositeRect(elementOrVirtualElement, offsetParent, isFixed) {
-    if (isFixed === void 0) {
-      isFixed = false;
-    }
-
     var isOffsetParentAnElement = isHTMLElement(offsetParent);
     var offsetParentIsScaled = isHTMLElement(offsetParent) && isElementScaled(offsetParent);
     var documentElement = getDocumentElement(offsetParent);
@@ -3185,7 +3174,7 @@
       y: 0
     };
 
-    if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+    if (isOffsetParentAnElement || !isFixed) {
       if (getNodeName(offsetParent) !== 'body' || // https://github.com/popperjs/popper-core/issues/1078
       isScrollParent(documentElement)) {
         scroll = getNodeScroll(offsetParent);
