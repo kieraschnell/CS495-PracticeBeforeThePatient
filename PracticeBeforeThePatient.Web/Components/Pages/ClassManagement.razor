@@ -50,7 +50,7 @@
                 <div class="editSelect">
                     <label class="editorLabel">Select a class</label>
                     <select class="editorInput" value="@_selectedClassId" @onchange="OnSelectedClassChanged">
-                        <option value="">Select</option>
+                        <option value="0">Select</option>
                         @foreach (var c in _classes)
                         {
                             <option value="@c.Id">@c.Name</option>
@@ -59,9 +59,9 @@
                 </div>
 
                 <div class="kebabWrap" @onclick:stopPropagation="true">
-                    <button class="kebabBtn" @onclick="ToggleMenu" disabled="@string.IsNullOrWhiteSpace(_selectedClassId)">&#8942;</button>
+                    <button class="kebabBtn" @onclick="ToggleMenu" disabled="@(_selectedClassId == 0)">&#8942;</button>
 
-                    @if (_menuOpen && !string.IsNullOrWhiteSpace(_selectedClassId))
+                    @if (_menuOpen && _selectedClassId != 0)
                     {
                         <div class="kebabMenu">
                             <button class="kebabMenuItem danger" @onclick="DeleteSelectedClassAsync">Delete class</button>
@@ -313,9 +313,9 @@
     </div>
 }
 
-@if (_selectedClass is not null && !string.IsNullOrWhiteSpace(_editingAssignmentDueId))
+@if (_selectedClass is not null && _editingAssignmentDueId.HasValue)
 {
-    var editingAssignment = _assignments.FirstOrDefault(x => string.Equals(x.Id, _editingAssignmentDueId, StringComparison.Ordinal));
+    var editingAssignment = _assignments.FirstOrDefault(x => x.Id == _editingAssignmentDueId.Value);
     if (editingAssignment is not null)
     {
         <div class="classMgmtModalBackdrop" @onclick="CancelDueEditor">
@@ -370,7 +370,7 @@
     private bool _isAddClassModalOpen;
     private bool _isAddTeacherModalOpen;
     private bool _isAddStudentModalOpen;
-    private string _selectedClassId = "";
+    private int _selectedClassId;
     private ClassRosterDto? _selectedClass;
     private string _emailToAdd = "";
     private string _teacherEmailToAdd = "";
@@ -391,7 +391,7 @@
     private string _assignmentScenarioId = "";
     private string _assignmentDate = "";
     private string _assignmentTime = "";
-    private string? _editingAssignmentDueId;
+    private int? _editingAssignmentDueId;
     private string _editDueDate = "";
     private string _editDueTime = "";
     private bool _isSavingDue;
@@ -714,7 +714,7 @@
 
     private void ToggleDueEditor(ClassAssignmentDto assignment)
     {
-        if (string.Equals(_editingAssignmentDueId, assignment.Id, StringComparison.Ordinal))
+        if (_editingAssignmentDueId == assignment.Id)
         {
             CancelDueEditor();
             return;
@@ -751,7 +751,7 @@
         _editDueTime = (e.Value?.ToString() ?? "").Trim();
     }
 
-    private async Task SaveAssignmentDueAsync(string assignmentId)
+    private async Task SaveAssignmentDueAsync(int assignmentId)
     {
         if (_selectedClass is null)
         {
@@ -799,7 +799,7 @@
         }
     }
 
-    private async Task ClearAssignmentDueAsync(string assignmentId)
+    private async Task ClearAssignmentDueAsync(int assignmentId)
     {
         _editDueDate = "";
         _editDueTime = "";
@@ -861,7 +861,7 @@
         return TimeOnly.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out time);
     }
 
-    private async Task DeleteAssignmentAsync(string assignmentId)
+    private async Task DeleteAssignmentAsync(int assignmentId)
     {
         if (_selectedClass is null) return;
 
@@ -907,7 +907,7 @@
             var created = await resp.Content.ReadFromJsonAsync<ClassRosterDto>();
             _newClassName = "";
             _isAddClassModalOpen = false;
-            _selectedClassId = created?.Id ?? "";
+            _selectedClassId = created?.Id ?? 0;
             SetMessage("Class created", true);
 
             await ReloadClassesAsync();
@@ -924,7 +924,7 @@
     {
         _menuOpen = false;
 
-        if (string.IsNullOrWhiteSpace(_selectedClassId))
+        if (_selectedClassId == 0)
         {
             SetMessage("Select a class first", false);
             return;
@@ -940,7 +940,7 @@
                 return;
             }
 
-            _selectedClassId = "";
+            _selectedClassId = 0;
             _selectedClass = null;
             _emailToAdd = "";
             _teacherEmailToAdd = "";
@@ -970,7 +970,7 @@
 
     private async Task OnSelectedClassChanged(ChangeEventArgs e)
     {
-        _selectedClassId = e.Value?.ToString() ?? "";
+        _selectedClassId = int.TryParse(e.Value?.ToString(), out var id) ? id : 0;
         _emailToAdd = "";
         _teacherEmailToAdd = "";
         _menuOpen = false;
@@ -1135,7 +1135,7 @@
 
     private sealed class ClassRosterDto
     {
-        public string Id { get; set; } = "";
+        public int Id { get; set; }
         public string Name { get; set; } = "";
         public List<string> Teachers { get; set; } = new();
         public List<string> Students { get; set; } = new();
@@ -1154,7 +1154,7 @@
 
     private sealed class ClassAssignmentDto
     {
-        public string Id { get; set; } = "";
+        public int Id { get; set; }
         public string Name { get; set; } = "";
         public string ScenarioId { get; set; } = "";
         public DateTimeOffset AssignedAtUtc { get; set; }

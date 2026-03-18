@@ -10,13 +10,11 @@ namespace PracticeBeforeThePatient.Api.Controllers;
 public sealed class AccessController : ControllerBase
 {
     private readonly DevAccessStore _devAccess;
-    private readonly ClassRosterStore _classes;
     private readonly AppDbContext _db;
 
-    public AccessController(DevAccessStore devAccess, ClassRosterStore classes, AppDbContext db)
+    public AccessController(DevAccessStore devAccess, AppDbContext db)
     {
         _devAccess = devAccess;
-        _classes = classes;
         _db = db;
     }
 
@@ -95,11 +93,11 @@ public sealed class AccessController : ControllerBase
         var isTeacher = await _devAccess.IsTeacherAsync();
         var isAdmin = await _devAccess.IsAdminAsync();
         var theme = await _devAccess.GetThemeForCurrentEmailAsync();
-        var nowUtc = DateTimeOffset.UtcNow;
+        var nowUtc = DateTime.UtcNow;
 
         if (isTeacher)
         {
-            var allScenarioIds = GetAllScenarioIds();
+            var allScenarioIds = await GetAllScenarioIdsAsync();
             return new AccessResponse
             {
                 Email = email,
@@ -135,14 +133,8 @@ public sealed class AccessController : ControllerBase
             };
         }
 
-        var allScenarios = GetAllScenarioIds();
-        var allClasses = await _classes.GetAllAsync();
-
-        var memberClasses = allClasses
-            .Where(c => c.Students.Any(s => string.Equals(s, email, StringComparison.OrdinalIgnoreCase)))
-            .ToList();
-
-        if (memberClasses.Count == 0)
+        var student = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (student is null)
         {
             return new AccessResponse
             {
@@ -156,44 +148,50 @@ public sealed class AccessController : ControllerBase
             };
         }
 
-        var allowedAssignments = memberClasses
-            .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
-            .Select(a => new
-            {
-                ScenarioId = (a.ScenarioId ?? "").Trim(),
-                AssignmentName = (a.Name ?? "").Trim(),
-                DueAtUtc = a.DueAtUtc,
-                AssignedAtUtc = a.AssignedAtUtc
-            })
-            .Where(x => !x.DueAtUtc.HasValue || x.DueAtUtc.Value >= nowUtc)
-            .Where(x => !string.IsNullOrWhiteSpace(x.ScenarioId))
-            .ToList();
+        var enrolledClassIds = await _db.ClassStudents
+            .Where(cs => cs.StudentUserId == student.Id)
+            .Select(cs => cs.ClassId)
+            .ToListAsync();
 
-        var filteredOptions = memberClasses
-            .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
+        if (enrolledClassIds.Count == 0)
+        {
+            return new AccessResponse
+            {
+                Email = email,
+                Role = role,
+                IsTeacher = false,
+                IsAdmin = false,
+                AllowedScenarioIds = new List<string>(),
+                AllowedScenarioOptions = new List<AllowedScenarioOptionDto>(),
+                Theme = theme
+            };
+        }
+
+        var allScenarios = await GetAllScenarioIdsAsync();
+        var allScenariosSet = allScenarios.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var assignments = await _db.Assignments
+            .Where(a => enrolledClassIds.Contains(a.ClassId))
+            .Where(a => !a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc)
+            .Include(a => a.Submissions.Where(s => s.StudentUserId == student.Id))
+            .OrderBy(a => a.DueAtUtc ?? DateTime.MaxValue)
+            .ThenBy(a => a.Name)
+            .ToListAsync();
+
+        var filteredOptions = assignments
+            .Where(a => !string.IsNullOrWhiteSpace(a.ScenarioId) && allScenariosSet.Contains(a.ScenarioId))
             .Select(a =>
             {
-                var scenarioId = (a.ScenarioId ?? "").Trim();
-                var assignmentName = (a.Name ?? "").Trim();
-                var submission = a.Submissions?
-                    .FirstOrDefault(s => string.Equals(s.StudentEmail, email, StringComparison.OrdinalIgnoreCase));
-
+                var submission = a.Submissions.FirstOrDefault();
                 return new AllowedScenarioOptionDto
                 {
-                    AssignmentId = a.Id,
-                    ScenarioId = scenarioId,
-                    Label = string.IsNullOrWhiteSpace(assignmentName) ? scenarioId : assignmentName,
+                    AssignmentId = a.Id.ToString(),
+                    ScenarioId = a.ScenarioId.Trim(),
+                    Label = string.IsNullOrWhiteSpace(a.Name) ? a.ScenarioId : a.Name,
                     DueAtUtc = a.DueAtUtc,
-                    IsSubmitted = submission?.SubmittedAtUtc.HasValue == true
+                    IsSubmitted = submission is not null
                 };
             })
-            .Where(x => !x.DueAtUtc.HasValue || x.DueAtUtc.Value >= nowUtc)
-            .Where(x =>
-                !string.IsNullOrWhiteSpace(x.AssignmentId) &&
-                !string.IsNullOrWhiteSpace(x.ScenarioId) &&
-                allScenarios.Contains(x.ScenarioId, StringComparer.OrdinalIgnoreCase))
-            .OrderBy(x => x.DueAtUtc ?? DateTimeOffset.MaxValue)
-            .ThenBy(x => x.Label, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         var filteredScenarioIds = filteredOptions
@@ -214,11 +212,11 @@ public sealed class AccessController : ControllerBase
         };
     }
 
-    private List<string> GetAllScenarioIds()
+    private async Task<List<string>> GetAllScenarioIdsAsync()
     {
-        return [.. _db.Scenarios
+        return await _db.Scenarios
             .Select(s => s.Id)
             .OrderBy(x => x)
-            .ToList()];
+            .ToListAsync();
     }
 }

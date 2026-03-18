@@ -18,13 +18,11 @@ public class ScenariosController : ControllerBase
 
     private readonly AppDbContext _db;
     private readonly DevAccessStore _access;
-    private readonly ClassRosterStore _classes;
 
-    public ScenariosController(AppDbContext db, DevAccessStore access, ClassRosterStore classes)
+    public ScenariosController(AppDbContext db, DevAccessStore access)
     {
         _db = db;
         _access = access;
-        _classes = classes;
     }
 
     [HttpGet("{scenarioId}")]
@@ -74,19 +72,29 @@ public class ScenariosController : ControllerBase
             return Ok(new List<string>());
         }
 
-        var classRosters = await _classes.GetAllAsync();
-        var nowUtc = DateTimeOffset.UtcNow;
-        var allowedScenarioIds = classRosters
-            .Where(c => c.Students.Any(s => string.Equals(s, email, StringComparison.OrdinalIgnoreCase)))
-            .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
-            .Where(a => !a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc)
-            .Select(a => (a.ScenarioId ?? "").Trim())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var student = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (student is null)
+        {
+            return Ok(new List<string>());
+        }
 
-        var filtered = allScenarios
-            .Where(id => allowedScenarioIds.Contains(id))
+        var nowUtc = DateTime.UtcNow;
+        var allScenariosSet = allScenarios.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var enrolledClassIds = await _db.ClassStudents
+            .Where(cs => cs.StudentUserId == student.Id)
+            .Select(cs => cs.ClassId)
+            .ToListAsync();
+
+        var allowedScenarioIds = await _db.Assignments
+            .Where(a => enrolledClassIds.Contains(a.ClassId))
+            .Where(a => !a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc)
+            .Select(a => a.ScenarioId)
+            .Distinct()
+            .ToListAsync();
+
+        var filtered = allowedScenarioIds
+            .Where(id => !string.IsNullOrWhiteSpace(id) && allScenariosSet.Contains(id))
             .ToList();
 
         return Ok(filtered);
@@ -165,13 +173,22 @@ public class ScenariosController : ControllerBase
             return false;
         }
 
-        var classRosters = await _classes.GetAllAsync();
-        var nowUtc = DateTimeOffset.UtcNow;
-        return classRosters
-            .Where(c => c.Students.Any(s => string.Equals(s, email, StringComparison.OrdinalIgnoreCase)))
-            .SelectMany(c => c.Assignments ?? new List<ClassRosterStore.ClassAssignment>())
-            .Where(a => !a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc)
-            .Any(a => string.Equals(a.ScenarioId, scenarioId, StringComparison.OrdinalIgnoreCase));
+        var student = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (student is null)
+        {
+            return false;
+        }
+
+        var nowUtc = DateTime.UtcNow;
+        var enrolledClassIds = await _db.ClassStudents
+            .Where(cs => cs.StudentUserId == student.Id)
+            .Select(cs => cs.ClassId)
+            .ToListAsync();
+
+        return await _db.Assignments
+            .AnyAsync(a => enrolledClassIds.Contains(a.ClassId)
+                && a.ScenarioId == scenarioId
+                && (!a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc));
     }
 
     private static Scenario ToModel(ScenarioEntity entity)

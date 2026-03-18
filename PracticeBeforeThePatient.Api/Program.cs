@@ -32,7 +32,6 @@ var dbPath = Path.Combine(dataDir, "app.db");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
-builder.Services.AddSingleton<ClassRosterStore>();
 builder.Services.AddSingleton<DevAccessStore>();
 
 builder.Services.AddEndpointsApiExplorer();
