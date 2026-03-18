@@ -7,12 +7,12 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    public DbSet<ScenarioEntity> Scenarios => Set<ScenarioEntity>();
     public DbSet<UserEntity> Users => Set<UserEntity>();
-    public DbSet<CourseEntity> Courses => Set<CourseEntity>();
-    public DbSet<CourseInstructorEntity> CourseInstructors => Set<CourseInstructorEntity>();
-    public DbSet<EnrollmentEntity> Enrollments => Set<EnrollmentEntity>();
-    public DbSet<CourseScenarioEntity> CourseScenarios => Set<CourseScenarioEntity>();
+    public DbSet<ClassEntity> Classes => Set<ClassEntity>();
+    public DbSet<ClassTeacherEntity> ClassTeachers => Set<ClassTeacherEntity>();
+    public DbSet<ClassStudentEntity> ClassStudents => Set<ClassStudentEntity>();
+    public DbSet<ScenarioEntity> Scenarios => Set<ScenarioEntity>();
+    public DbSet<AssignmentEntity> Assignments => Set<AssignmentEntity>();
     public DbSet<SubmissionEntity> Submissions => Set<SubmissionEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -22,54 +22,104 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<UserEntity>(entity =>
         {
             entity.HasIndex(e => e.SsoSubject).IsUnique();
+            entity.HasIndex(e => e.Email).IsUnique();
             entity.Property(e => e.SsoSubject).HasMaxLength(256);
             entity.Property(e => e.Email).HasMaxLength(256);
             entity.Property(e => e.Name).HasMaxLength(256);
             entity.Property(e => e.Role).HasMaxLength(50);
         });
 
+        modelBuilder.Entity<ClassEntity>(entity =>
+        {
+            entity.HasIndex(e => e.Name).IsUnique();
+            entity.Property(e => e.Name).HasMaxLength(256);
+
+            entity.HasOne(e => e.CreatedBy)
+                  .WithMany(u => u.CreatedClasses)
+                  .HasForeignKey(e => e.CreatedByUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ClassTeacherEntity>(entity =>
+        {
+            entity.HasIndex(e => new { e.ClassId, e.TeacherUserId }).IsUnique();
+
+            entity.HasOne(e => e.Class)
+                  .WithMany(c => c.Teachers)
+                  .HasForeignKey(e => e.ClassId);
+
+            entity.HasOne(e => e.Teacher)
+                  .WithMany(u => u.TeachingAssignments)
+                  .HasForeignKey(e => e.TeacherUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.AddedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.AddedByUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ClassStudentEntity>(entity =>
+        {
+            entity.HasIndex(e => new { e.ClassId, e.StudentUserId }).IsUnique();
+
+            entity.HasOne(e => e.Class)
+                  .WithMany(c => c.Students)
+                  .HasForeignKey(e => e.ClassId);
+
+            entity.HasOne(e => e.Student)
+                  .WithMany(u => u.StudentEnrollments)
+                  .HasForeignKey(e => e.StudentUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.AddedBy)
+                  .WithMany()
+                  .HasForeignKey(e => e.AddedByUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<ScenarioEntity>(entity =>
         {
             entity.Property(e => e.Id).HasMaxLength(128);
-            entity.Property(e => e.CreatedBy).HasMaxLength(256);
+            entity.Property(e => e.CreatedByEmail).HasMaxLength(256);
             entity.Property(e => e.Title).HasMaxLength(256);
         });
 
-        modelBuilder.Entity<CourseEntity>(entity =>
+        modelBuilder.Entity<AssignmentEntity>(entity =>
         {
-            entity.Property(e => e.Title).HasMaxLength(256);
-            entity.Property(e => e.CourseCode).HasMaxLength(50);
-            entity.HasIndex(e => e.CourseCode).IsUnique();
-        });
-
-        modelBuilder.Entity<CourseInstructorEntity>(entity =>
-        {
-            entity.HasOne(e => e.Course).WithMany().HasForeignKey(e => e.CourseId);
-            entity.HasOne(e => e.Instructor).WithMany().HasForeignKey(e => e.InstructorId);
-            entity.HasIndex(e => new { e.CourseId, e.InstructorId }).IsUnique();
-        });
-
-        modelBuilder.Entity<EnrollmentEntity>(entity =>
-        {
-            entity.HasOne(e => e.Course).WithMany().HasForeignKey(e => e.CourseId);
-            entity.HasOne(e => e.Student).WithMany().HasForeignKey(e => e.StudentId);
-            entity.HasIndex(e => new { e.CourseId, e.StudentId }).IsUnique();
-        });
-
-        modelBuilder.Entity<CourseScenarioEntity>(entity =>
-        {
-            entity.HasOne(e => e.Course).WithMany().HasForeignKey(e => e.CourseId);
-            entity.HasOne(e => e.Scenario).WithMany().HasForeignKey(e => e.ScenarioId);
+            entity.HasIndex(e => new { e.ClassId, e.ScenarioId }).IsUnique();
             entity.Property(e => e.ScenarioId).HasMaxLength(128);
-            entity.HasIndex(e => new { e.CourseId, e.ScenarioId }).IsUnique();
+            entity.Property(e => e.Name).HasMaxLength(256);
+
+            entity.HasOne(e => e.Class)
+                  .WithMany(c => c.Assignments)
+                  .HasForeignKey(e => e.ClassId);
+
+            entity.HasOne(e => e.Scenario)
+                  .WithMany(s => s.Assignments)
+                  .HasForeignKey(e => e.ScenarioId);
+
+            entity.HasOne(e => e.AssignedBy)
+                  .WithMany(u => u.AssignedAssignments)
+                  .HasForeignKey(e => e.AssignedByUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<SubmissionEntity>(entity =>
         {
-            entity.HasOne(e => e.Student).WithMany().HasForeignKey(e => e.StudentId);
-            entity.HasOne(e => e.Scenario).WithMany().HasForeignKey(e => e.ScenarioId);
-            entity.HasOne(e => e.Course).WithMany().HasForeignKey(e => e.CourseId);
-            entity.Property(e => e.ScenarioId).HasMaxLength(128);
+            entity.HasOne(e => e.Assignment)
+                  .WithMany(a => a.Submissions)
+                  .HasForeignKey(e => e.AssignmentId);
+
+            entity.HasOne(e => e.Student)
+                  .WithMany(u => u.SubmittedSubmissions)
+                  .HasForeignKey(e => e.StudentUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.GradedBy)
+                  .WithMany(u => u.GradedSubmissions)
+                  .HasForeignKey(e => e.GradedByUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

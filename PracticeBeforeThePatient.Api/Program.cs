@@ -54,7 +54,7 @@ using (var scope = app.Services.CreateScope())
             foreach (var file in Directory.GetFiles(scenariosDir, "*.json"))
             {
                 var id = Path.GetFileNameWithoutExtension(file) ?? "";
-                var createdBy = "admin@ua.edu";
+                var createdByEmail = "admin@ua.edu";
                 var json = File.ReadAllText(file);
                 var parsed = JsonSerializer.Deserialize<Scenario>(json, jsonOptions);
                 var rootJson = JsonSerializer.Serialize(parsed?.Root ?? new Node(), jsonOptions);
@@ -62,11 +62,11 @@ using (var scope = app.Services.CreateScope())
                 db.Scenarios.Add(new ScenarioEntity
                 {
                     Id = id,
-                    CreatedBy = string.IsNullOrWhiteSpace(parsed?.CreatedBy) ? createdBy : parsed.CreatedBy,
+                    CreatedByEmail = string.IsNullOrWhiteSpace(parsed?.CreatedBy) ? createdByEmail : parsed.CreatedBy,
                     Title = parsed?.Title ?? id,
                     Description = parsed?.Description ?? "",
                     NodesJson = rootJson,
-                    CreatedAt = parsed?.CreatedAt ?? DateTime.UtcNow
+                    CreatedAtUtc = parsed?.CreatedAt ?? DateTime.UtcNow
                 });
             }
             db.SaveChanges();
@@ -81,28 +81,32 @@ using (var scope = app.Services.CreateScope())
                 SsoSubject = "admin-sso-001",
                 Email = "admin@ua.edu",
                 Name = "Platform Admin",
-                Role = DevAccessStore.AdminRole
+                Role = DevAccessStore.AdminRole,
+                CreatedAtUtc = DateTime.UtcNow
             },
             new UserEntity
             {
                 SsoSubject = "instructor-sso-002",
                 Email = "instructor@ua.edu",
                 Name = "Jane Doe",
-                Role = DevAccessStore.TeacherRole
+                Role = DevAccessStore.TeacherRole,
+                CreatedAtUtc = DateTime.UtcNow
             },
             new UserEntity
             {
                 SsoSubject = "student-sso-003",
                 Email = "student1@ua.edu",
                 Name = "Alice Smith",
-                Role = "student"
+                Role = "student",
+                CreatedAtUtc = DateTime.UtcNow
             },
             new UserEntity
             {
                 SsoSubject = "student-sso-004",
                 Email = "student2@ua.edu",
                 Name = "Bob Johnson",
-                Role = "student"
+                Role = "student",
+                CreatedAtUtc = DateTime.UtcNow
             }
         );
         db.SaveChanges();
@@ -130,65 +134,118 @@ using (var scope = app.Services.CreateScope())
         db.SaveChanges();
     }
 
-    if (!db.Courses.Any())
+    if (!db.Classes.Any())
     {
-        db.Courses.AddRange(
-            new CourseEntity
+        var adminUser = db.Users.First(u => u.Email == "admin@ua.edu");
+
+        db.Classes.AddRange(
+            new ClassEntity
             {
-                Title = "Intro to Computer Science",
-                CourseCode = "CS 100"
+                Name = "CS 100 - Intro to Computer Science",
+                CreatedAtUtc = DateTime.UtcNow,
+                CreatedByUserId = adminUser.Id
             },
-            new CourseEntity
+            new ClassEntity
             {
-                Title = "Programming Fundamentals",
-                CourseCode = "CS 101"
+                Name = "CS 101 - Programming Fundamentals",
+                CreatedAtUtc = DateTime.UtcNow,
+                CreatedByUserId = adminUser.Id
             }
         );
         db.SaveChanges();
     }
 
-    if (!db.CourseInstructors.Any())
+    if (!db.ClassTeachers.Any())
     {
         var adminUser = db.Users.First(u => u.Email == "admin@ua.edu");
-        var cs100 = db.Courses.First(c => c.CourseCode == "CS 100");
-        var cs101 = db.Courses.First(c => c.CourseCode == "CS 101");
+        var instructor = db.Users.First(u => u.Email == "instructor@ua.edu");
+        var cs100 = db.Classes.First(c => c.Name.StartsWith("CS 100"));
+        var cs101 = db.Classes.First(c => c.Name.StartsWith("CS 101"));
 
-        db.CourseInstructors.AddRange(
-            new CourseInstructorEntity { CourseId = cs100.Id, InstructorId = adminUser.Id },
-            new CourseInstructorEntity { CourseId = cs101.Id, InstructorId = adminUser.Id }
+        db.ClassTeachers.AddRange(
+            new ClassTeacherEntity
+            {
+                ClassId = cs100.Id,
+                TeacherUserId = adminUser.Id,
+                AddedAtUtc = DateTime.UtcNow,
+                AddedByUserId = adminUser.Id
+            },
+            new ClassTeacherEntity
+            {
+                ClassId = cs101.Id,
+                TeacherUserId = instructor.Id,
+                AddedAtUtc = DateTime.UtcNow,
+                AddedByUserId = adminUser.Id
+            }
         );
         db.SaveChanges();
     }
 
-    if (!db.Enrollments.Any())
+    if (!db.ClassStudents.Any())
     {
+        var adminUser = db.Users.First(u => u.Email == "admin@ua.edu");
         var alice = db.Users.First(u => u.Email == "student1@ua.edu");
         var bob = db.Users.First(u => u.Email == "student2@ua.edu");
-        var cs100 = db.Courses.First(c => c.CourseCode == "CS 100");
-        var cs101 = db.Courses.First(c => c.CourseCode == "CS 101");
+        var cs100 = db.Classes.First(c => c.Name.StartsWith("CS 100"));
+        var cs101 = db.Classes.First(c => c.Name.StartsWith("CS 101"));
 
-        db.Enrollments.AddRange(
-            new EnrollmentEntity { CourseId = cs100.Id, StudentId = alice.Id },
-            new EnrollmentEntity { CourseId = cs100.Id, StudentId = bob.Id },
-            new EnrollmentEntity { CourseId = cs101.Id, StudentId = alice.Id }
+        db.ClassStudents.AddRange(
+            new ClassStudentEntity
+            {
+                ClassId = cs100.Id,
+                StudentUserId = alice.Id,
+                AddedAtUtc = DateTime.UtcNow,
+                AddedByUserId = adminUser.Id
+            },
+            new ClassStudentEntity
+            {
+                ClassId = cs100.Id,
+                StudentUserId = bob.Id,
+                AddedAtUtc = DateTime.UtcNow,
+                AddedByUserId = adminUser.Id
+            },
+            new ClassStudentEntity
+            {
+                ClassId = cs101.Id,
+                StudentUserId = alice.Id,
+                AddedAtUtc = DateTime.UtcNow,
+                AddedByUserId = adminUser.Id
+            }
         );
         db.SaveChanges();
     }
 
-    if (!db.CourseScenarios.Any())
+    if (!db.Assignments.Any())
     {
-        var cs100 = db.Courses.First(c => c.CourseCode == "CS 100");
-        var cs101 = db.Courses.First(c => c.CourseCode == "CS 101");
-        var scenarioIds = db.Scenarios.Select(s => s.Id).ToList();
+        var adminUser = db.Users.First(u => u.Email == "admin@ua.edu");
+        var cs100 = db.Classes.First(c => c.Name.StartsWith("CS 100"));
+        var cs101 = db.Classes.First(c => c.Name.StartsWith("CS 101"));
+        var scenarios = db.Scenarios.ToList();
 
-        foreach (var scenarioId in scenarioIds)
+        foreach (var scenario in scenarios)
         {
-            db.CourseScenarios.Add(new CourseScenarioEntity { CourseId = cs100.Id, ScenarioId = scenarioId });
+            db.Assignments.Add(new AssignmentEntity
+            {
+                ClassId = cs100.Id,
+                ScenarioId = scenario.Id,
+                Name = $"{scenario.Title} Assignment",
+                AssignedAtUtc = DateTime.UtcNow,
+                DueAtUtc = DateTime.UtcNow.AddDays(14),
+                AssignedByUserId = adminUser.Id
+            });
         }
 
-        if (scenarioIds.Count > 0)
+        if (scenarios.Count > 0)
         {
-            db.CourseScenarios.Add(new CourseScenarioEntity { CourseId = cs101.Id, ScenarioId = scenarioIds[0] });
+            db.Assignments.Add(new AssignmentEntity
+            {
+                ClassId = cs101.Id,
+                ScenarioId = scenarios[0].Id,
+                Name = $"{scenarios[0].Title} Assignment",
+                AssignedAtUtc = DateTime.UtcNow,
+                DueAtUtc = DateTime.UtcNow.AddDays(14),
+                AssignedByUserId = adminUser.Id
+            });
         }
         db.SaveChanges();
     }
@@ -196,15 +253,14 @@ using (var scope = app.Services.CreateScope())
     if (!db.Submissions.Any())
     {
         var alice = db.Users.First(u => u.Email == "student1@ua.edu");
-        var cs100 = db.Courses.First(c => c.CourseCode == "CS 100");
-        var scenarioId = db.Scenarios.Select(s => s.Id).First();
+        var firstAssignment = db.Assignments.First();
 
         db.Submissions.Add(new SubmissionEntity
         {
-            StudentId = alice.Id,
-            ScenarioId = scenarioId,
-            CourseId = cs100.Id,
-            AnswersJson = "{}",
+            AssignmentId = firstAssignment.Id,
+            StudentUserId = alice.Id,
+            SubmittedAtUtc = DateTime.UtcNow,
+            SubmissionText = "{}",
             Grade = 85m
         });
         db.SaveChanges();

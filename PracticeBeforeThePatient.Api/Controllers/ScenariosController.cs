@@ -136,14 +136,14 @@ public class ScenariosController : ControllerBase
         }
         else
         {
-            entity.CreatedBy = string.IsNullOrWhiteSpace(scenario.CreatedBy)
-                ? entity.CreatedBy
+            entity.CreatedByEmail = string.IsNullOrWhiteSpace(scenario.CreatedBy)
+                ? entity.CreatedByEmail
                 : scenario.CreatedBy;
             entity.Title = scenario.Title ?? scenarioId;
             entity.Description = scenario.Description ?? "";
             if (scenario.CreatedAt != default)
             {
-                entity.CreatedAt = scenario.CreatedAt;
+                entity.CreatedAtUtc = scenario.CreatedAt;
             }
             entity.NodesJson = JsonSerializer.Serialize(scenario.Root ?? new Node(), JsonOptions);
         }
@@ -179,10 +179,10 @@ public class ScenariosController : ControllerBase
         return new Scenario
         {
             Id = entity.Id,
-            CreatedBy = entity.CreatedBy,
+            CreatedBy = entity.CreatedByEmail,
             Title = entity.Title,
             Description = entity.Description,
-            CreatedAt = entity.CreatedAt,
+            CreatedAt = entity.CreatedAtUtc,
             Root = JsonSerializer.Deserialize<Node>(entity.NodesJson ?? "{}", JsonOptions) ?? new()
         };
     }
@@ -192,11 +192,11 @@ public class ScenariosController : ControllerBase
         return new ScenarioEntity
         {
             Id = id,
-            CreatedBy = string.IsNullOrWhiteSpace(model.CreatedBy) ? "admin@ua.edu" : model.CreatedBy,
+            CreatedByEmail = string.IsNullOrWhiteSpace(model.CreatedBy) ? "admin@ua.edu" : model.CreatedBy,
             Title = model.Title ?? id,
             Description = model.Description ?? "",
             NodesJson = JsonSerializer.Serialize(model.Root ?? new Node(), JsonOptions),
-            CreatedAt = model.CreatedAt == default ? DateTime.UtcNow : model.CreatedAt
+            CreatedAtUtc = model.CreatedAt == default ? DateTime.UtcNow : model.CreatedAt
         };
     }
 }
