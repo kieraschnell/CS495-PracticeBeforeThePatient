@@ -28,10 +28,13 @@ jobs:
           host: 34.58.25.26
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
+          envs: VM_USER
           script: |
+            export DOTNET_ROOT="/home/$VM_USER/.dotnet"
+            export PATH="$DOTNET_ROOT:$PATH"
             cd ~/CS495-PracticeBeforeThePatient
             git pull origin main
-            sudo /home/$USER/.dotnet/dotnet publish PracticeBeforeThePatient.Api -c Release -o /var/www/pbtp-api
-            sudo /home/$USER/.dotnet/dotnet publish PracticeBeforeThePatient.Web -c Release -o /var/www/pbtp-web
+            sudo "$DOTNET_ROOT/dotnet" publish PracticeBeforeThePatient.Api -c Release -o /var/www/pbtp-api
+            sudo "$DOTNET_ROOT/dotnet" publish PracticeBeforeThePatient.Web -c Release -o /var/www/pbtp-web
             sudo systemctl restart pbtp-api
             sudo systemctl restart pbtp-web
