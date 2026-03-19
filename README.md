@@ -29,17 +29,14 @@ An interactive medical training simulation platform built with .NET 9. Instructo
 | **Backend** | `PracticeBeforeThePatient.Api` | ASP.NET Core Web API — scenarios, assignments, class rosters, and access control |
 | **Shared** | `PracticeBeforeThePatient.Core` | Domain models shared across projects (`Scenario`, `Node`, `Choice`, `ClassRoster`) |
 
-Both the Web and API projects are containerized with Docker and orchestrated via Docker Compose.
+Data is persisted with **Entity Framework Core** and **SQLite**.
 
 ---
 
 ## Prerequisites
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows, Mac, or Linux)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/) (v17.12+) with the **ASP.NET and web development** workload — *or* the [.NET CLI](https://learn.microsoft.com/dotnet/core/tools/)
-
-> **Note:** Ensure Docker Desktop is running before starting the application.
 
 ---
 
@@ -47,9 +44,11 @@ Both the Web and API projects are containerized with Docker and orchestrated via
 
 ### Visual Studio (recommended)
 
-1. Open `PracticeBeforeThePatient.sln` in Visual Studio 2022.
-2. Set the startup project to **Docker Compose** using the toolbar dropdown.
-3. Press **F5** to build the images, start the containers, and attach the debugger.
+1. Open `CS495-PracticeBeforeThePatient.sln` in Visual Studio 2022.
+2. Right-click the **Solution** in Solution Explorer → **Configure Startup Projects…**
+3. Select **Multiple startup projects** and set both **PracticeBeforeThePatient.Api** and **PracticeBeforeThePatient.Web** to **Start**.
+4. Ensure both projects are using the **https** launch profile.
+5. Press **F5** to build and run with the debugger attached.
 
 ### Command Line
 
@@ -58,17 +57,11 @@ Both the Web and API projects are containerized with Docker and orchestrated via
 git clone https://github.com/kieraschnell/CS495-PracticeBeforeThePatient.git
 cd CS495-PracticeBeforeThePatient
 
-# Build and start all services
-docker-compose up --build
+# Start the API (terminal 1)
+dotnet run --project PracticeBeforeThePatient.Api --launch-profile https
 
-# Or run in detached mode
-docker-compose up -d --build
-
-# View live logs (detached mode)
-docker-compose logs -f
-
-# Stop and remove containers
-docker-compose down
+# Start the Web app (terminal 2)
+dotnet run --project PracticeBeforeThePatient.Web --launch-profile https
 ```
 
 ---
@@ -108,65 +101,82 @@ For the full, up-to-date endpoint list, visit the [Swagger UI](#accessing-the-ap
 erDiagram
 
     USERS {
-        int id PK
-        string sso_subject UK
-        string email
-        string name
-        string role "instructor | student"
+        int Id PK
+        string SsoSubject UK
+        string Email UK
+        string Name
+        string Role "admin | teacher | student"
+        datetime CreatedAtUtc
     }
 
-    COURSES {
-        int id PK
-        string title
-        string course_code
+    CLASSES {
+        int Id PK
+        string Name UK
+        datetime CreatedAtUtc
+        int CreatedByUserId FK
     }
 
-    COURSE_INSTRUCTORS {
-        int id PK
-        int course_id FK
-        int instructor_id FK
+    CLASS_TEACHERS {
+        int Id PK
+        int ClassId FK
+        int TeacherUserId FK
+        datetime AddedAtUtc
+        int AddedByUserId FK
     }
 
-    ENROLLMENTS {
-        int id PK
-        int course_id FK
-        int student_id FK
+    CLASS_STUDENTS {
+        int Id PK
+        int ClassId FK
+        int StudentUserId FK
+        datetime AddedAtUtc
+        int AddedByUserId FK
     }
 
     SCENARIOS {
-        int id PK
-        int created_by FK
-        string title
-        string description
-        json nodes_json
-        timestamp created_at
+        string Id PK
+        string Title
+        string Description
+        string CreatedByEmail
+        string NodesJson
+        datetime CreatedAtUtc
     }
 
-    COURSE_SCENARIOS {
-        int id PK
-        int course_id FK
-        int scenario_id FK
+    ASSIGNMENTS {
+        int Id PK
+        int ClassId FK
+        string ScenarioId FK
+        string Name
+        datetime AssignedAtUtc
+        datetime DueAtUtc "nullable"
+        int AssignedByUserId FK
     }
 
     SUBMISSIONS {
-        int id PK
-        int student_id FK
-        int scenario_id FK
-        int course_id FK
-        json answers_json
-        decimal grade "nullable"
+        int Id PK
+        int AssignmentId FK
+        int StudentUserId FK
+        datetime SubmittedAtUtc
+        string SubmissionText
+        decimal Grade "nullable"
+        string GradeFeedback "nullable"
+        datetime GradedAtUtc "nullable"
+        int GradedByUserId FK "nullable"
     }
 
-    USERS ||--o{ COURSE_INSTRUCTORS : "instructs"
-    COURSES ||--o{ COURSE_INSTRUCTORS : "has"
-    USERS ||--o{ ENROLLMENTS : "enrolled in"
-    COURSES ||--o{ ENROLLMENTS : "has"
-    USERS ||--o{ SCENARIOS : "created by"
-    COURSES ||--o{ COURSE_SCENARIOS : "has"
-    SCENARIOS ||--o{ COURSE_SCENARIOS : "assigned to"
+    USERS ||--o{ CLASS_TEACHERS : "teaches"
+    USERS ||--o{ CLASS_STUDENTS : "enrolled in"
+    USERS ||--o{ CLASSES : "creates"
+    USERS ||--o{ ASSIGNMENTS : "assigns"
     USERS ||--o{ SUBMISSIONS : "submits"
-    SCENARIOS ||--o{ SUBMISSIONS : "used in"
-    COURSES ||--o{ SUBMISSIONS : "scoped to"
+    USERS ||--o{ SUBMISSIONS : "grades"
+
+    CLASSES ||--o{ CLASS_TEACHERS : "has teachers"
+    CLASSES ||--o{ CLASS_STUDENTS : "has students"
+    CLASSES ||--o{ ASSIGNMENTS : "has assignments"
+
+    SCENARIOS ||--o{ ASSIGNMENTS : "used by"
+
+    ASSIGNMENTS ||--o{ SUBMISSIONS : "receives"
 ```
 
 ---
@@ -178,15 +188,16 @@ CS495-PracticeBeforeThePatient/
 ├── PracticeBeforeThePatient.Api/        # ASP.NET Core Web API
 │   ├── Controllers/                     # API endpoints
 │   │   ├── AccessController.cs          #   /api/access — user access & themes
+│   │   ├── AdminUsersController.cs      #   /api/admin/users — user management
 │   │   ├── AssignmentsController.cs     #   /api/assignments — scenario submissions
-│   │   ├── ClassManagementController.cs #   /api/classes — roster CRUD (admin)
+│   │   ├── ClassManagementController.cs #   /api/classes — roster CRUD
 │   │   └── ScenariosController.cs       #   /api/scenarios — scenario retrieval & editing
-│   ├── Services/                        # Business logic & data stores
-│   │   ├── ClassRosterStore.cs
-│   │   ├── DevAccessStore.cs
+│   ├── Data/
+│   │   ├── AppDbContext.cs              # EF Core DbContext (SQLite)
+│   │   └── Entities/                    # Database entity classes
+│   ├── Services/
+│   │   ├── DevAccessStore.cs            # Dev-mode user switching
 │   │   └── EmailValidator.cs
-│   ├── Data/scenarios/                  # Scenario JSON files
-│   ├── Dockerfile
 │   └── Program.cs
 ├── PracticeBeforeThePatient.Web/        # Blazor Server frontend
 │   ├── Components/Pages/
@@ -194,7 +205,6 @@ CS495-PracticeBeforeThePatient/
 │   │   └── ScenarioEditor.razor.cs      # Instructor scenario editor
 │   ├── Services/
 │   │   └── ApiClient.cs                 # Typed HTTP client for the API
-│   ├── Dockerfile
 │   └── Program.cs
 ├── PracticeBeforeThePatient.Core/       # Shared domain models
 │   └── Models/
@@ -202,8 +212,8 @@ CS495-PracticeBeforeThePatient/
 │       ├── Node.cs
 │       ├── Choice.cs
 │       └── ClassRoster.cs
-├── docker-compose.yml
-├── docker-compose.override.yml
+├── .github/workflows/deploy.yml         # CI/CD — auto-deploy on push to main
+├── .gitignore
 └── README.md
 ```
 
@@ -211,39 +221,42 @@ CS495-PracticeBeforeThePatient/
 
 ## Configuration
 
-Key settings are managed through environment variables in `docker-compose.override.yml`:
+Configuration is managed through `appsettings.{Environment}.json` files:
 
-| Variable | Service | Default | Description |
-|----------|---------|---------|-------------|
-| `ASPNETCORE_ENVIRONMENT` | Both | `Development` | Runtime environment (`Development`, `Production`) |
-| `ASPNETCORE_HTTP_PORTS` | Both | `8080` | Internal HTTP port |
-| `ASPNETCORE_HTTPS_PORTS` | Both | `8081` | Internal HTTPS port |
-| `ApiBaseUrl` | Web | `http://practicebeforethepatient.api:8080/` | Base URL the Blazor app uses to reach the API |
+| Setting | Project | Dev Value | Prod Value | Description |
+|---------|---------|-----------|------------|-------------|
+| `ASPNETCORE_ENVIRONMENT` | Both | `Development` | `Production` | Runtime environment |
+| `ApiBaseUrl` | Web | `http://localhost:5186/` | `http://localhost:5100/` | Base URL the Blazor app uses to reach the API |
 
-Port mappings (host → container) can be customized in `docker-compose.override.yml`.
+### Local Development Ports
+
+| Service | HTTP | HTTPS |
+|---------|------|-------|
+| **API** | `localhost:5186` | `localhost:7144` |
+| **Web** | `localhost:5009` | `localhost:7124` |
+
+### Production Deployment
+
+The application is deployed to a GCP Compute Engine VM with:
+- **Caddy** reverse proxy (auto-HTTPS via Let's Encrypt)
+- **systemd** services for both API and Web
+- **GitHub Actions** CI/CD (auto-deploy on push to `main`)
 
 ---
 
 ## Troubleshooting
 
-### Docker Containers Won't Start
-- Ensure Docker Desktop is running.
-- Inspect logs: `docker-compose logs`
-- Rebuild from scratch: `docker-compose down && docker-compose up --build`
-- Verify no port conflicts on the host machine.
-
 ### API Connection Issues
-- Confirm both containers are healthy: `docker-compose ps`
-- Check individual service logs:
-  ```bash
-  docker-compose logs practicebeforethepatient.api
-  docker-compose logs practicebeforethepatient.web
-  ```
+- Ensure both projects are running (multi-project startup or two terminals).
+- Verify `ApiBaseUrl` in `appsettings.Development.json` matches the API's launch profile port.
 
 ### Port Already in Use
-- Stop any running instances: `docker-compose down`
 - Identify conflicting processes on ports **5009**, **5186**, **7124**, or **7144**.
-- Adjust port mappings in `docker-compose.override.yml` if needed.
+- Stop any other `dotnet` processes: `dotnet build-server shutdown`
+
+### Database Issues
+- The SQLite database (`app.db`) is created automatically on first run via EF Core migrations.
+- To reset the database, delete `PracticeBeforeThePatient.Api/Data/app.db` and restart the API.
 
 ---
 
