@@ -1,0 +1,37 @@
+name: Deploy to GCP VM
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish API
+        run: dotnet publish PracticeBeforeThePatient.Api -c Release -o publish/api
+
+      - name: Publish Web
+        run: dotnet publish PracticeBeforeThePatient.Web -c Release -o publish/web
+
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 34.58.25.26
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/CS495-PracticeBeforeThePatient
+            git pull origin main
+            sudo /home/$USER/.dotnet/dotnet publish PracticeBeforeThePatient.Api -c Release -o /var/www/pbtp-api
+            sudo /home/$USER/.dotnet/dotnet publish PracticeBeforeThePatient.Web -c Release -o /var/www/pbtp-web
+            sudo systemctl restart pbtp-api
+            sudo systemctl restart pbtp-web
