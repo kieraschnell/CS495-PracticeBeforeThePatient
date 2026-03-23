@@ -1,4 +1,5 @@
 name: Deploy to GCP VM
+# Triggered on push to main — SSH into VM, pull, publish, restart services
 
 on:
   push:
