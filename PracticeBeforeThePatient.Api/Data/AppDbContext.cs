@@ -81,15 +81,17 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ScenarioEntity>(entity =>
         {
             entity.Property(e => e.Id).HasMaxLength(128);
-            entity.Property(e => e.CreatedByEmail).HasMaxLength(256);
-            entity.Property(e => e.Title).HasMaxLength(256);
+            entity.Property(e => e.CreatedByEmail).HasMaxLength(256).IsRequired();
+            entity.Property(e => e.Title).HasMaxLength(256).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(2000).IsRequired();
+            entity.Property(e => e.NodesJson).IsRequired();
         });
 
         modelBuilder.Entity<AssignmentEntity>(entity =>
         {
             entity.HasIndex(e => new { e.ClassId, e.ScenarioId }).IsUnique();
             entity.Property(e => e.ScenarioId).HasMaxLength(128);
-            entity.Property(e => e.Name).HasMaxLength(256);
+            entity.Property(e => e.Name).HasMaxLength(256).IsRequired();
 
             entity.HasOne(e => e.Class)
                   .WithMany(c => c.Assignments)
@@ -107,6 +109,9 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<SubmissionEntity>(entity =>
         {
+            entity.HasIndex(e => new { e.AssignmentId, e.StudentUserId }).IsUnique();
+            entity.Property(e => e.SubmissionText).IsRequired();
+
             entity.HasOne(e => e.Assignment)
                   .WithMany(a => a.Submissions)
                   .HasForeignKey(e => e.AssignmentId);
