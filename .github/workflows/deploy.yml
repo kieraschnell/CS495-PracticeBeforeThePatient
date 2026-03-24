@@ -25,11 +25,14 @@ jobs:
 
       - name: Deploy to VM
         uses: appleboy/ssh-action@v1
+        env:
+          VM_USER: ${{ secrets.VM_USER }}
         with:
           host: 34.58.25.26
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           envs: VM_USER
+          script_stop: true
           script: |
             export DOTNET_ROOT="/home/$VM_USER/.dotnet"
             export PATH="$DOTNET_ROOT:$PATH"
