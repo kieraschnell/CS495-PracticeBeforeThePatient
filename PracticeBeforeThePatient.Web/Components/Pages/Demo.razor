@@ -25,8 +25,8 @@
 
         <div class="createRow demoLoginRow">
             <input class="editorInput"
-                   value="@EmailInput"
-                   @oninput="OnEmailInput"
+                   @bind="EmailInput"
+                   @bind:event="oninput"
                    @onkeydown="OnEmailInputKeyDown"
                    placeholder="admin@ua.edu, instructor@ua.edu, student1@ua.edu" />
             <button class="primaryBtn" @onclick="ApplyUserAsync" disabled="@IsSaving">Apply</button>
@@ -60,11 +60,6 @@
         {
             await JS.InvokeVoidAsync("pbpTheme.setTheme", _themeToApply);
         }
-    }
-
-    private void OnEmailInput(ChangeEventArgs e)
-    {
-        EmailInput = e.Value?.ToString() ?? "";
     }
 
     private async Task ApplyUserAsync()
