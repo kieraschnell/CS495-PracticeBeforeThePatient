@@ -309,11 +309,26 @@
                     </div>
                     <div>
                         <label class="editorLabel">Due time (optional)</label>
-                        <input class="editorInput"
-                               type="text"
-                               value="@_assignmentTime"
-                               @onchange="OnAssignmentTimeChanged"
-                               placeholder="h:mm AM/PM" />
+                        <div class="createRow">
+                            <select class="editorInput" @bind="_assignmentDueHour">
+                                @foreach (var hour in HourOptions)
+                                {
+                                    <option value="@hour">@hour</option>
+                                }
+                            </select>
+                            <select class="editorInput" @bind="_assignmentDueMinute">
+                                @foreach (var minute in MinuteOptions)
+                                {
+                                    <option value="@minute">@minute</option>
+                                }
+                            </select>
+                            <select class="editorInput" @bind="_assignmentDuePeriod">
+                                @foreach (var period in MeridiemOptions)
+                                {
+                                    <option value="@period">@period</option>
+                                }
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -349,11 +364,26 @@
                     </div>
                     <div>
                         <label class="editorLabel">Due time (optional)</label>
-                        <input class="editorInput"
-                               type="text"
-                               value="@_editDueTime"
-                               @onchange="OnEditDueTimeChanged"
-                               placeholder="h:mm AM/PM" />
+                        <div class="createRow">
+                            <select class="editorInput" @bind="_editDueHour">
+                                @foreach (var hour in HourOptions)
+                                {
+                                    <option value="@hour">@hour</option>
+                                }
+                            </select>
+                            <select class="editorInput" @bind="_editDueMinute">
+                                @foreach (var minute in MinuteOptions)
+                                {
+                                    <option value="@minute">@minute</option>
+                                }
+                            </select>
+                            <select class="editorInput" @bind="_editDuePeriod">
+                                @foreach (var period in MeridiemOptions)
+                                {
+                                    <option value="@period">@period</option>
+                                }
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -404,12 +434,26 @@
     private string _assignmentAssignDate = "";
     private string _assignmentAssignTime = "";
     private string _assignmentDate = "";
-    private string _assignmentTime = "";
+    private string _assignmentDueHour = DefaultDueHour;
+    private string _assignmentDueMinute = DefaultDueMinute;
+    private string _assignmentDuePeriod = DefaultDuePeriod;
     private int? _editingAssignmentDueId;
     private string _editDueDate = "";
-    private string _editDueTime = "";
+    private string _editDueHour = DefaultDueHour;
+    private string _editDueMinute = DefaultDueMinute;
+    private string _editDuePeriod = DefaultDuePeriod;
     private bool _isSavingDue;
     private static readonly TimeSpan CstOffset = TimeSpan.FromHours(-6);
+    private const string DefaultDueHour = "11";
+    private const string DefaultDueMinute = "59";
+    private const string DefaultDuePeriod = "PM";
+    private static readonly string[] HourOptions = Enumerable.Range(1, 12)
+        .Select(x => x.ToString(CultureInfo.InvariantCulture))
+        .ToArray();
+    private static readonly string[] MinuteOptions = Enumerable.Range(0, 60)
+        .Select(x => x.ToString("00", CultureInfo.InvariantCulture))
+        .ToArray();
+    private static readonly string[] MeridiemOptions = ["AM", "PM"];
     private bool CanAssignScenario =>
         !string.IsNullOrWhiteSpace(_assignmentName) &&
         !string.IsNullOrWhiteSpace(_assignmentScenarioId);
@@ -552,6 +596,11 @@
         _assignmentDate = (e.Value?.ToString() ?? "").Trim();
     }
 
+    private void OnEditDueDateChanged(ChangeEventArgs e)
+    {
+        _editDueDate = (e.Value?.ToString() ?? "").Trim();
+    }
+
     private void OnAssignmentAssignDateChanged(ChangeEventArgs e)
     {
         _assignmentAssignDate = (e.Value?.ToString() ?? "").Trim();
@@ -560,11 +609,6 @@
     private void OnAssignmentAssignTimeChanged(ChangeEventArgs e)
     {
         _assignmentAssignTime = (e.Value?.ToString() ?? "").Trim();
-    }
-
-    private void OnAssignmentTimeChanged(ChangeEventArgs e)
-    {
-        _assignmentTime = (e.Value?.ToString() ?? "").Trim();
     }
 
     private async Task OnNewClassNameKeyDown(KeyboardEventArgs e)
@@ -672,7 +716,9 @@
         _assignmentAssignDate = "";
         _assignmentAssignTime = "";
         _assignmentDate = "";
-        _assignmentTime = "";
+        _assignmentDueHour = DefaultDueHour;
+        _assignmentDueMinute = DefaultDueMinute;
+        _assignmentDuePeriod = DefaultDuePeriod;
         _isAddAssignmentModalOpen = false;
         _isAddTeacherModalOpen = false;
         _isAddStudentModalOpen = false;
@@ -692,7 +738,7 @@
         var assignmentAssignDate = (_assignmentAssignDate ?? "").Trim();
         var assignmentAssignTime = (_assignmentAssignTime ?? "").Trim();
         var assignmentDate = (_assignmentDate ?? "").Trim();
-        var assignmentTime = (_assignmentTime ?? "").Trim();
+        var assignmentTime = BuildTwelveHourTimeText(_assignmentDueHour, _assignmentDueMinute, _assignmentDuePeriod);
 
         if (string.IsNullOrWhiteSpace(assignmentName))
         {
@@ -762,7 +808,9 @@
             _assignmentAssignDate = "";
             _assignmentAssignTime = "";
             _assignmentDate = "";
-            _assignmentTime = "";
+            _assignmentDueHour = DefaultDueHour;
+            _assignmentDueMinute = DefaultDueMinute;
+            _assignmentDuePeriod = DefaultDuePeriod;
             _isAddAssignmentModalOpen = false;
             SetMessage(assignedAtUtc.HasValue ? "Assignment scheduled" : "Scenario assigned", true);
             await ReloadAssignmentsAsync();
@@ -786,12 +834,16 @@
         {
             var dueCst = assignment.DueAtUtc.Value.ToOffset(CstOffset);
             _editDueDate = dueCst.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-            _editDueTime = dueCst.ToString("h:mm tt", CultureInfo.InvariantCulture);
+            _editDueHour = dueCst.ToString("%h", CultureInfo.InvariantCulture);
+            _editDueMinute = dueCst.ToString("mm", CultureInfo.InvariantCulture);
+            _editDuePeriod = dueCst.ToString("tt", CultureInfo.InvariantCulture);
         }
         else
         {
             _editDueDate = "";
-            _editDueTime = "";
+            _editDueHour = DefaultDueHour;
+            _editDueMinute = DefaultDueMinute;
+            _editDuePeriod = DefaultDuePeriod;
         }
     }
 
@@ -799,17 +851,9 @@
     {
         _editingAssignmentDueId = null;
         _editDueDate = "";
-        _editDueTime = "";
-    }
-
-    private void OnEditDueDateChanged(ChangeEventArgs e)
-    {
-        _editDueDate = (e.Value?.ToString() ?? "").Trim();
-    }
-
-    private void OnEditDueTimeChanged(ChangeEventArgs e)
-    {
-        _editDueTime = (e.Value?.ToString() ?? "").Trim();
+        _editDueHour = DefaultDueHour;
+        _editDueMinute = DefaultDueMinute;
+        _editDuePeriod = DefaultDuePeriod;
     }
 
     private async Task SaveAssignmentDueAsync(int assignmentId)
@@ -821,7 +865,7 @@
         }
 
         var dueDateText = (_editDueDate ?? "").Trim();
-        var dueTimeText = (_editDueTime ?? "").Trim();
+        var dueTimeText = BuildTwelveHourTimeText(_editDueHour, _editDueMinute, _editDuePeriod);
         var assignment = _assignments.FirstOrDefault(x => x.Id == assignmentId);
 
         if (!TryBuildOptionalCstDateTimeUtc(
@@ -878,7 +922,9 @@
     private async Task ClearAssignmentDueAsync(int assignmentId)
     {
         _editDueDate = "";
-        _editDueTime = "";
+        _editDueHour = DefaultDueHour;
+        _editDueMinute = DefaultDueMinute;
+        _editDuePeriod = DefaultDuePeriod;
         await SaveAssignmentDueAsync(assignmentId);
     }
 
@@ -895,6 +941,11 @@
         }
 
         return $"{dueAtUtc.Value.ToOffset(CstOffset).ToString("MM/dd/yyyy h:mm tt", CultureInfo.InvariantCulture)} CST";
+    }
+
+    private static string BuildTwelveHourTimeText(string hour, string minute, string period)
+    {
+        return $"{hour}:{minute} {period}";
     }
 
     private static bool TryBuildOptionalCstDateTimeUtc(
