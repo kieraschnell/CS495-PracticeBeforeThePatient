@@ -273,7 +273,7 @@
 
                 <div class="assignmentModalForm">
                     <div>
-                        <label class="editorLabel">Assignment name</label>
+                        <label class="editorLabel">Assignment name <span class="requiredMark">*</span></label>
                         <input class="editorInput"
                                type="text"
                                @bind="_assignmentName"
@@ -281,7 +281,7 @@
                                placeholder="Example: Week 4 Chest Pain Case" />
                     </div>
                     <div>
-                        <label class="editorLabel">Scenario</label>
+                        <label class="editorLabel">Scenario <span class="requiredMark">*</span></label>
                         <select class="editorInput" @bind="_assignmentScenarioId">
                             <option value="">Select</option>
                             @foreach (var id in _allScenarioIds)
@@ -299,16 +299,18 @@
                     </div>
                     <div>
                         <label class="editorLabel">Assign time (optional)</label>
-                        <div class="compactTimeRow">
+                        <div style="display:grid; grid-template-columns:5rem auto 5rem 5rem; column-gap:8px; align-items:center; justify-content:start;">
                             <input class="editorInput timeNumberInput"
+                                   style="width:5rem; min-width:5rem;"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
                                    disabled="@string.IsNullOrWhiteSpace(_assignmentAssignDate)"
                                    value="@_assignmentAssignHour"
                                    @oninput="OnAssignmentAssignHourChanged" />
-                            <span class="timeSeparator">:</span>
+                            <span class="timeSeparator" style="font-size:22px; font-weight:700; line-height:1; text-align:center;">:</span>
                             <input class="editorInput timeNumberInput"
+                                   style="width:5rem; min-width:5rem;"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
@@ -316,6 +318,7 @@
                                    value="@_assignmentAssignMinute"
                                    @oninput="OnAssignmentAssignMinuteChanged" />
                             <select class="editorInput timePeriodInput"
+                                    style="width:5rem; min-width:5rem;"
                                     disabled="@string.IsNullOrWhiteSpace(_assignmentAssignDate)"
                                     @bind="_assignmentAssignPeriod">
                                 @foreach (var period in MeridiemOptions)
@@ -334,16 +337,18 @@
                     </div>
                     <div>
                         <label class="editorLabel">Due time (optional)</label>
-                        <div class="compactTimeRow">
+                        <div style="display:grid; grid-template-columns:5rem auto 5rem 5rem; column-gap:8px; align-items:center; justify-content:start;">
                             <input class="editorInput timeNumberInput"
+                                   style="width:5rem; min-width:5rem;"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
                                    disabled="@string.IsNullOrWhiteSpace(_assignmentDate)"
                                    value="@_assignmentDueHour"
                                    @oninput="OnAssignmentDueHourChanged" />
-                            <span class="timeSeparator">:</span>
+                            <span class="timeSeparator" style="font-size:22px; font-weight:700; line-height:1; text-align:center;">:</span>
                             <input class="editorInput timeNumberInput"
+                                   style="width:5rem; min-width:5rem;"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
@@ -351,6 +356,7 @@
                                    value="@_assignmentDueMinute"
                                    @oninput="OnAssignmentDueMinuteChanged" />
                             <select class="editorInput timePeriodInput"
+                                    style="width:5rem; min-width:5rem;"
                                     disabled="@string.IsNullOrWhiteSpace(_assignmentDate)"
                                     @bind="_assignmentDuePeriod">
                                 @foreach (var period in MeridiemOptions)
@@ -391,7 +397,7 @@
 
                 <div class="assignmentModalForm">
                     <div>
-                        <label class="editorLabel">Assignment name</label>
+                        <label class="editorLabel">Assignment name <span class="requiredMark">*</span></label>
                         <input class="editorInput"
                                type="text"
                                @bind="_editAssignmentName"
@@ -399,7 +405,7 @@
                                placeholder="Example: Week 4 Chest Pain Case" />
                     </div>
                     <div>
-                        <label class="editorLabel">Scenario</label>
+                        <label class="editorLabel">Scenario <span class="requiredMark">*</span></label>
                         <select class="editorInput" @bind="_editAssignmentScenarioId">
                             <option value="">Select</option>
                             @foreach (var id in _allScenarioIds)
@@ -417,16 +423,18 @@
                     </div>
                     <div>
                         <label class="editorLabel">Assign time (optional)</label>
-                        <div class="compactTimeRow">
+                        <div style="display:grid; grid-template-columns:5rem auto 5rem 5rem; column-gap:8px; align-items:center; justify-content:start;">
                             <input class="editorInput timeNumberInput"
+                                   style="width:5rem; min-width:5rem;"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
                                    disabled="@string.IsNullOrWhiteSpace(_editAssignmentAssignDate)"
                                    value="@_editAssignmentAssignHour"
                                    @oninput="OnEditAssignmentAssignHourChanged" />
-                            <span class="timeSeparator">:</span>
+                            <span class="timeSeparator" style="font-size:22px; font-weight:700; line-height:1; text-align:center;">:</span>
                             <input class="editorInput timeNumberInput"
+                                   style="width:5rem; min-width:5rem;"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
@@ -434,6 +442,7 @@
                                    value="@_editAssignmentAssignMinute"
                                    @oninput="OnEditAssignmentAssignMinuteChanged" />
                             <select class="editorInput timePeriodInput"
+                                    style="width:5rem; min-width:5rem;"
                                     disabled="@string.IsNullOrWhiteSpace(_editAssignmentAssignDate)"
                                     @bind="_editAssignmentAssignPeriod">
                                 @foreach (var period in MeridiemOptions)
@@ -452,16 +461,18 @@
                     </div>
                     <div>
                         <label class="editorLabel">Due time (optional)</label>
-                        <div class="compactTimeRow">
+                        <div style="display:grid; grid-template-columns:5rem auto 5rem 5rem; column-gap:8px; align-items:center; justify-content:start;">
                             <input class="editorInput timeNumberInput"
+                                   style="width:5rem; min-width:5rem;"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
                                    disabled="@string.IsNullOrWhiteSpace(_editAssignmentDueDate)"
                                    value="@_editAssignmentDueHour"
                                    @oninput="OnEditAssignmentDueHourChanged" />
-                            <span class="timeSeparator">:</span>
+                            <span class="timeSeparator" style="font-size:22px; font-weight:700; line-height:1; text-align:center;">:</span>
                             <input class="editorInput timeNumberInput"
+                                   style="width:5rem; min-width:5rem;"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
@@ -469,6 +480,7 @@
                                    value="@_editAssignmentDueMinute"
                                    @oninput="OnEditAssignmentDueMinuteChanged" />
                             <select class="editorInput timePeriodInput"
+                                    style="width:5rem; min-width:5rem;"
                                     disabled="@string.IsNullOrWhiteSpace(_editAssignmentDueDate)"
                                     @bind="_editAssignmentDuePeriod">
                                 @foreach (var period in MeridiemOptions)

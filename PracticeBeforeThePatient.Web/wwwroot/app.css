@@ -1187,6 +1187,11 @@ textarea:focus {
   margin-bottom: 12px;
 }
 
+.requiredMark {
+  color: rgb(185, 28, 28);
+  font-weight: 800;
+}
+
 .assignmentList {
   display: grid;
   gap: 10px;
