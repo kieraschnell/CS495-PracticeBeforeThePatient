@@ -1142,6 +1142,25 @@ textarea:focus {
   margin-top: 14px;
 }
 
+.timeInputRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.timeNumberInput {
+  flex: 0 0 5.5rem;
+  min-width: 5.5rem;
+  width: 5.5rem;
+}
+
+.timePeriodInput {
+  flex: 0 0 6rem;
+  min-width: 6rem;
+  width: 6rem;
+}
+
 .assignmentList {
   display: grid;
   gap: 10px;

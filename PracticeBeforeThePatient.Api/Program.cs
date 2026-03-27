@@ -43,7 +43,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    EnsureCurrentDatabaseSchema(db, dbPath, app.Logger);
     EnsureAssignmentsSchema(db);
 
     if (!db.Scenarios.Any())
@@ -306,6 +306,117 @@ static void EnsureAssignmentsSchema(AppDbContext db)
     finally
     {
         db.Database.CloseConnection();
+    }
+}
+
+static void EnsureCurrentDatabaseSchema(AppDbContext db, string dbPath, ILogger logger)
+{
+    db.Database.OpenConnection();
+
+    try
+    {
+        var connection = db.Database.GetDbConnection();
+        var hasAnyTables = HasAnyUserTables(connection);
+
+        if (!hasAnyTables)
+        {
+            db.Database.CloseConnection();
+            db.Database.EnsureCreated();
+            return;
+        }
+
+        if (!RequiresDatabaseReset(connection))
+        {
+            return;
+        }
+    }
+    finally
+    {
+        db.Database.CloseConnection();
+    }
+
+    BackupLegacyDatabaseFiles(dbPath, logger);
+    db.Database.EnsureCreated();
+}
+
+static bool HasAnyUserTables(DbConnection connection)
+{
+    using var command = connection.CreateCommand();
+    command.CommandText = """
+        SELECT 1
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name NOT LIKE 'sqlite_%'
+        LIMIT 1;
+        """;
+
+    return command.ExecuteScalar() is not null;
+}
+
+static bool RequiresDatabaseReset(DbConnection connection)
+{
+    var legacyTables = new[]
+    {
+        "Courses",
+        "CourseInstructors",
+        "CourseScenarios",
+        "Enrollments"
+    };
+
+    if (legacyTables.Any(table => TableExists(connection, table)))
+    {
+        return true;
+    }
+
+    var requiredTables = new[]
+    {
+        "Users",
+        "Classes",
+        "ClassTeachers",
+        "ClassStudents",
+        "Scenarios",
+        "Assignments",
+        "Submissions"
+    };
+
+    if (requiredTables.Any(table => !TableExists(connection, table)))
+    {
+        return true;
+    }
+
+    return TableExists(connection, "Users") && !GetTableColumns(connection, "Users").Contains("CreatedAtUtc")
+        || TableExists(connection, "Scenarios") && !GetTableColumns(connection, "Scenarios").Contains("CreatedAtUtc")
+        || TableExists(connection, "Scenarios") && !GetTableColumns(connection, "Scenarios").Contains("CreatedByEmail")
+        || TableExists(connection, "Classes") && !GetTableColumns(connection, "Classes").Contains("CreatedAtUtc")
+        || TableExists(connection, "Submissions") && !GetTableColumns(connection, "Submissions").Contains("AssignmentId");
+}
+
+static void BackupLegacyDatabaseFiles(string dbPath, ILogger logger)
+{
+    var directory = Path.GetDirectoryName(dbPath);
+    var fileName = Path.GetFileNameWithoutExtension(dbPath);
+    var extension = Path.GetExtension(dbPath);
+    var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+
+    if (directory is null)
+    {
+        throw new InvalidOperationException($"Could not determine directory for database path '{dbPath}'.");
+    }
+
+    Directory.CreateDirectory(directory);
+
+    foreach (var sourcePath in new[] { dbPath, $"{dbPath}-shm", $"{dbPath}-wal" })
+    {
+        if (!File.Exists(sourcePath))
+        {
+            continue;
+        }
+
+        var sourceFileName = Path.GetFileName(sourcePath);
+        var suffix = sourceFileName[(fileName.Length + extension.Length)..];
+        var backupPath = Path.Combine(directory, $"{fileName}.legacy-{timestamp}{extension}{suffix}");
+        File.Move(sourcePath, backupPath);
+        logger.LogWarning("Moved legacy database file '{Source}' to '{Backup}'.", sourceFileName, Path.GetFileName(backupPath));
     }
 }
 

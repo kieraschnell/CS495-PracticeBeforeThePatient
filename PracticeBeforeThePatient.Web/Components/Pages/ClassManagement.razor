@@ -309,20 +309,24 @@
                     </div>
                     <div>
                         <label class="editorLabel">Due time (optional)</label>
-                        <div class="createRow">
-                            <select class="editorInput" @bind="_assignmentDueHour">
-                                @foreach (var hour in HourOptions)
-                                {
-                                    <option value="@hour">@hour</option>
-                                }
-                            </select>
-                            <select class="editorInput" @bind="_assignmentDueMinute">
-                                @foreach (var minute in MinuteOptions)
-                                {
-                                    <option value="@minute">@minute</option>
-                                }
-                            </select>
-                            <select class="editorInput" @bind="_assignmentDuePeriod">
+                        <div class="timeInputRow">
+                            <input class="editorInput timeNumberInput"
+                                   type="number"
+                                   min="1"
+                                   max="12"
+                                   step="1"
+                                   inputmode="numeric"
+                                   @bind="_assignmentDueHour"
+                                   @bind:event="oninput" />
+                            <input class="editorInput timeNumberInput"
+                                   type="number"
+                                   min="0"
+                                   max="59"
+                                   step="1"
+                                   inputmode="numeric"
+                                   @bind="_assignmentDueMinute"
+                                   @bind:event="oninput" />
+                            <select class="editorInput timePeriodInput" @bind="_assignmentDuePeriod">
                                 @foreach (var period in MeridiemOptions)
                                 {
                                     <option value="@period">@period</option>
@@ -364,20 +368,24 @@
                     </div>
                     <div>
                         <label class="editorLabel">Due time (optional)</label>
-                        <div class="createRow">
-                            <select class="editorInput" @bind="_editDueHour">
-                                @foreach (var hour in HourOptions)
-                                {
-                                    <option value="@hour">@hour</option>
-                                }
-                            </select>
-                            <select class="editorInput" @bind="_editDueMinute">
-                                @foreach (var minute in MinuteOptions)
-                                {
-                                    <option value="@minute">@minute</option>
-                                }
-                            </select>
-                            <select class="editorInput" @bind="_editDuePeriod">
+                        <div class="timeInputRow">
+                            <input class="editorInput timeNumberInput"
+                                   type="number"
+                                   min="1"
+                                   max="12"
+                                   step="1"
+                                   inputmode="numeric"
+                                   @bind="_editDueHour"
+                                   @bind:event="oninput" />
+                            <input class="editorInput timeNumberInput"
+                                   type="number"
+                                   min="0"
+                                   max="59"
+                                   step="1"
+                                   inputmode="numeric"
+                                   @bind="_editDueMinute"
+                                   @bind:event="oninput" />
+                            <select class="editorInput timePeriodInput" @bind="_editDuePeriod">
                                 @foreach (var period in MeridiemOptions)
                                 {
                                     <option value="@period">@period</option>
@@ -447,12 +455,6 @@
     private const string DefaultDueHour = "11";
     private const string DefaultDueMinute = "59";
     private const string DefaultDuePeriod = "PM";
-    private static readonly string[] HourOptions = Enumerable.Range(1, 12)
-        .Select(x => x.ToString(CultureInfo.InvariantCulture))
-        .ToArray();
-    private static readonly string[] MinuteOptions = Enumerable.Range(0, 60)
-        .Select(x => x.ToString("00", CultureInfo.InvariantCulture))
-        .ToArray();
     private static readonly string[] MeridiemOptions = ["AM", "PM"];
     private bool CanAssignScenario =>
         !string.IsNullOrWhiteSpace(_assignmentName) &&
@@ -945,7 +947,16 @@
 
     private static string BuildTwelveHourTimeText(string hour, string minute, string period)
     {
-        return $"{hour}:{minute} {period}";
+        var normalizedHour = int.TryParse(hour, out var parsedHour)
+            ? Math.Clamp(parsedHour, 1, 12).ToString(CultureInfo.InvariantCulture)
+            : DefaultDueHour;
+
+        var normalizedMinute = int.TryParse(minute, out var parsedMinute)
+            ? Math.Clamp(parsedMinute, 0, 59).ToString("00", CultureInfo.InvariantCulture)
+            : DefaultDueMinute;
+
+        var normalizedPeriod = string.Equals(period, "AM", StringComparison.OrdinalIgnoreCase) ? "AM" : "PM";
+        return $"{normalizedHour}:{normalizedMinute} {normalizedPeriod}";
     }
 
     private static bool TryBuildOptionalCstDateTimeUtc(
