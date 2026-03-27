@@ -375,6 +375,58 @@ public sealed class ClassesController : ControllerBase
         public DateTimeOffset? DueAtUtc { get; set; }
     }
 
+    public sealed class UpdateAssignmentRequest
+    {
+        public string Name { get; set; } = "";
+        public string ScenarioId { get; set; } = "";
+        public DateTimeOffset? AssignedAtUtc { get; set; }
+        public DateTimeOffset? DueAtUtc { get; set; }
+    }
+
+    [HttpPut("{classId:int}/assignments/{assignmentId:int}")]
+    public async Task<IActionResult> UpdateAssignment(int classId, int assignmentId, [FromBody] UpdateAssignmentRequest req)
+    {
+        if (!await CanAccessClassAsync(classId)) return Forbid();
+
+        var assignment = await _db.Assignments
+            .FirstOrDefaultAsync(a => a.Id == assignmentId && a.ClassId == classId);
+
+        if (assignment is null) return NotFound();
+
+        var assignmentName = (req.Name ?? "").Trim();
+        var scenarioId = (req.ScenarioId ?? "").Trim();
+        var assignedAtUtc = req.AssignedAtUtc?.UtcDateTime ?? assignment.AssignedAtUtc;
+        var dueAtUtc = req.DueAtUtc?.UtcDateTime;
+
+        if (string.IsNullOrWhiteSpace(assignmentName))
+        {
+            return BadRequest("Assignment name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(scenarioId))
+        {
+            return BadRequest("Scenario id is required.");
+        }
+
+        if (!await _db.Scenarios.AnyAsync(s => s.Id == scenarioId))
+        {
+            return BadRequest("Invalid scenario id.");
+        }
+
+        if (dueAtUtc.HasValue && dueAtUtc.Value < assignedAtUtc)
+        {
+            return BadRequest("Due date must be after the assign date.");
+        }
+
+        assignment.Name = assignmentName;
+        assignment.ScenarioId = scenarioId;
+        assignment.AssignedAtUtc = assignedAtUtc;
+        assignment.DueAtUtc = dueAtUtc;
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpPut("{classId:int}/assignments/{assignmentId:int}/due")]
     public async Task<IActionResult> UpdateAssignmentDue(int classId, int assignmentId, [FromBody] UpdateAssignmentDueRequest req)
     {

@@ -101,7 +101,7 @@
                                     <div class="assignmentMeta">Submitted: @submitted / @total</div>
                                 </div>
                                 <div class="assignmentActions">
-                                    <button class="secondaryBtn" type="button" @onclick="() => ToggleDueEditor(a)">Edit due</button>
+                                    <button class="secondaryBtn" type="button" @onclick="() => OpenEditAssignmentModalAsync(a)">Edit assignment</button>
                                     <a class="secondaryBtn" href="@($"assignment-grading/{_selectedClass.Id}/{a.Id}")">Grade</a>
                                     <button class="deleteBtn" @onclick="() => DeleteAssignmentAsync(a.Id)">Delete</button>
                                 </div>
@@ -365,46 +365,102 @@
     </div>
 }
 
-@if (_selectedClass is not null && _editingAssignmentDueId.HasValue)
+@if (_selectedClass is not null && _editingAssignmentId.HasValue)
 {
-    var editingAssignment = _assignments.FirstOrDefault(x => x.Id == _editingAssignmentDueId.Value);
+    var editingAssignment = _assignments.FirstOrDefault(x => x.Id == _editingAssignmentId.Value);
     if (editingAssignment is not null)
     {
-        <div class="classMgmtModalBackdrop" @onclick="CancelDueEditor">
-            <div class="classMgmtModalCard classMgmtModalCardNarrow" @onclick:stopPropagation="true">
+        <div class="classMgmtModalBackdrop" @onclick="CloseEditAssignmentModal">
+            <div class="classMgmtModalCard" @onclick:stopPropagation="true">
                 <div class="classMgmtModalTop">
-                    <div class="sectionTitle">Edit due date</div>
-                    <button class="secondaryBtn" type="button" @onclick="CancelDueEditor" disabled="@_isSavingDue">Cancel</button>
+                    <div class="sectionTitle">Edit assignment</div>
+                    <button class="secondaryBtn" type="button" @onclick="CloseEditAssignmentModal" disabled="@_isSavingAssignment">Cancel</button>
                 </div>
 
                 <div class="assignmentMeta">@editingAssignment.Name · @editingAssignment.ScenarioId</div>
 
-                <div class="assignmentModalForm assignmentModalFormSingle">
+                <div class="assignmentModalForm">
                     <div>
-                        <label class="editorLabel">Due date (optional)</label>
-                        <div class="dateTimeInputRow">
-                            <input class="editorInput dateInputGrow"
-                                   type="date"
-                                   value="@_editDueDate"
-                                   @onchange="OnEditDueDateChanged" />
+                        <label class="editorLabel">Assignment name</label>
+                        <input class="editorInput"
+                               type="text"
+                               @bind="_editAssignmentName"
+                               @bind:event="oninput"
+                               placeholder="Example: Week 4 Chest Pain Case" />
+                    </div>
+                    <div>
+                        <label class="editorLabel">Scenario</label>
+                        <select class="editorInput" @bind="_editAssignmentScenarioId">
+                            <option value="">Select</option>
+                            @foreach (var id in _allScenarioIds)
+                            {
+                                <option value="@id">@id</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="editorLabel">Assign date (optional)</label>
+                        <input class="editorInput"
+                               type="date"
+                               value="@_editAssignmentAssignDate"
+                               @onchange="OnEditAssignmentAssignDateChanged" />
+                    </div>
+                    <div>
+                        <label class="editorLabel">Assign time (optional)</label>
+                        <div class="compactTimeRow">
                             <input class="editorInput timeNumberInput"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
-                                   disabled="@string.IsNullOrWhiteSpace(_editDueDate)"
-                                   value="@_editDueHour"
-                                   @oninput="OnEditDueHourChanged" />
+                                   disabled="@string.IsNullOrWhiteSpace(_editAssignmentAssignDate)"
+                                   value="@_editAssignmentAssignHour"
+                                   @oninput="OnEditAssignmentAssignHourChanged" />
                             <span class="timeSeparator">:</span>
                             <input class="editorInput timeNumberInput"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
-                                   disabled="@string.IsNullOrWhiteSpace(_editDueDate)"
-                                   value="@_editDueMinute"
-                                   @oninput="OnEditDueMinuteChanged" />
+                                   disabled="@string.IsNullOrWhiteSpace(_editAssignmentAssignDate)"
+                                   value="@_editAssignmentAssignMinute"
+                                   @oninput="OnEditAssignmentAssignMinuteChanged" />
                             <select class="editorInput timePeriodInput"
-                                    disabled="@string.IsNullOrWhiteSpace(_editDueDate)"
-                                    @bind="_editDuePeriod">
+                                    disabled="@string.IsNullOrWhiteSpace(_editAssignmentAssignDate)"
+                                    @bind="_editAssignmentAssignPeriod">
+                                @foreach (var period in MeridiemOptions)
+                                {
+                                    <option value="@period">@period</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="editorLabel">Due date (optional)</label>
+                        <input class="editorInput"
+                               type="date"
+                               value="@_editAssignmentDueDate"
+                               @onchange="OnEditAssignmentDueDateChanged" />
+                    </div>
+                    <div>
+                        <label class="editorLabel">Due time (optional)</label>
+                        <div class="compactTimeRow">
+                            <input class="editorInput timeNumberInput"
+                                   type="text"
+                                   inputmode="numeric"
+                                   maxlength="2"
+                                   disabled="@string.IsNullOrWhiteSpace(_editAssignmentDueDate)"
+                                   value="@_editAssignmentDueHour"
+                                   @oninput="OnEditAssignmentDueHourChanged" />
+                            <span class="timeSeparator">:</span>
+                            <input class="editorInput timeNumberInput"
+                                   type="text"
+                                   inputmode="numeric"
+                                   maxlength="2"
+                                   disabled="@string.IsNullOrWhiteSpace(_editAssignmentDueDate)"
+                                   value="@_editAssignmentDueMinute"
+                                   @oninput="OnEditAssignmentDueMinuteChanged" />
+                            <select class="editorInput timePeriodInput"
+                                    disabled="@string.IsNullOrWhiteSpace(_editAssignmentDueDate)"
+                                    @bind="_editAssignmentDuePeriod">
                                 @foreach (var period in MeridiemOptions)
                                 {
                                     <option value="@period">@period</option>
@@ -417,15 +473,9 @@
                 <div class="assignmentModalActions assignmentDueModalActions">
                     <button class="primaryBtn"
                             type="button"
-                            @onclick="() => SaveAssignmentDueAsync(editingAssignment.Id)"
-                            disabled="@_isSavingDue">
-                        Save due
-                    </button>
-                    <button class="secondaryBtn"
-                            type="button"
-                            @onclick="() => ClearAssignmentDueAsync(editingAssignment.Id)"
-                            disabled="@_isSavingDue">
-                        Clear due
+                            @onclick="() => SaveAssignmentAsync(editingAssignment.Id)"
+                            disabled="@_isSavingAssignment">
+                        Save assignment
                     </button>
                 </div>
             </div>
@@ -466,12 +516,18 @@
     private string _assignmentDueHour = "";
     private string _assignmentDueMinute = "";
     private string _assignmentDuePeriod = DefaultDuePeriod;
-    private int? _editingAssignmentDueId;
-    private string _editDueDate = "";
-    private string _editDueHour = "";
-    private string _editDueMinute = "";
-    private string _editDuePeriod = DefaultDuePeriod;
-    private bool _isSavingDue;
+    private int? _editingAssignmentId;
+    private string _editAssignmentName = "";
+    private string _editAssignmentScenarioId = "";
+    private string _editAssignmentAssignDate = "";
+    private string _editAssignmentAssignHour = "";
+    private string _editAssignmentAssignMinute = "";
+    private string _editAssignmentAssignPeriod = DefaultAssignPeriod;
+    private string _editAssignmentDueDate = "";
+    private string _editAssignmentDueHour = "";
+    private string _editAssignmentDueMinute = "";
+    private string _editAssignmentDuePeriod = DefaultDuePeriod;
+    private bool _isSavingAssignment;
     private static readonly TimeSpan CstOffset = TimeSpan.FromHours(-6);
     private const string DefaultAssignHour = "12";
     private const string DefaultAssignMinute = "00";
@@ -509,7 +565,7 @@
         _isAddAssignmentModalOpen = false;
         _isAddTeacherModalOpen = false;
         _isAddStudentModalOpen = false;
-        CancelDueEditor();
+        CloseEditAssignmentModal();
     }
 
     private void CloseAddClassModal()
@@ -539,7 +595,7 @@
         _isAddClassModalOpen = false;
         _isAddTeacherModalOpen = false;
         _isAddStudentModalOpen = false;
-        CancelDueEditor();
+        CloseEditAssignmentModal();
     }
 
     private void CloseAddAssignmentModal()
@@ -554,7 +610,7 @@
         _isAddStudentModalOpen = false;
         _isAddAssignmentModalOpen = false;
         _isAddClassModalOpen = false;
-        CancelDueEditor();
+        CloseEditAssignmentModal();
     }
 
     private void CloseAddTeacherModal()
@@ -569,7 +625,7 @@
         _isAddTeacherModalOpen = false;
         _isAddAssignmentModalOpen = false;
         _isAddClassModalOpen = false;
-        CancelDueEditor();
+        CloseEditAssignmentModal();
     }
 
     private void CloseAddStudentModal()
@@ -645,36 +701,68 @@
         _assignmentDueMinute = NormalizeTimePartInput(e.Value?.ToString());
     }
 
-    private void OnEditDueDateChanged(ChangeEventArgs e)
+    private void OnEditAssignmentAssignDateChanged(ChangeEventArgs e)
     {
-        _editDueDate = (e.Value?.ToString() ?? "").Trim();
-        if (string.IsNullOrWhiteSpace(_editDueDate))
+        _editAssignmentAssignDate = (e.Value?.ToString() ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(_editAssignmentAssignDate))
         {
-            _editDueHour = "";
-            _editDueMinute = "";
-            _editDuePeriod = DefaultDuePeriod;
+            _editAssignmentAssignHour = "";
+            _editAssignmentAssignMinute = "";
+            _editAssignmentAssignPeriod = DefaultAssignPeriod;
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(_editDueHour))
+        if (string.IsNullOrWhiteSpace(_editAssignmentAssignHour))
         {
-            _editDueHour = DefaultDueHour;
+            _editAssignmentAssignHour = DefaultAssignHour;
         }
 
-        if (string.IsNullOrWhiteSpace(_editDueMinute))
+        if (string.IsNullOrWhiteSpace(_editAssignmentAssignMinute))
         {
-            _editDueMinute = DefaultDueMinute;
+            _editAssignmentAssignMinute = DefaultAssignMinute;
         }
     }
 
-    private void OnEditDueHourChanged(ChangeEventArgs e)
+    private void OnEditAssignmentAssignHourChanged(ChangeEventArgs e)
     {
-        _editDueHour = NormalizeTimePartInput(e.Value?.ToString());
+        _editAssignmentAssignHour = NormalizeTimePartInput(e.Value?.ToString());
     }
 
-    private void OnEditDueMinuteChanged(ChangeEventArgs e)
+    private void OnEditAssignmentAssignMinuteChanged(ChangeEventArgs e)
     {
-        _editDueMinute = NormalizeTimePartInput(e.Value?.ToString());
+        _editAssignmentAssignMinute = NormalizeTimePartInput(e.Value?.ToString());
+    }
+
+    private void OnEditAssignmentDueDateChanged(ChangeEventArgs e)
+    {
+        _editAssignmentDueDate = (e.Value?.ToString() ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(_editAssignmentDueDate))
+        {
+            _editAssignmentDueHour = "";
+            _editAssignmentDueMinute = "";
+            _editAssignmentDuePeriod = DefaultDuePeriod;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_editAssignmentDueHour))
+        {
+            _editAssignmentDueHour = DefaultDueHour;
+        }
+
+        if (string.IsNullOrWhiteSpace(_editAssignmentDueMinute))
+        {
+            _editAssignmentDueMinute = DefaultDueMinute;
+        }
+    }
+
+    private void OnEditAssignmentDueHourChanged(ChangeEventArgs e)
+    {
+        _editAssignmentDueHour = NormalizeTimePartInput(e.Value?.ToString());
+    }
+
+    private void OnEditAssignmentDueMinuteChanged(ChangeEventArgs e)
+    {
+        _editAssignmentDueMinute = NormalizeTimePartInput(e.Value?.ToString());
     }
 
     private void OnAssignmentAssignDateChanged(ChangeEventArgs e)
@@ -822,7 +910,7 @@
         _isAddAssignmentModalOpen = false;
         _isAddTeacherModalOpen = false;
         _isAddStudentModalOpen = false;
-        CancelDueEditor();
+        CloseEditAssignmentModal();
     }
 
     private async Task CreateAssignmentAsync()
@@ -927,42 +1015,63 @@
         }
     }
 
-    private void ToggleDueEditor(ClassAssignmentDto assignment)
+    private async Task OpenEditAssignmentModalAsync(ClassAssignmentDto assignment)
     {
-        if (_editingAssignmentDueId == assignment.Id)
+        if (_selectedClass is null)
         {
-            CancelDueEditor();
             return;
         }
 
-        _editingAssignmentDueId = assignment.Id;
+        await ReloadAvailableScenariosAsync();
+        _editingAssignmentId = assignment.Id;
+        _editAssignmentName = assignment.Name;
+        _editAssignmentScenarioId = assignment.ScenarioId;
+
+        var assignCst = assignment.AssignedAtUtc.ToOffset(CstOffset);
+        _editAssignmentAssignDate = assignCst.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        _editAssignmentAssignHour = assignCst.ToString("%h", CultureInfo.InvariantCulture);
+        _editAssignmentAssignMinute = assignCst.ToString("mm", CultureInfo.InvariantCulture);
+        _editAssignmentAssignPeriod = assignCst.ToString("tt", CultureInfo.InvariantCulture);
+
         if (assignment.DueAtUtc.HasValue)
         {
             var dueCst = assignment.DueAtUtc.Value.ToOffset(CstOffset);
-            _editDueDate = dueCst.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-            _editDueHour = dueCst.ToString("%h", CultureInfo.InvariantCulture);
-            _editDueMinute = dueCst.ToString("mm", CultureInfo.InvariantCulture);
-            _editDuePeriod = dueCst.ToString("tt", CultureInfo.InvariantCulture);
+            _editAssignmentDueDate = dueCst.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            _editAssignmentDueHour = dueCst.ToString("%h", CultureInfo.InvariantCulture);
+            _editAssignmentDueMinute = dueCst.ToString("mm", CultureInfo.InvariantCulture);
+            _editAssignmentDuePeriod = dueCst.ToString("tt", CultureInfo.InvariantCulture);
         }
         else
         {
-            _editDueDate = "";
-            _editDueHour = "";
-            _editDueMinute = "";
-            _editDuePeriod = DefaultDuePeriod;
+            _editAssignmentDueDate = "";
+            _editAssignmentDueHour = "";
+            _editAssignmentDueMinute = "";
+            _editAssignmentDuePeriod = DefaultDuePeriod;
         }
+
+        _isAddAssignmentModalOpen = false;
+        _isAddClassModalOpen = false;
+        _isAddTeacherModalOpen = false;
+        _isAddStudentModalOpen = false;
     }
 
-    private void CancelDueEditor()
+    private void CloseEditAssignmentModal()
     {
-        _editingAssignmentDueId = null;
-        _editDueDate = "";
-        _editDueHour = "";
-        _editDueMinute = "";
-        _editDuePeriod = DefaultDuePeriod;
+        _editingAssignmentId = null;
+        _editAssignmentName = "";
+        _editAssignmentScenarioId = "";
+        _editAssignmentAssignDate = "";
+        _editAssignmentAssignHour = "";
+        _editAssignmentAssignMinute = "";
+        _editAssignmentAssignPeriod = DefaultAssignPeriod;
+        _editAssignmentDueDate = "";
+        _editAssignmentDueHour = "";
+        _editAssignmentDueMinute = "";
+        _editAssignmentDuePeriod = DefaultDuePeriod;
+        _isSavingAssignment = false;
     }
 
-    private async Task SaveAssignmentDueAsync(int assignmentId)
+    private async Task SaveAssignmentAsync(int assignmentId)
     {
         if (_selectedClass is null)
         {
@@ -970,15 +1079,46 @@
             return;
         }
 
-        var dueDateText = (_editDueDate ?? "").Trim();
-        var dueTimeText = string.IsNullOrWhiteSpace(dueDateText)
+        var assignmentName = (_editAssignmentName ?? "").Trim();
+        var scenarioId = (_editAssignmentScenarioId ?? "").Trim();
+        var assignDate = (_editAssignmentAssignDate ?? "").Trim();
+        var assignTime = string.IsNullOrWhiteSpace(assignDate)
             ? ""
-            : BuildTwelveHourTimeText(_editDueHour, _editDueMinute, _editDuePeriod);
-        var assignment = _assignments.FirstOrDefault(x => x.Id == assignmentId);
+            : BuildTwelveHourTimeText(_editAssignmentAssignHour, _editAssignmentAssignMinute, _editAssignmentAssignPeriod);
+        var dueDate = (_editAssignmentDueDate ?? "").Trim();
+        var dueTime = string.IsNullOrWhiteSpace(dueDate)
+            ? ""
+            : BuildTwelveHourTimeText(_editAssignmentDueHour, _editAssignmentDueMinute, _editAssignmentDuePeriod);
+
+        if (string.IsNullOrWhiteSpace(assignmentName))
+        {
+            SetMessage("Enter an assignment name", false);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(scenarioId))
+        {
+            SetMessage("Select a scenario to assign", false);
+            return;
+        }
 
         if (!TryBuildOptionalCstDateTimeUtc(
-            dueDateText,
-            dueTimeText,
+            assignDate,
+            assignTime,
+            defaultTime: new TimeOnly(0, 0),
+            missingDateMessage: "Select an assign date when entering an assign time",
+            invalidDateMessage: "Invalid assign date",
+            invalidTimeMessage: "Invalid assign time. Use h:mm AM/PM.",
+            out var assignedAtUtc,
+            out var assignError))
+        {
+            SetMessage(assignError, false);
+            return;
+        }
+
+        if (!TryBuildOptionalCstDateTimeUtc(
+            dueDate,
+            dueTime,
             defaultTime: new TimeOnly(23, 59),
             missingDateMessage: "Select a due date when entering a due time",
             invalidDateMessage: "Invalid due date",
@@ -990,50 +1130,44 @@
             return;
         }
 
-        if (assignment is not null && dueAtUtc.HasValue && dueAtUtc.Value < assignment.AssignedAtUtc)
+        if (assignedAtUtc.HasValue && dueAtUtc.HasValue && dueAtUtc.Value < assignedAtUtc.Value)
         {
             SetMessage("Due date must be after the assign date", false);
             return;
         }
 
-        _isSavingDue = true;
+        _isSavingAssignment = true;
         try
         {
             var resp = await Api.Http.PutAsJsonAsync(
-                $"api/classes/{_selectedClass.Id}/assignments/{assignmentId}/due",
-                new UpdateAssignmentDueRequest
+                $"api/classes/{_selectedClass.Id}/assignments/{assignmentId}",
+                new UpdateAssignmentRequest
                 {
+                    Name = assignmentName,
+                    ScenarioId = scenarioId,
+                    AssignedAtUtc = assignedAtUtc,
                     DueAtUtc = dueAtUtc
                 });
 
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync();
-                SetMessage($"Update due failed {((int)resp.StatusCode)} {body}", false);
+                SetMessage($"Update assignment failed {((int)resp.StatusCode)} {body}", false);
                 return;
             }
 
-            SetMessage("Due date updated", true);
-            CancelDueEditor();
+            SetMessage("Assignment updated", true);
+            CloseEditAssignmentModal();
             await ReloadAssignmentsAsync();
         }
         catch
         {
-            SetMessage("Could not update due date", false);
+            SetMessage("Could not update assignment", false);
         }
         finally
         {
-            _isSavingDue = false;
+            _isSavingAssignment = false;
         }
-    }
-
-    private async Task ClearAssignmentDueAsync(int assignmentId)
-    {
-        _editDueDate = "";
-        _editDueHour = "";
-        _editDueMinute = "";
-        _editDuePeriod = DefaultDuePeriod;
-        await SaveAssignmentDueAsync(assignmentId);
     }
 
     private static string FormatAssignedAtCst(DateTimeOffset assignedAtUtc)
@@ -1241,7 +1375,7 @@
         _isAddTeacherModalOpen = false;
         _isAddStudentModalOpen = false;
         _isAddAssignmentModalOpen = false;
-        CancelDueEditor();
+        CloseEditAssignmentModal();
 
         await ReloadClassesAsync();
         await ReloadAvailableScenariosAsync();
@@ -1445,6 +1579,14 @@
 
     private sealed class UpdateAssignmentDueRequest
     {
+        public DateTimeOffset? DueAtUtc { get; set; }
+    }
+
+    private sealed class UpdateAssignmentRequest
+    {
+        public string Name { get; set; } = "";
+        public string ScenarioId { get; set; } = "";
+        public DateTimeOffset? AssignedAtUtc { get; set; }
         public DateTimeOffset? DueAtUtc { get; set; }
     }
 
