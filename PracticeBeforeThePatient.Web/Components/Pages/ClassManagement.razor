@@ -311,21 +311,17 @@
                         <label class="editorLabel">Due time (optional)</label>
                         <div class="timeInputRow">
                             <input class="editorInput timeNumberInput"
-                                   type="number"
-                                   min="1"
-                                   max="12"
-                                   step="1"
+                                   type="text"
                                    inputmode="numeric"
-                                   @bind="_assignmentDueHour"
-                                   @bind:event="oninput" />
+                                   maxlength="2"
+                                   value="@_assignmentDueHour"
+                                   @oninput="OnAssignmentDueHourChanged" />
                             <input class="editorInput timeNumberInput"
-                                   type="number"
-                                   min="0"
-                                   max="59"
-                                   step="1"
+                                   type="text"
                                    inputmode="numeric"
-                                   @bind="_assignmentDueMinute"
-                                   @bind:event="oninput" />
+                                   maxlength="2"
+                                   value="@_assignmentDueMinute"
+                                   @oninput="OnAssignmentDueMinuteChanged" />
                             <select class="editorInput timePeriodInput" @bind="_assignmentDuePeriod">
                                 @foreach (var period in MeridiemOptions)
                                 {
@@ -370,21 +366,17 @@
                         <label class="editorLabel">Due time (optional)</label>
                         <div class="timeInputRow">
                             <input class="editorInput timeNumberInput"
-                                   type="number"
-                                   min="1"
-                                   max="12"
-                                   step="1"
+                                   type="text"
                                    inputmode="numeric"
-                                   @bind="_editDueHour"
-                                   @bind:event="oninput" />
+                                   maxlength="2"
+                                   value="@_editDueHour"
+                                   @oninput="OnEditDueHourChanged" />
                             <input class="editorInput timeNumberInput"
-                                   type="number"
-                                   min="0"
-                                   max="59"
-                                   step="1"
+                                   type="text"
                                    inputmode="numeric"
-                                   @bind="_editDueMinute"
-                                   @bind:event="oninput" />
+                                   maxlength="2"
+                                   value="@_editDueMinute"
+                                   @oninput="OnEditDueMinuteChanged" />
                             <select class="editorInput timePeriodInput" @bind="_editDuePeriod">
                                 @foreach (var period in MeridiemOptions)
                                 {
@@ -598,9 +590,29 @@
         _assignmentDate = (e.Value?.ToString() ?? "").Trim();
     }
 
+    private void OnAssignmentDueHourChanged(ChangeEventArgs e)
+    {
+        _assignmentDueHour = NormalizeTimePartInput(e.Value?.ToString(), DefaultDueHour);
+    }
+
+    private void OnAssignmentDueMinuteChanged(ChangeEventArgs e)
+    {
+        _assignmentDueMinute = NormalizeTimePartInput(e.Value?.ToString(), DefaultDueMinute);
+    }
+
     private void OnEditDueDateChanged(ChangeEventArgs e)
     {
         _editDueDate = (e.Value?.ToString() ?? "").Trim();
+    }
+
+    private void OnEditDueHourChanged(ChangeEventArgs e)
+    {
+        _editDueHour = NormalizeTimePartInput(e.Value?.ToString(), DefaultDueHour);
+    }
+
+    private void OnEditDueMinuteChanged(ChangeEventArgs e)
+    {
+        _editDueMinute = NormalizeTimePartInput(e.Value?.ToString(), DefaultDueMinute);
     }
 
     private void OnAssignmentAssignDateChanged(ChangeEventArgs e)
@@ -957,6 +969,12 @@
 
         var normalizedPeriod = string.Equals(period, "AM", StringComparison.OrdinalIgnoreCase) ? "AM" : "PM";
         return $"{normalizedHour}:{normalizedMinute} {normalizedPeriod}";
+    }
+
+    private static string NormalizeTimePartInput(string? rawValue, string fallback)
+    {
+        var digitsOnly = new string((rawValue ?? "").Where(char.IsDigit).Take(2).ToArray());
+        return string.IsNullOrWhiteSpace(digitsOnly) ? fallback : digitsOnly;
     }
 
     private static bool TryBuildOptionalCstDateTimeUtc(
