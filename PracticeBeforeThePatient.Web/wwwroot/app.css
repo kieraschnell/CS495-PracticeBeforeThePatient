@@ -1150,28 +1150,37 @@ textarea:focus {
   flex-wrap: nowrap;
 }
 
+.compactTimeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  padding-top: 2px;
+}
+
 .dateInputGrow {
   flex: 1 1 auto;
   min-width: 0;
 }
 
 .timeNumberInput {
-  flex: 0 0 5.5rem;
-  min-width: 5.5rem;
-  width: 5.5rem;
+  flex: 0 0 5rem;
+  min-width: 5rem;
+  width: 5rem;
 }
 
 .timePeriodInput {
-  flex: 0 0 5.5rem;
-  min-width: 5.5rem;
-  width: 5.5rem;
+  flex: 0 0 5rem;
+  min-width: 5rem;
+  width: 5rem;
 }
 
 .timeSeparator {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1;
   color: rgba(0, 0, 0, 0.8);
+  margin: 0 2px;
 }
 
 .assignmentList {
