@@ -1183,6 +1183,10 @@ textarea:focus {
   margin: 0 2px;
 }
 
+.assignmentModalMessage {
+  margin-bottom: 12px;
+}
+
 .assignmentList {
   display: grid;
   gap: 10px;

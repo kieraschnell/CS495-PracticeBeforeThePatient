@@ -266,6 +266,11 @@
             }
             else
             {
+                @if (!string.IsNullOrWhiteSpace(_assignmentModalMessage))
+                {
+                    <div class="warningMessage assignmentModalMessage">@_assignmentModalMessage</div>
+                }
+
                 <div class="assignmentModalForm">
                     <div>
                         <label class="editorLabel">Assignment name</label>
@@ -378,6 +383,11 @@
                 </div>
 
                 <div class="assignmentMeta">@editingAssignment.Name · @editingAssignment.ScenarioId</div>
+
+                @if (!string.IsNullOrWhiteSpace(_assignmentModalMessage))
+                {
+                    <div class="warningMessage assignmentModalMessage">@_assignmentModalMessage</div>
+                }
 
                 <div class="assignmentModalForm">
                     <div>
@@ -498,6 +508,7 @@
     private string _message = "";
     private string _messageKind = "success";
     private int _messageVersion;
+    private string _assignmentModalMessage = "";
 
     private bool _menuOpen;
 
@@ -590,6 +601,7 @@
             return;
         }
 
+        ClearAssignmentModalMessage();
         await ReloadAvailableScenariosAsync();
         _isAddAssignmentModalOpen = true;
         _isAddClassModalOpen = false;
@@ -600,6 +612,7 @@
 
     private void CloseAddAssignmentModal()
     {
+        ClearAssignmentModalMessage();
         _isAddAssignmentModalOpen = false;
     }
 
@@ -640,6 +653,17 @@
         StateHasChanged();
         var version = ++_messageVersion;
         _ = ClearMessageLater(version);
+    }
+
+    private void SetAssignmentModalMessage(string text)
+    {
+        _assignmentModalMessage = text;
+        StateHasChanged();
+    }
+
+    private void ClearAssignmentModalMessage()
+    {
+        _assignmentModalMessage = "";
     }
 
     private async Task ClearMessageLater(int version)
@@ -917,7 +941,7 @@
     {
         if (_selectedClass is null)
         {
-            SetMessage("Select a class first", false);
+            SetAssignmentModalMessage("Select a class first");
             return;
         }
 
@@ -934,13 +958,13 @@
 
         if (string.IsNullOrWhiteSpace(assignmentName))
         {
-            SetMessage("Enter an assignment name", false);
+            SetAssignmentModalMessage("Enter an assignment name");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(assignmentScenarioId))
         {
-            SetMessage("Select a scenario to assign", false);
+            SetAssignmentModalMessage("Select a scenario to assign");
             return;
         }
 
@@ -954,7 +978,7 @@
             out var assignedAtUtc,
             out var assignError))
         {
-            SetMessage(assignError, false);
+            SetAssignmentModalMessage(assignError);
             return;
         }
 
@@ -968,18 +992,19 @@
             out var dueAtUtc,
             out var dueError))
         {
-            SetMessage(dueError, false);
+            SetAssignmentModalMessage(dueError);
             return;
         }
 
         if (assignedAtUtc.HasValue && dueAtUtc.HasValue && dueAtUtc.Value < assignedAtUtc.Value)
         {
-            SetMessage("Due date must be after the assign date", false);
+            SetAssignmentModalMessage("Due date must be after the assign date");
             return;
         }
 
         try
         {
+            ClearAssignmentModalMessage();
             var resp = await Api.Http.PostAsJsonAsync($"api/classes/{_selectedClass.Id}/assignments", new CreateAssignmentRequest
             {
                 Name = assignmentName,
@@ -991,7 +1016,7 @@
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync();
-                SetMessage($"Assign failed {((int)resp.StatusCode)} {body}", false);
+                SetAssignmentModalMessage($"Assign failed {((int)resp.StatusCode)} {body}");
 
                 return;
             }
@@ -1011,7 +1036,7 @@
         }
         catch
         {
-            SetMessage("Could not create assignment", false);
+            SetAssignmentModalMessage("Could not create assignment");
         }
     }
 
@@ -1023,6 +1048,7 @@
         }
 
         await ReloadAvailableScenariosAsync();
+        ClearAssignmentModalMessage();
         _editingAssignmentId = assignment.Id;
         _editAssignmentName = assignment.Name;
         _editAssignmentScenarioId = assignment.ScenarioId;
@@ -1057,6 +1083,7 @@
 
     private void CloseEditAssignmentModal()
     {
+        ClearAssignmentModalMessage();
         _editingAssignmentId = null;
         _editAssignmentName = "";
         _editAssignmentScenarioId = "";
@@ -1075,7 +1102,7 @@
     {
         if (_selectedClass is null)
         {
-            SetMessage("Select a class first", false);
+            SetAssignmentModalMessage("Select a class first");
             return;
         }
 
@@ -1092,13 +1119,13 @@
 
         if (string.IsNullOrWhiteSpace(assignmentName))
         {
-            SetMessage("Enter an assignment name", false);
+            SetAssignmentModalMessage("Enter an assignment name");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(scenarioId))
         {
-            SetMessage("Select a scenario to assign", false);
+            SetAssignmentModalMessage("Select a scenario to assign");
             return;
         }
 
@@ -1112,7 +1139,7 @@
             out var assignedAtUtc,
             out var assignError))
         {
-            SetMessage(assignError, false);
+            SetAssignmentModalMessage(assignError);
             return;
         }
 
@@ -1126,19 +1153,20 @@
             out var dueAtUtc,
             out var dueError))
         {
-            SetMessage(dueError, false);
+            SetAssignmentModalMessage(dueError);
             return;
         }
 
         if (assignedAtUtc.HasValue && dueAtUtc.HasValue && dueAtUtc.Value < assignedAtUtc.Value)
         {
-            SetMessage("Due date must be after the assign date", false);
+            SetAssignmentModalMessage("Due date must be after the assign date");
             return;
         }
 
         _isSavingAssignment = true;
         try
         {
+            ClearAssignmentModalMessage();
             var resp = await Api.Http.PutAsJsonAsync(
                 $"api/classes/{_selectedClass.Id}/assignments/{assignmentId}",
                 new UpdateAssignmentRequest
@@ -1152,7 +1180,7 @@
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync();
-                SetMessage($"Update assignment failed {((int)resp.StatusCode)} {body}", false);
+                SetAssignmentModalMessage($"Update assignment failed {((int)resp.StatusCode)} {body}");
                 return;
             }
 
@@ -1162,7 +1190,7 @@
         }
         catch
         {
-            SetMessage("Could not update assignment", false);
+            SetAssignmentModalMessage("Could not update assignment");
         }
         finally
         {
