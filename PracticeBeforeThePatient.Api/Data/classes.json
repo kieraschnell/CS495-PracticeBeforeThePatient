@@ -1,0 +1,12 @@
+[
+  {
+    "Id": "912abaa3a2aa41ff8783be31a89cff0f",
+    "Name": "fg",
+    "Teachers": [
+      "admin@ua.edu"
+    ],
+    "Students": [],
+    "AllowedScenarioIds": [],
+    "Assignments": []
+  }
+]

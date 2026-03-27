@@ -294,11 +294,34 @@
                     </div>
                     <div>
                         <label class="editorLabel">Assign time (optional)</label>
-                        <input class="editorInput"
-                               type="text"
-                               value="@_assignmentAssignTime"
-                               @onchange="OnAssignmentAssignTimeChanged"
-                               placeholder="h:mm AM/PM" />
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:nowrap;">
+                            <input class="editorInput timeNumberInput"
+                                   style="flex:0 0 5.5rem; min-width:5.5rem; width:5.5rem;"
+                                   type="text"
+                                   inputmode="numeric"
+                                   maxlength="2"
+                                   disabled="@string.IsNullOrWhiteSpace(_assignmentAssignDate)"
+                                   value="@_assignmentAssignHour"
+                                   @oninput="OnAssignmentAssignHourChanged" />
+                            <span class="timeSeparator">:</span>
+                            <input class="editorInput timeNumberInput"
+                                   style="flex:0 0 5.5rem; min-width:5.5rem; width:5.5rem;"
+                                   type="text"
+                                   inputmode="numeric"
+                                   maxlength="2"
+                                   disabled="@string.IsNullOrWhiteSpace(_assignmentAssignDate)"
+                                   value="@_assignmentAssignMinute"
+                                   @oninput="OnAssignmentAssignMinuteChanged" />
+                            <select class="editorInput timePeriodInput"
+                                    style="flex:0 0 5.5rem; min-width:5.5rem; width:5.5rem;"
+                                    disabled="@string.IsNullOrWhiteSpace(_assignmentAssignDate)"
+                                    @bind="_assignmentAssignPeriod">
+                                @foreach (var period in MeridiemOptions)
+                                {
+                                    <option value="@period">@period</option>
+                                }
+                            </select>
+                        </div>
                     </div>
                     <div>
                         <label class="editorLabel">Due date (optional)</label>
@@ -309,20 +332,28 @@
                     </div>
                     <div>
                         <label class="editorLabel">Due time (optional)</label>
-                        <div class="timeInputRow">
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:nowrap;">
                             <input class="editorInput timeNumberInput"
+                                   style="flex:0 0 5.5rem; min-width:5.5rem; width:5.5rem;"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
+                                   disabled="@string.IsNullOrWhiteSpace(_assignmentDate)"
                                    value="@_assignmentDueHour"
                                    @oninput="OnAssignmentDueHourChanged" />
+                            <span class="timeSeparator">:</span>
                             <input class="editorInput timeNumberInput"
+                                   style="flex:0 0 5.5rem; min-width:5.5rem; width:5.5rem;"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
+                                   disabled="@string.IsNullOrWhiteSpace(_assignmentDate)"
                                    value="@_assignmentDueMinute"
                                    @oninput="OnAssignmentDueMinuteChanged" />
-                            <select class="editorInput timePeriodInput" @bind="_assignmentDuePeriod">
+                            <select class="editorInput timePeriodInput"
+                                    style="flex:0 0 6rem; min-width:6rem; width:6rem;"
+                                    disabled="@string.IsNullOrWhiteSpace(_assignmentDate)"
+                                    @bind="_assignmentDuePeriod">
                                 @foreach (var period in MeridiemOptions)
                                 {
                                     <option value="@period">@period</option>
@@ -333,7 +364,7 @@
                 </div>
 
                 <div class="assignmentModalActions">
-                    <button class="primaryBtn" type="button" @onclick="CreateAssignmentAsync" disabled="@(!CanAssignScenario)">Assign scenario</button>
+                    <button class="primaryBtn" type="button" @onclick="CreateAssignmentAsync">Assign scenario</button>
                 </div>
             }
         </div>
@@ -357,27 +388,29 @@
                 <div class="assignmentModalForm assignmentModalFormSingle">
                     <div>
                         <label class="editorLabel">Due date (optional)</label>
-                        <input class="editorInput"
-                               type="date"
-                               value="@_editDueDate"
-                               @onchange="OnEditDueDateChanged" />
-                    </div>
-                    <div>
-                        <label class="editorLabel">Due time (optional)</label>
-                        <div class="timeInputRow">
+                        <div class="dateTimeInputRow">
+                            <input class="editorInput dateInputGrow"
+                                   type="date"
+                                   value="@_editDueDate"
+                                   @onchange="OnEditDueDateChanged" />
                             <input class="editorInput timeNumberInput"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
+                                   disabled="@string.IsNullOrWhiteSpace(_editDueDate)"
                                    value="@_editDueHour"
                                    @oninput="OnEditDueHourChanged" />
+                            <span class="timeSeparator">:</span>
                             <input class="editorInput timeNumberInput"
                                    type="text"
                                    inputmode="numeric"
                                    maxlength="2"
+                                   disabled="@string.IsNullOrWhiteSpace(_editDueDate)"
                                    value="@_editDueMinute"
                                    @oninput="OnEditDueMinuteChanged" />
-                            <select class="editorInput timePeriodInput" @bind="_editDuePeriod">
+                            <select class="editorInput timePeriodInput"
+                                    disabled="@string.IsNullOrWhiteSpace(_editDueDate)"
+                                    @bind="_editDuePeriod">
                                 @foreach (var period in MeridiemOptions)
                                 {
                                     <option value="@period">@period</option>
@@ -432,26 +465,27 @@
     private string _assignmentName = "";
     private string _assignmentScenarioId = "";
     private string _assignmentAssignDate = "";
-    private string _assignmentAssignTime = "";
+    private string _assignmentAssignHour = "";
+    private string _assignmentAssignMinute = "";
+    private string _assignmentAssignPeriod = DefaultAssignPeriod;
     private string _assignmentDate = "";
-    private string _assignmentDueHour = DefaultDueHour;
-    private string _assignmentDueMinute = DefaultDueMinute;
+    private string _assignmentDueHour = "";
+    private string _assignmentDueMinute = "";
     private string _assignmentDuePeriod = DefaultDuePeriod;
     private int? _editingAssignmentDueId;
     private string _editDueDate = "";
-    private string _editDueHour = DefaultDueHour;
-    private string _editDueMinute = DefaultDueMinute;
+    private string _editDueHour = "";
+    private string _editDueMinute = "";
     private string _editDuePeriod = DefaultDuePeriod;
     private bool _isSavingDue;
     private static readonly TimeSpan CstOffset = TimeSpan.FromHours(-6);
+    private const string DefaultAssignHour = "12";
+    private const string DefaultAssignMinute = "00";
+    private const string DefaultAssignPeriod = "AM";
     private const string DefaultDueHour = "11";
     private const string DefaultDueMinute = "59";
     private const string DefaultDuePeriod = "PM";
     private static readonly string[] MeridiemOptions = ["AM", "PM"];
-    private bool CanAssignScenario =>
-        !string.IsNullOrWhiteSpace(_assignmentName) &&
-        !string.IsNullOrWhiteSpace(_assignmentScenarioId);
-
     private bool _isTeacherLoaded;
     private bool _isTeacher;
 
@@ -588,41 +622,97 @@
     private void OnAssignmentDateChanged(ChangeEventArgs e)
     {
         _assignmentDate = (e.Value?.ToString() ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(_assignmentDate))
+        {
+            _assignmentDueHour = "";
+            _assignmentDueMinute = "";
+            _assignmentDuePeriod = DefaultDuePeriod;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_assignmentDueHour))
+        {
+            _assignmentDueHour = DefaultDueHour;
+        }
+
+        if (string.IsNullOrWhiteSpace(_assignmentDueMinute))
+        {
+            _assignmentDueMinute = DefaultDueMinute;
+        }
     }
 
     private void OnAssignmentDueHourChanged(ChangeEventArgs e)
     {
-        _assignmentDueHour = NormalizeTimePartInput(e.Value?.ToString(), DefaultDueHour);
+        _assignmentDueHour = NormalizeTimePartInput(e.Value?.ToString());
     }
 
     private void OnAssignmentDueMinuteChanged(ChangeEventArgs e)
     {
-        _assignmentDueMinute = NormalizeTimePartInput(e.Value?.ToString(), DefaultDueMinute);
+        _assignmentDueMinute = NormalizeTimePartInput(e.Value?.ToString());
     }
 
     private void OnEditDueDateChanged(ChangeEventArgs e)
     {
         _editDueDate = (e.Value?.ToString() ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(_editDueDate))
+        {
+            _editDueHour = "";
+            _editDueMinute = "";
+            _editDuePeriod = DefaultDuePeriod;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_editDueHour))
+        {
+            _editDueHour = DefaultDueHour;
+        }
+
+        if (string.IsNullOrWhiteSpace(_editDueMinute))
+        {
+            _editDueMinute = DefaultDueMinute;
+        }
     }
 
     private void OnEditDueHourChanged(ChangeEventArgs e)
     {
-        _editDueHour = NormalizeTimePartInput(e.Value?.ToString(), DefaultDueHour);
+        _editDueHour = NormalizeTimePartInput(e.Value?.ToString());
     }
 
     private void OnEditDueMinuteChanged(ChangeEventArgs e)
     {
-        _editDueMinute = NormalizeTimePartInput(e.Value?.ToString(), DefaultDueMinute);
+        _editDueMinute = NormalizeTimePartInput(e.Value?.ToString());
     }
 
     private void OnAssignmentAssignDateChanged(ChangeEventArgs e)
     {
         _assignmentAssignDate = (e.Value?.ToString() ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(_assignmentAssignDate))
+        {
+            _assignmentAssignHour = "";
+            _assignmentAssignMinute = "";
+            _assignmentAssignPeriod = DefaultAssignPeriod;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_assignmentAssignHour))
+        {
+            _assignmentAssignHour = DefaultAssignHour;
+        }
+
+        if (string.IsNullOrWhiteSpace(_assignmentAssignMinute))
+        {
+            _assignmentAssignMinute = DefaultAssignMinute;
+        }
     }
 
-    private void OnAssignmentAssignTimeChanged(ChangeEventArgs e)
+    private void OnAssignmentAssignHourChanged(ChangeEventArgs e)
     {
-        _assignmentAssignTime = (e.Value?.ToString() ?? "").Trim();
+        _assignmentAssignHour = NormalizeTimePartInput(e.Value?.ToString());
+    }
+
+    private void OnAssignmentAssignMinuteChanged(ChangeEventArgs e)
+    {
+        _assignmentAssignMinute = NormalizeTimePartInput(e.Value?.ToString());
     }
 
     private async Task OnNewClassNameKeyDown(KeyboardEventArgs e)
@@ -728,10 +818,12 @@
         _assignmentName = "";
         _assignmentScenarioId = "";
         _assignmentAssignDate = "";
-        _assignmentAssignTime = "";
+        _assignmentAssignHour = "";
+        _assignmentAssignMinute = "";
+        _assignmentAssignPeriod = DefaultAssignPeriod;
         _assignmentDate = "";
-        _assignmentDueHour = DefaultDueHour;
-        _assignmentDueMinute = DefaultDueMinute;
+        _assignmentDueHour = "";
+        _assignmentDueMinute = "";
         _assignmentDuePeriod = DefaultDuePeriod;
         _isAddAssignmentModalOpen = false;
         _isAddTeacherModalOpen = false;
@@ -750,9 +842,13 @@
         var assignmentName = (_assignmentName ?? "").Trim();
         var assignmentScenarioId = (_assignmentScenarioId ?? "").Trim();
         var assignmentAssignDate = (_assignmentAssignDate ?? "").Trim();
-        var assignmentAssignTime = (_assignmentAssignTime ?? "").Trim();
+        var assignmentAssignTime = string.IsNullOrWhiteSpace(assignmentAssignDate)
+            ? ""
+            : BuildTwelveHourTimeText(_assignmentAssignHour, _assignmentAssignMinute, _assignmentAssignPeriod);
         var assignmentDate = (_assignmentDate ?? "").Trim();
-        var assignmentTime = BuildTwelveHourTimeText(_assignmentDueHour, _assignmentDueMinute, _assignmentDuePeriod);
+        var assignmentTime = string.IsNullOrWhiteSpace(assignmentDate)
+            ? ""
+            : BuildTwelveHourTimeText(_assignmentDueHour, _assignmentDueMinute, _assignmentDuePeriod);
 
         if (string.IsNullOrWhiteSpace(assignmentName))
         {
@@ -820,10 +916,12 @@
 
             _assignmentName = "";
             _assignmentAssignDate = "";
-            _assignmentAssignTime = "";
+            _assignmentAssignHour = "";
+            _assignmentAssignMinute = "";
+            _assignmentAssignPeriod = DefaultAssignPeriod;
             _assignmentDate = "";
-            _assignmentDueHour = DefaultDueHour;
-            _assignmentDueMinute = DefaultDueMinute;
+            _assignmentDueHour = "";
+            _assignmentDueMinute = "";
             _assignmentDuePeriod = DefaultDuePeriod;
             _isAddAssignmentModalOpen = false;
             SetMessage(assignedAtUtc.HasValue ? "Assignment scheduled" : "Scenario assigned", true);
@@ -855,8 +953,8 @@
         else
         {
             _editDueDate = "";
-            _editDueHour = DefaultDueHour;
-            _editDueMinute = DefaultDueMinute;
+            _editDueHour = "";
+            _editDueMinute = "";
             _editDuePeriod = DefaultDuePeriod;
         }
     }
@@ -865,8 +963,8 @@
     {
         _editingAssignmentDueId = null;
         _editDueDate = "";
-        _editDueHour = DefaultDueHour;
-        _editDueMinute = DefaultDueMinute;
+        _editDueHour = "";
+        _editDueMinute = "";
         _editDuePeriod = DefaultDuePeriod;
     }
 
@@ -879,7 +977,9 @@
         }
 
         var dueDateText = (_editDueDate ?? "").Trim();
-        var dueTimeText = BuildTwelveHourTimeText(_editDueHour, _editDueMinute, _editDuePeriod);
+        var dueTimeText = string.IsNullOrWhiteSpace(dueDateText)
+            ? ""
+            : BuildTwelveHourTimeText(_editDueHour, _editDueMinute, _editDuePeriod);
         var assignment = _assignments.FirstOrDefault(x => x.Id == assignmentId);
 
         if (!TryBuildOptionalCstDateTimeUtc(
@@ -936,8 +1036,8 @@
     private async Task ClearAssignmentDueAsync(int assignmentId)
     {
         _editDueDate = "";
-        _editDueHour = DefaultDueHour;
-        _editDueMinute = DefaultDueMinute;
+        _editDueHour = "";
+        _editDueMinute = "";
         _editDuePeriod = DefaultDuePeriod;
         await SaveAssignmentDueAsync(assignmentId);
     }
@@ -971,10 +1071,10 @@
         return $"{normalizedHour}:{normalizedMinute} {normalizedPeriod}";
     }
 
-    private static string NormalizeTimePartInput(string? rawValue, string fallback)
+    private static string NormalizeTimePartInput(string? rawValue)
     {
         var digitsOnly = new string((rawValue ?? "").Where(char.IsDigit).Take(2).ToArray());
-        return string.IsNullOrWhiteSpace(digitsOnly) ? fallback : digitsOnly;
+        return digitsOnly;
     }
 
     private static bool TryBuildOptionalCstDateTimeUtc(

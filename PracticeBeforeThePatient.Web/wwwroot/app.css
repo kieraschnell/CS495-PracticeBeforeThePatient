@@ -1142,11 +1142,17 @@ textarea:focus {
   margin-top: 14px;
 }
 
+.dateTimeInputRow,
 .timeInputRow {
   display: flex;
   gap: 10px;
   align-items: center;
   flex-wrap: nowrap;
+}
+
+.dateInputGrow {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .timeNumberInput {
@@ -1156,9 +1162,16 @@ textarea:focus {
 }
 
 .timePeriodInput {
-  flex: 0 0 6rem;
-  min-width: 6rem;
-  width: 6rem;
+  flex: 0 0 5.5rem;
+  min-width: 5.5rem;
+  width: 5.5rem;
+}
+
+.timeSeparator {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .assignmentList {
