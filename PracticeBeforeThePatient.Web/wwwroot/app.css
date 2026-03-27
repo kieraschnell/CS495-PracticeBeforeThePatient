@@ -1666,7 +1666,8 @@ html[data-theme="dark"] .card,
 html[data-theme="dark"] .compareCol,
 html[data-theme="dark"] .compareFooter,
 html[data-theme="dark"] .choiceCard,
-html[data-theme="dark"] .kebabMenu {
+html[data-theme="dark"] .kebabMenu,
+html[data-theme="dark"] .classMgmtModalCard {
   background: var(--card);
   border-color: var(--border);
 }
@@ -1701,15 +1702,21 @@ html[data-theme="dark"] .nodeTitle,
 html[data-theme="dark"] .choiceLabel,
 html[data-theme="dark"] .editorLabel,
 html[data-theme="dark"] .settingsLabel,
-html[data-theme="dark"] .classMgmtStudentEmail {
+html[data-theme="dark"] .classMgmtStudentEmail,
+html[data-theme="dark"] .assignmentMeta {
   color: var(--text);
 }
 
 html[data-theme="dark"] .settingsSubLabel,
 html[data-theme="dark"] .compareSmall,
 html[data-theme="dark"] .simSubtitle,
-html[data-theme="dark"] .narrLine {
+html[data-theme="dark"] .narrLine,
+html[data-theme="dark"] .timeSeparator {
   color: var(--muted);
+}
+
+html[data-theme="dark"] .classMgmtModalBackdrop {
+  background: rgba(5, 8, 14, 0.74);
 }
 
 html[data-theme="dark"] .panel-title,
@@ -1805,6 +1812,29 @@ html[data-theme="dark"] .optionCard,
 html[data-theme="dark"] .classMgmtStudent {
   background: rgba(236, 240, 246, 0.05);
   border-color: var(--border);
+}
+
+html[data-theme="dark"] .adminUserItem {
+  background: rgba(236, 240, 246, 0.04);
+  border-color: rgba(236, 240, 246, 0.08);
+}
+
+html[data-theme="dark"] .adminRoleChipTeacher {
+  background: rgba(236, 240, 246, 0.08);
+  color: #ecf0f6;
+  border-color: rgba(236, 240, 246, 0.16);
+}
+
+html[data-theme="dark"] .adminRoleChipAdmin {
+  background: rgba(212, 58, 86, 0.18);
+  color: #ffb8c4;
+  border-color: rgba(212, 58, 86, 0.3);
+}
+
+html[data-theme="dark"] .adminRoleChipStudent {
+  background: rgba(96, 165, 250, 0.14);
+  color: #bfdbfe;
+  border-color: rgba(96, 165, 250, 0.24);
 }
 
 html[data-theme="dark"] .optionCard,
