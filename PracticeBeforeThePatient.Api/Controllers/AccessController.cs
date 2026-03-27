@@ -34,6 +34,7 @@ public sealed class AccessController : ControllerBase
         public string AssignmentId { get; set; } = "";
         public string ScenarioId { get; set; } = "";
         public string Label { get; set; } = "";
+        public DateTimeOffset AssignedAtUtc { get; set; }
         public DateTimeOffset? DueAtUtc { get; set; }
         public bool IsSubmitted { get; set; }
     }
@@ -111,6 +112,7 @@ public sealed class AccessController : ControllerBase
                         AssignmentId = id,
                         ScenarioId = id,
                         Label = id,
+                        AssignedAtUtc = DateTimeOffset.UtcNow,
                         DueAtUtc = null,
                         IsSubmitted = false
                     })
@@ -172,9 +174,11 @@ public sealed class AccessController : ControllerBase
 
         var assignments = await _db.Assignments
             .Where(a => enrolledClassIds.Contains(a.ClassId))
+            .Where(a => a.AssignedAtUtc <= nowUtc)
             .Where(a => !a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc)
             .Include(a => a.Submissions.Where(s => s.StudentUserId == student.Id))
             .OrderBy(a => a.DueAtUtc ?? DateTime.MaxValue)
+            .ThenBy(a => a.AssignedAtUtc)
             .ThenBy(a => a.Name)
             .ToListAsync();
 
@@ -188,6 +192,7 @@ public sealed class AccessController : ControllerBase
                     AssignmentId = a.Id.ToString(),
                     ScenarioId = a.ScenarioId.Trim(),
                     Label = string.IsNullOrWhiteSpace(a.Name) ? a.ScenarioId : a.Name,
+                    AssignedAtUtc = a.AssignedAtUtc,
                     DueAtUtc = a.DueAtUtc,
                     IsSubmitted = submission is not null
                 };

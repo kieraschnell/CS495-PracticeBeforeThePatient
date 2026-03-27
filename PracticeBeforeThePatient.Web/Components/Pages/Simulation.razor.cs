@@ -372,6 +372,7 @@ public partial class Simulation : ComponentBase
 
         AvailableScenarios = (access.AllowedScenarioOptions ?? new List<ApiClient.AllowedScenarioOption>())
             .Where(x => !string.IsNullOrWhiteSpace(x.AssignmentId) && !string.IsNullOrWhiteSpace(x.ScenarioId))
+            .Where(x => x.AssignedAtUtc <= nowUtc)
             .Where(x => !x.DueAtUtc.HasValue || x.DueAtUtc.Value >= nowUtc)
             .Select(x => new ScenarioSelectionOption
             {

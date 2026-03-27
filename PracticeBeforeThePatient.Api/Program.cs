@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using PracticeBeforeThePatient.Core.Models;
 using PracticeBeforeThePatient.Data;
@@ -43,6 +44,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+    EnsureAssignmentsSchema(db);
 
     if (!db.Scenarios.Any())
     {
@@ -277,3 +279,144 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static void EnsureAssignmentsSchema(AppDbContext db)
+{
+    db.Database.OpenConnection();
+
+    try
+    {
+        var connection = db.Database.GetDbConnection();
+        if (!TableExists(connection, "Assignments"))
+        {
+            return;
+        }
+
+        var columns = GetTableColumns(connection, "Assignments");
+        var needsAssignedAtColumn = !columns.Contains("AssignedAtUtc");
+        var hasUniqueClassScenarioConstraint = HasUniqueClassScenarioConstraint(connection);
+
+        if (!needsAssignedAtColumn && !hasUniqueClassScenarioConstraint)
+        {
+            return;
+        }
+
+        RebuildAssignmentsTable(connection, columns.Contains("AssignedAtUtc"));
+    }
+    finally
+    {
+        db.Database.CloseConnection();
+    }
+}
+
+static bool TableExists(DbConnection connection, string tableName)
+{
+    using var command = connection.CreateCommand();
+    command.CommandText = "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = $name LIMIT 1;";
+
+    var parameter = command.CreateParameter();
+    parameter.ParameterName = "$name";
+    parameter.Value = tableName;
+    command.Parameters.Add(parameter);
+
+    return command.ExecuteScalar() is not null;
+}
+
+static HashSet<string> GetTableColumns(DbConnection connection, string tableName)
+{
+    using var command = connection.CreateCommand();
+    command.CommandText = $"PRAGMA table_info(\"{tableName}\");";
+
+    using var reader = command.ExecuteReader();
+    var columns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    while (reader.Read())
+    {
+        columns.Add(reader.GetString(1));
+    }
+
+    return columns;
+}
+
+static bool HasUniqueClassScenarioConstraint(DbConnection connection)
+{
+    var uniqueIndexes = new List<string>();
+
+    using (var command = connection.CreateCommand())
+    {
+        command.CommandText = "PRAGMA index_list(\"Assignments\");";
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var isUnique = reader.GetInt32(2) == 1;
+            if (!isUnique)
+            {
+                continue;
+            }
+
+            uniqueIndexes.Add(reader.GetString(1));
+        }
+    }
+
+    foreach (var indexName in uniqueIndexes)
+    {
+        var indexColumns = new List<string>();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = $"PRAGMA index_info(\"{indexName}\");";
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            indexColumns.Add(reader.GetString(2));
+        }
+
+        if (indexColumns.Count == 2
+            && indexColumns.Contains("ClassId", StringComparer.OrdinalIgnoreCase)
+            && indexColumns.Contains("ScenarioId", StringComparer.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static void RebuildAssignmentsTable(DbConnection connection, bool sourceHasAssignedAtUtc)
+{
+    var assignedAtSelect = sourceHasAssignedAtUtc
+        ? "COALESCE(AssignedAtUtc, CURRENT_TIMESTAMP)"
+        : "CURRENT_TIMESTAMP";
+
+    using var command = connection.CreateCommand();
+    command.CommandText =
+        $"""
+        PRAGMA foreign_keys = OFF;
+        BEGIN TRANSACTION;
+        DROP TABLE IF EXISTS Assignments_new;
+        CREATE TABLE Assignments_new (
+            Id INTEGER NOT NULL CONSTRAINT PK_Assignments PRIMARY KEY AUTOINCREMENT,
+            ClassId INTEGER NOT NULL,
+            ScenarioId TEXT NOT NULL,
+            Name TEXT NOT NULL,
+            AssignedAtUtc TEXT NOT NULL,
+            DueAtUtc TEXT NULL,
+            AssignedByUserId INTEGER NOT NULL,
+            CONSTRAINT FK_Assignments_Classes_ClassId FOREIGN KEY (ClassId) REFERENCES Classes (Id) ON DELETE NO ACTION,
+            CONSTRAINT FK_Assignments_Scenarios_ScenarioId FOREIGN KEY (ScenarioId) REFERENCES Scenarios (Id) ON DELETE NO ACTION,
+            CONSTRAINT FK_Assignments_Users_AssignedByUserId FOREIGN KEY (AssignedByUserId) REFERENCES Users (Id) ON DELETE RESTRICT
+        );
+        INSERT INTO Assignments_new (Id, ClassId, ScenarioId, Name, AssignedAtUtc, DueAtUtc, AssignedByUserId)
+        SELECT Id, ClassId, ScenarioId, Name, {assignedAtSelect}, DueAtUtc, AssignedByUserId
+        FROM Assignments;
+        DROP TABLE Assignments;
+        ALTER TABLE Assignments_new RENAME TO Assignments;
+        CREATE INDEX IF NOT EXISTS IX_Assignments_AssignedByUserId ON Assignments (AssignedByUserId);
+        CREATE INDEX IF NOT EXISTS IX_Assignments_ClassId ON Assignments (ClassId);
+        CREATE INDEX IF NOT EXISTS IX_Assignments_ScenarioId ON Assignments (ScenarioId);
+        COMMIT;
+        PRAGMA foreign_keys = ON;
+        """;
+    command.ExecuteNonQuery();
+}

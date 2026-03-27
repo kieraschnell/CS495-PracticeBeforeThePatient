@@ -88,6 +88,7 @@ public class ScenariosController : ControllerBase
 
         var allowedScenarioIds = await _db.Assignments
             .Where(a => enrolledClassIds.Contains(a.ClassId))
+            .Where(a => a.AssignedAtUtc <= nowUtc)
             .Where(a => !a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc)
             .Select(a => a.ScenarioId)
             .Distinct()
@@ -188,6 +189,7 @@ public class ScenariosController : ControllerBase
         return await _db.Assignments
             .AnyAsync(a => enrolledClassIds.Contains(a.ClassId)
                 && a.ScenarioId == scenarioId
+                && a.AssignedAtUtc <= nowUtc
                 && (!a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc));
     }
 

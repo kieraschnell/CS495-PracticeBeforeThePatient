@@ -252,7 +252,8 @@ public sealed class ClassesController : ControllerBase
             .Where(a => a.ClassId == classId)
             .Include(a => a.Submissions).ThenInclude(s => s.Student)
             .Include(a => a.Submissions).ThenInclude(s => s.GradedBy)
-            .OrderBy(a => a.DueAtUtc ?? DateTime.MaxValue)
+            .OrderBy(a => a.AssignedAtUtc)
+            .ThenBy(a => a.DueAtUtc ?? DateTime.MaxValue)
             .ThenBy(a => a.ScenarioId)
             .ToListAsync();
 
@@ -285,6 +286,7 @@ public sealed class ClassesController : ControllerBase
     {
         public string Name { get; set; } = "";
         public string ScenarioId { get; set; } = "";
+        public DateTimeOffset? AssignedAtUtc { get; set; }
         public DateTimeOffset? DueAtUtc { get; set; }
     }
 
@@ -293,12 +295,17 @@ public sealed class ClassesController : ControllerBase
     {
         if (!await CanAccessClassAsync(classId)) return Forbid();
 
-        if (string.IsNullOrWhiteSpace(req.Name))
+        var assignmentName = (req.Name ?? "").Trim();
+        var scenarioId = (req.ScenarioId ?? "").Trim();
+        var assignedAtUtc = req.AssignedAtUtc?.UtcDateTime ?? DateTime.UtcNow;
+        var dueAtUtc = req.DueAtUtc?.UtcDateTime;
+
+        if (string.IsNullOrWhiteSpace(assignmentName))
         {
             return BadRequest("Assignment name is required.");
         }
 
-        if (string.IsNullOrWhiteSpace(req.ScenarioId))
+        if (string.IsNullOrWhiteSpace(scenarioId))
         {
             return BadRequest("Scenario id is required.");
         }
@@ -308,9 +315,14 @@ public sealed class ClassesController : ControllerBase
             return BadRequest("Invalid class id.");
         }
 
-        if (!await _db.Scenarios.AnyAsync(s => s.Id == req.ScenarioId))
+        if (!await _db.Scenarios.AnyAsync(s => s.Id == scenarioId))
         {
             return BadRequest("Invalid scenario id.");
+        }
+
+        if (dueAtUtc.HasValue && dueAtUtc.Value < assignedAtUtc)
+        {
+            return BadRequest("Due date must be after the assign date.");
         }
 
         var currentEmail = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
@@ -319,10 +331,10 @@ public sealed class ClassesController : ControllerBase
         var assignment = new AssignmentEntity
         {
             ClassId = classId,
-            ScenarioId = req.ScenarioId.Trim(),
-            Name = req.Name.Trim(),
-            AssignedAtUtc = DateTime.UtcNow,
-            DueAtUtc = req.DueAtUtc?.UtcDateTime,
+            ScenarioId = scenarioId,
+            Name = assignmentName,
+            AssignedAtUtc = assignedAtUtc,
+            DueAtUtc = dueAtUtc,
             AssignedByUserId = currentUser.Id
         };
 
@@ -373,7 +385,13 @@ public sealed class ClassesController : ControllerBase
 
         if (assignment is null) return NotFound();
 
-        assignment.DueAtUtc = req.DueAtUtc?.UtcDateTime;
+        var dueAtUtc = req.DueAtUtc?.UtcDateTime;
+        if (dueAtUtc.HasValue && dueAtUtc.Value < assignment.AssignedAtUtc)
+        {
+            return BadRequest("Due date must be after the assign date.");
+        }
+
+        assignment.DueAtUtc = dueAtUtc;
         await _db.SaveChangesAsync();
 
         return NoContent();
@@ -540,10 +558,12 @@ public sealed class ClassesController : ControllerBase
 
         var assignments = await _db.Assignments
             .Where(a => enrolledClassIds.Contains(a.ClassId))
+            .Where(a => a.AssignedAtUtc <= DateTime.UtcNow)
             .Include(a => a.Class)
             .Include(a => a.Submissions.Where(s => s.StudentUserId == student.Id))
                 .ThenInclude(s => s.GradedBy)
-            .OrderBy(a => a.DueAtUtc ?? DateTime.MaxValue)
+            .OrderBy(a => a.AssignedAtUtc)
+            .ThenBy(a => a.DueAtUtc ?? DateTime.MaxValue)
             .ThenBy(a => a.Name)
             .ToListAsync();
 

@@ -87,7 +87,6 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<AssignmentEntity>(entity =>
         {
-            entity.HasIndex(e => new { e.ClassId, e.ScenarioId }).IsUnique();
             entity.Property(e => e.ScenarioId).HasMaxLength(128);
             entity.Property(e => e.Name).HasMaxLength(256);
 

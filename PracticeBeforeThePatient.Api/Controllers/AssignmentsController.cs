@@ -59,7 +59,10 @@ public sealed class AssignmentsController : ControllerBase
             .ToListAsync();
 
         var matchingAssignments = await _db.Assignments
-            .Where(a => enrolledClassIds.Contains(a.ClassId) && a.ScenarioId == scenarioId)
+            .Where(a => enrolledClassIds.Contains(a.ClassId)
+                && a.ScenarioId == scenarioId
+                && a.AssignedAtUtc <= nowUtc
+                && (!a.DueAtUtc.HasValue || a.DueAtUtc.Value >= nowUtc))
             .Include(a => a.Submissions.Where(s => s.StudentUserId == student.Id))
             .ToListAsync();
 

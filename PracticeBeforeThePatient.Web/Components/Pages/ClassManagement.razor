@@ -94,6 +94,7 @@
                                 <div class="assignmentInfo">
                                     <div class="assignmentTitle">@a.Name</div>
                                     <div class="assignmentMeta">Scenario: @a.ScenarioId</div>
+                                    <div class="assignmentMeta">Assign at: @FormatAssignedAtCst(a.AssignedAtUtc)</div>
                                     <div class="assignmentMeta">
                                         Due: @FormatDueAtCst(a.DueAtUtc)
                                     </div>
@@ -263,10 +264,6 @@
             {
                 <div class="infoMessage">Loading scenarios</div>
             }
-            else if (_allScenarioIds.Count == 0)
-            {
-                <div class="warningMessage">No scenarios found in the API</div>
-            }
             else
             {
                 <div class="assignmentModalForm">
@@ -287,6 +284,21 @@
                                 <option value="@id">@id</option>
                             }
                         </select>
+                    </div>
+                    <div>
+                        <label class="editorLabel">Assign date (optional)</label>
+                        <input class="editorInput"
+                               type="date"
+                               value="@_assignmentAssignDate"
+                               @onchange="OnAssignmentAssignDateChanged" />
+                    </div>
+                    <div>
+                        <label class="editorLabel">Assign time (optional)</label>
+                        <input class="editorInput"
+                               type="text"
+                               value="@_assignmentAssignTime"
+                               @onchange="OnAssignmentAssignTimeChanged"
+                               placeholder="h:mm AM/PM" />
                     </div>
                     <div>
                         <label class="editorLabel">Due date (optional)</label>
@@ -389,6 +401,8 @@
     private bool _isAddAssignmentModalOpen;
     private string _assignmentName = "";
     private string _assignmentScenarioId = "";
+    private string _assignmentAssignDate = "";
+    private string _assignmentAssignTime = "";
     private string _assignmentDate = "";
     private string _assignmentTime = "";
     private int? _editingAssignmentDueId;
@@ -538,6 +552,16 @@
         _assignmentDate = (e.Value?.ToString() ?? "").Trim();
     }
 
+    private void OnAssignmentAssignDateChanged(ChangeEventArgs e)
+    {
+        _assignmentAssignDate = (e.Value?.ToString() ?? "").Trim();
+    }
+
+    private void OnAssignmentAssignTimeChanged(ChangeEventArgs e)
+    {
+        _assignmentAssignTime = (e.Value?.ToString() ?? "").Trim();
+    }
+
     private void OnAssignmentTimeChanged(ChangeEventArgs e)
     {
         _assignmentTime = (e.Value?.ToString() ?? "").Trim();
@@ -628,7 +652,8 @@
         {
             var assignments = await Api.Http.GetFromJsonAsync<List<ClassAssignmentDto>>($"api/classes/{_selectedClass.Id}/assignments");
             _assignments = (assignments ?? new List<ClassAssignmentDto>())
-                .OrderBy(x => x.DueAtUtc ?? DateTimeOffset.MaxValue)
+                .OrderBy(x => x.AssignedAtUtc)
+                .ThenBy(x => x.DueAtUtc ?? DateTimeOffset.MaxValue)
                 .ThenBy(x => x.ScenarioId, StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
@@ -644,6 +669,8 @@
         _assignments = new List<ClassAssignmentDto>();
         _assignmentName = "";
         _assignmentScenarioId = "";
+        _assignmentAssignDate = "";
+        _assignmentAssignTime = "";
         _assignmentDate = "";
         _assignmentTime = "";
         _isAddAssignmentModalOpen = false;
@@ -662,6 +689,8 @@
 
         var assignmentName = (_assignmentName ?? "").Trim();
         var assignmentScenarioId = (_assignmentScenarioId ?? "").Trim();
+        var assignmentAssignDate = (_assignmentAssignDate ?? "").Trim();
+        var assignmentAssignTime = (_assignmentAssignTime ?? "").Trim();
         var assignmentDate = (_assignmentDate ?? "").Trim();
         var assignmentTime = (_assignmentTime ?? "").Trim();
 
@@ -677,9 +706,37 @@
             return;
         }
 
-        if (!TryBuildDueAtUtc(assignmentDate, assignmentTime, out var dueAtUtc, out var dueError))
+        if (!TryBuildOptionalCstDateTimeUtc(
+            assignmentAssignDate,
+            assignmentAssignTime,
+            defaultTime: new TimeOnly(0, 0),
+            missingDateMessage: "Select an assign date when entering an assign time",
+            invalidDateMessage: "Invalid assign date",
+            invalidTimeMessage: "Invalid assign time. Use h:mm AM/PM.",
+            out var assignedAtUtc,
+            out var assignError))
+        {
+            SetMessage(assignError, false);
+            return;
+        }
+
+        if (!TryBuildOptionalCstDateTimeUtc(
+            assignmentDate,
+            assignmentTime,
+            defaultTime: new TimeOnly(23, 59),
+            missingDateMessage: "Select a due date when entering a due time",
+            invalidDateMessage: "Invalid due date",
+            invalidTimeMessage: "Invalid due time. Use h:mm AM/PM.",
+            out var dueAtUtc,
+            out var dueError))
         {
             SetMessage(dueError, false);
+            return;
+        }
+
+        if (assignedAtUtc.HasValue && dueAtUtc.HasValue && dueAtUtc.Value < assignedAtUtc.Value)
+        {
+            SetMessage("Due date must be after the assign date", false);
             return;
         }
 
@@ -689,6 +746,7 @@
             {
                 Name = assignmentName,
                 ScenarioId = assignmentScenarioId,
+                AssignedAtUtc = assignedAtUtc,
                 DueAtUtc = dueAtUtc
             });
 
@@ -696,14 +754,17 @@
             {
                 var body = await resp.Content.ReadAsStringAsync();
                 SetMessage($"Assign failed {((int)resp.StatusCode)} {body}", false);
+
                 return;
             }
 
             _assignmentName = "";
+            _assignmentAssignDate = "";
+            _assignmentAssignTime = "";
             _assignmentDate = "";
             _assignmentTime = "";
             _isAddAssignmentModalOpen = false;
-            SetMessage("Scenario assigned", true);
+            SetMessage(assignedAtUtc.HasValue ? "Assignment scheduled" : "Scenario assigned", true);
             await ReloadAssignmentsAsync();
         }
         catch
@@ -761,10 +822,25 @@
 
         var dueDateText = (_editDueDate ?? "").Trim();
         var dueTimeText = (_editDueTime ?? "").Trim();
+        var assignment = _assignments.FirstOrDefault(x => x.Id == assignmentId);
 
-        if (!TryBuildDueAtUtc(dueDateText, dueTimeText, out var dueAtUtc, out var dueError))
+        if (!TryBuildOptionalCstDateTimeUtc(
+            dueDateText,
+            dueTimeText,
+            defaultTime: new TimeOnly(23, 59),
+            missingDateMessage: "Select a due date when entering a due time",
+            invalidDateMessage: "Invalid due date",
+            invalidTimeMessage: "Invalid due time. Use h:mm AM/PM.",
+            out var dueAtUtc,
+            out var dueError))
         {
             SetMessage(dueError, false);
+            return;
+        }
+
+        if (assignment is not null && dueAtUtc.HasValue && dueAtUtc.Value < assignment.AssignedAtUtc)
+        {
+            SetMessage("Due date must be after the assign date", false);
             return;
         }
 
@@ -806,6 +882,11 @@
         await SaveAssignmentDueAsync(assignmentId);
     }
 
+    private static string FormatAssignedAtCst(DateTimeOffset assignedAtUtc)
+    {
+        return $"{assignedAtUtc.ToOffset(CstOffset).ToString("MM/dd/yyyy h:mm tt", CultureInfo.InvariantCulture)} CST";
+    }
+
     private static string FormatDueAtCst(DateTimeOffset? dueAtUtc)
     {
         if (!dueAtUtc.HasValue)
@@ -816,41 +897,49 @@
         return $"{dueAtUtc.Value.ToOffset(CstOffset).ToString("MM/dd/yyyy h:mm tt", CultureInfo.InvariantCulture)} CST";
     }
 
-    private static bool TryBuildDueAtUtc(string dueDateText, string dueTimeText, out DateTimeOffset? dueAtUtc, out string error)
+    private static bool TryBuildOptionalCstDateTimeUtc(
+        string dateText,
+        string timeText,
+        TimeOnly defaultTime,
+        string missingDateMessage,
+        string invalidDateMessage,
+        string invalidTimeMessage,
+        out DateTimeOffset? valueUtc,
+        out string error)
     {
-        dueAtUtc = null;
+        valueUtc = null;
         error = "";
 
-        if (string.IsNullOrWhiteSpace(dueDateText) && string.IsNullOrWhiteSpace(dueTimeText))
+        if (string.IsNullOrWhiteSpace(dateText) && string.IsNullOrWhiteSpace(timeText))
         {
             return true;
         }
 
-        if (string.IsNullOrWhiteSpace(dueDateText))
+        if (string.IsNullOrWhiteSpace(dateText))
         {
-            error = "Select a due date when entering a due time";
+            error = missingDateMessage;
             return false;
         }
 
-        if (!DateOnly.TryParse(dueDateText, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dueDate))
+        if (!DateOnly.TryParse(dateText, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
         {
-            error = "Invalid due date";
+            error = invalidDateMessage;
             return false;
         }
 
-        TimeOnly dueTime;
-        if (string.IsNullOrWhiteSpace(dueTimeText))
+        TimeOnly parsedTime;
+        if (string.IsNullOrWhiteSpace(timeText))
         {
-            dueTime = new TimeOnly(23, 59);
+            parsedTime = defaultTime;
         }
-        else if (!TryParseTwelveHourTime(dueTimeText, out dueTime))
+        else if (!TryParseTwelveHourTime(timeText, out parsedTime))
         {
-            error = "Invalid due time. Use h:mm AM/PM.";
+            error = invalidTimeMessage;
             return false;
         }
 
-        var dueCst = new DateTimeOffset(dueDate.ToDateTime(dueTime), CstOffset);
-        dueAtUtc = dueCst.ToUniversalTime();
+        var valueCst = new DateTimeOffset(parsedDate.ToDateTime(parsedTime), CstOffset);
+        valueUtc = valueCst.ToUniversalTime();
         return true;
     }
 
@@ -1176,6 +1265,7 @@
     {
         public string Name { get; set; } = "";
         public string ScenarioId { get; set; } = "";
+        public DateTimeOffset? AssignedAtUtc { get; set; }
         public DateTimeOffset? DueAtUtc { get; set; }
     }
 

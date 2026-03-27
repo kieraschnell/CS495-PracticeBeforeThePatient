@@ -30,6 +30,7 @@ public class ApiClient
         public string AssignmentId { get; set; } = "";
         public string ScenarioId { get; set; } = "";
         public string Label { get; set; } = "";
+        public DateTimeOffset AssignedAtUtc { get; set; }
         public DateTimeOffset? DueAtUtc { get; set; }
         public bool IsSubmitted { get; set; }
     }
