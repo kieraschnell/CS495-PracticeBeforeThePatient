@@ -1117,10 +1117,6 @@ textarea:focus {
   width: min(640px, calc(100vw - 48px));
 }
 
-.classMgmtModalCardLight {
-  color-scheme: light;
-}
-
 .classMgmtModalTop {
   display: flex;
   align-items: center;
@@ -1794,56 +1790,6 @@ html[data-theme="dark"] .scenarioInlineSelect:focus {
   border-color: rgba(236, 240, 246, 0.32);
 }
 
-html[data-theme="dark"] .classMgmtModalCardLight {
-  background: #ffffff;
-  color: #111;
-  border-color: rgba(15, 23, 42, 0.25);
-  box-shadow: 0 26px 70px rgba(15, 23, 42, 0.35);
-}
-
-html[data-theme="dark"] .classMgmtModalCardLight .sectionTitle,
-html[data-theme="dark"] .classMgmtModalCardLight .editorLabel,
-html[data-theme="dark"] .classMgmtModalCardLight .assignmentMeta,
-html[data-theme="dark"] .classMgmtModalCardLight .createHint,
-html[data-theme="dark"] .classMgmtModalCardLight .warningMessage,
-html[data-theme="dark"] .classMgmtModalCardLight .infoMessage {
-  color: #111;
-}
-
-html[data-theme="dark"] .classMgmtModalCardLight .primaryBtn,
-html[data-theme="dark"] .classMgmtModalCardLight .secondaryBtn {
-  background: #ffffff;
-  color: #111;
-  border-color: rgba(0, 0, 0, 0.58);
-}
-
-html[data-theme="dark"] .classMgmtModalCardLight .primaryBtn:hover,
-html[data-theme="dark"] .classMgmtModalCardLight .secondaryBtn:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-html[data-theme="dark"] .classMgmtModalCardLight .editorInput,
-html[data-theme="dark"] .classMgmtModalCardLight .editorTextarea,
-html[data-theme="dark"] .classMgmtModalCardLight textarea,
-html[data-theme="dark"] .classMgmtModalCardLight .scenarioInlineSelect {
-  background: #ffffff;
-  color: #111;
-  border-color: rgba(0, 0, 0, 0.45);
-}
-
-html[data-theme="dark"] .classMgmtModalCardLight .editorInput::placeholder,
-html[data-theme="dark"] .classMgmtModalCardLight .editorTextarea::placeholder,
-html[data-theme="dark"] .classMgmtModalCardLight textarea::placeholder {
-  color: rgba(0, 0, 0, 0.48);
-}
-
-html[data-theme="dark"] .classMgmtModalCardLight .editorInput:focus,
-html[data-theme="dark"] .classMgmtModalCardLight .editorTextarea:focus,
-html[data-theme="dark"] .classMgmtModalCardLight textarea:focus,
-html[data-theme="dark"] .classMgmtModalCardLight .scenarioInlineSelect:focus {
-  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 0, 0, 0.32);
-}
 
 html[data-theme="dark"] .divider,
 html[data-theme="dark"] .narrLine,

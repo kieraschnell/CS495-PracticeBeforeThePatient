@@ -179,7 +179,7 @@
 @if (_isAddClassModalOpen)
 {
     <div class="classMgmtModalBackdrop" @onclick="CloseAddClassModal">
-        <div class="classMgmtModalCard classMgmtModalCardNarrow classMgmtModalCardLight" @onclick:stopPropagation="true">
+        <div class="classMgmtModalCard classMgmtModalCardNarrow" @onclick:stopPropagation="true">
             <div class="classMgmtModalTop">
                 <div class="sectionTitle">Add class</div>
                 <button class="secondaryBtn" type="button" @onclick="CloseAddClassModal">Cancel</button>
@@ -254,7 +254,7 @@
 @if (_selectedClass is not null && _isAddAssignmentModalOpen)
 {
     <div class="classMgmtModalBackdrop" @onclick="CloseAddAssignmentModal">
-        <div class="classMgmtModalCard classMgmtModalCardLight" @onclick:stopPropagation="true">
+        <div class="classMgmtModalCard" @onclick:stopPropagation="true">
             <div class="classMgmtModalTop">
                 <div class="sectionTitle">Add assignment</div>
                 <button class="secondaryBtn" type="button" @onclick="CloseAddAssignmentModal">Cancel</button>
@@ -382,7 +382,7 @@
     if (editingAssignment is not null)
     {
         <div class="classMgmtModalBackdrop" @onclick="CloseEditAssignmentModal">
-            <div class="classMgmtModalCard classMgmtModalCardLight" @onclick:stopPropagation="true">
+            <div class="classMgmtModalCard" @onclick:stopPropagation="true">
                 <div class="classMgmtModalTop">
                     <div class="sectionTitle">Edit assignment</div>
                     <button class="secondaryBtn" type="button" @onclick="CloseEditAssignmentModal" disabled="@_isSavingAssignment">Cancel</button>
