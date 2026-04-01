@@ -30,8 +30,12 @@ var dataDir = Path.Combine(builder.Environment.ContentRootPath, "Data");
 Directory.CreateDirectory(dataDir);
 var dbPath = Path.Combine(dataDir, "app.db");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}"));
+// Only register SQLite provider if not in test environment (tests use InMemory)
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlite($"Data Source={dbPath}"));
+}
 
 builder.Services.AddSingleton<DevAccessStore>();
 
@@ -40,6 +44,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+if (!app.Environment.IsEnvironment("Testing"))
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -531,3 +536,6 @@ static void RebuildAssignmentsTable(DbConnection connection, bool sourceHasAssig
         """;
     command.ExecuteNonQuery();
 }
+
+// Make Program accessible for integration tests
+public partial class Program { }

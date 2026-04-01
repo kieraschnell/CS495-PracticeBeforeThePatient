@@ -427,39 +427,235 @@ dotnet ef database update --project PracticeBeforeThePatient.Api --startup-proje
 
 ## Testing
 
-### Current Testing Status
+### Test Project Overview
 
-The project currently relies on manual testing. Automated test infrastructure has not been implemented.
+The project includes a comprehensive xUnit test suite in `PracticeBeforeThePatient.Tests`.
 
-### Manual Test Cases
+**Project Structure:**
+```
+PracticeBeforeThePatient.Tests/
+├── Unit/
+│   ├── DevAccessStoreTests.cs       # Role management & authentication logic
+│   ├── EntityRelationshipTests.cs   # Database entity relationships & cascades
+│   └── ScenarioValidationTests.cs   # Scenario model validation rules
+├── Integration/
+│   ├── AccessControllerTests.cs     # /api/access endpoint tests
+│   ├── ScenariosControllerTests.cs  # /api/scenarios endpoint tests
+│   ├── ClassManagementTests.cs      # Class/enrollment operations
+│   ├── GradingTests.cs              # Submission & grading workflow
+│   └── ApiTestFixture.cs            # WebApplicationFactory setup
+└── Fixtures/
+    ├── TestDbContextFactory.cs      # In-memory database factory
+    └── TestDataSeeder.cs            # Reusable test data creation
+```
 
-**Authentication & Authorization:**
-- [ ] Admin can access all pages
-- [ ] Teacher can access Class Management, Scenario Editor, Assignment Grading
-- [ ] Student can only access Simulation, Grades, Settings
-- [ ] Switching dev user updates permissions immediately
+### Running Tests
 
-**Simulation Flow:**
-- [ ] Student sees only assigned scenarios
-- [ ] Completing simulation creates submission record
-- [ ] Submission appears on Grades page
+**Run all tests:**
+```bash
+dotnet test
+```
 
-**Class Management:**
-- [ ] Create class with unique name
-- [ ] Add/remove students and teachers
-- [ ] Create assignment with scenario and due date
-- [ ] Delete class cascades properly
+**Run tests with detailed output:**
+```bash
+dotnet test --verbosity normal
+```
 
-**Grading:**
-- [ ] Teacher can view submissions
-- [ ] Entering grade saves correctly
-- [ ] Student sees grade on Grades page
+**Run specific test class:**
+```bash
+dotnet test --filter "FullyQualifiedName~AccessControllerTests"
+```
 
-### Future Testing Recommendations
+**Run tests in Visual Studio:**
+- Open Test Explorer (Test → Test Explorer)
+- Click **Run All** or right-click specific tests
 
-1. **Unit Tests** — Add xUnit project for business logic
-2. **Integration Tests** — Test API endpoints with TestServer
-3. **UI Tests** — Consider Playwright or bUnit for Blazor components
+### Unit Tests
+
+#### DevAccessStoreTests
+Tests the `DevAccessStore` service which manages user authentication state in dev mode.
+
+| Test | Description |
+|------|-------------|
+| `GetCurrentEmailAsync_ReturnsSetEmail` | Verifies email is stored and retrieved correctly |
+| `GetCurrentRoleAsync_ReturnsCorrectRole` | Validates role lookup from database |
+| `IsTeacherAsync_ReturnsTrue_ForTeacher` | Teachers have teacher privileges |
+| `IsTeacherAsync_ReturnsTrue_ForAdmin` | Admins also have teacher privileges |
+| `IsTeacherAsync_ReturnsFalse_ForStudent` | Students don't have teacher privileges |
+| `IsAdminAsync_ReturnsTrue_OnlyForAdmin` | Only admins have admin flag |
+| `NormalizeRole_ReturnsExpectedRole` | Role normalization (instructor → teacher, etc.) |
+| `SetThemeForCurrentEmailAsync_SetsTheme` | Theme preference is stored |
+| `GetThemeForCurrentEmailAsync_ReturnsLightByDefault` | Default theme is light |
+
+#### EntityRelationshipTests
+Tests database entity relationships and cascade delete behavior.
+
+| Test | Description |
+|------|-------------|
+| `DeletingClass_CascadesDeleteToRelatedEntities` | Deleting a class removes teachers, students, assignments, submissions |
+| `UserEntity_UniqueEmailConstraint_PreventsDuplicates` | Email uniqueness is enforced |
+| `ClassEntity_UniqueNameConstraint_Exists` | Class name uniqueness is enforced |
+| `StudentEnrollment_CorrectlyLinksStudentToClass` | ClassStudents table links correctly |
+| `Assignment_CorrectlyLinksToClassAndScenario` | Assignment foreign keys are correct |
+| `Submission_CorrectlyLinksToAssignmentAndStudent` | Submission relationships are valid |
+
+#### ScenarioValidationTests
+Tests scenario model validation rules.
+
+| Test | Description |
+|------|-------------|
+| `Scenario_MustHaveTitle` | Empty title is invalid |
+| `Scenario_WithTitle_IsValid` | Non-empty title passes validation |
+| `Scenario_HasRequiredProperties` | Model initializes with required defaults |
+
+### Integration Tests
+
+Integration tests use `WebApplicationFactory` to test the full HTTP pipeline.
+
+#### AccessControllerTests
+Tests `/api/access` endpoints.
+
+| Test | Description |
+|------|-------------|
+| `GetAccess_ReturnsOk` | Endpoint returns 200 OK |
+| `GetAccess_ReturnsAccessResponse` | Response contains required fields |
+| `SetDevUser_ChangesCurrentUser` | Dev user switching works |
+| `SetDevUser_ReturnsBadRequest_WhenBodyIsNull` | Null body is rejected |
+| `SetTheme_UpdatesUserTheme` | Theme preference is saved |
+| `AdminUser_HasTeacherAndAdminFlags` | Admin has both flags true |
+| `TeacherUser_HasTeacherFlagOnly` | Teacher has only teacher flag |
+| `StudentUser_HasNoElevatedFlags` | Student has no elevated access |
+| `Student_SeesOnlyAssignedScenarios` | Students see only their class assignments |
+| `Teacher_SeesAllScenarios` | Teachers see all scenarios |
+
+#### ScenariosControllerTests
+Tests `/api/scenarios` endpoints.
+
+| Test | Description |
+|------|-------------|
+| `GetScenarios_ReturnsOk` | List endpoint returns 200 |
+| `GetScenarios_ReturnsListOfScenarioIds` | Returns scenario ID list |
+| `GetScenarioById_ReturnsScenario_WhenExists` | Get by ID works for existing scenarios |
+| `GetScenarioById_ReturnsNotFound_WhenNotExists` | 404 for missing scenarios |
+
+#### ClassManagementTests
+Tests class and enrollment operations.
+
+| Test | Description |
+|------|-------------|
+| `CreateClass_WithUniqueName_Succeeds` | Class creation works |
+| `AddStudentToClass_CreatesEnrollment` | Student enrollment is created |
+| `AddTeacherToClass_CreatesTeachingAssignment` | Teacher assignment is created |
+| `CreateAssignment_WithScenarioAndDueDate_Succeeds` | Assignment creation works |
+| `RemoveStudentFromClass_DeletesEnrollment` | Student removal works |
+| `AddingStudent_CreatesUserIfNotExists` | New users are auto-created |
+
+#### GradingTests
+Tests submission and grading workflow.
+
+| Test | Description |
+|------|-------------|
+| `GradeSubmission_SetsGradeAndFeedback` | Grading updates submission |
+| `Grade_AcceptsValidRange` | Grades 0-100 are accepted |
+| `SubmissionStates_AreDistinguishable` | Not submitted / Submitted / Graded states work |
+
+### Test Fixtures
+
+#### TestDbContextFactory
+Creates isolated in-memory database contexts for unit tests.
+
+```csharp
+using var db = TestDbContextFactory.CreateInMemoryContext();
+// Use db for isolated test operations
+```
+
+#### TestDataSeeder
+Provides reusable methods for creating test data.
+
+```csharp
+var admin = TestDataSeeder.CreateAdmin(db, "admin@test.edu");
+var teacher = TestDataSeeder.CreateTeacher(db, "teacher@test.edu");
+var student = TestDataSeeder.CreateStudent(db, "student@test.edu");
+var classEntity = TestDataSeeder.CreateClass(db, admin, "Test Class");
+TestDataSeeder.AddStudentToClass(db, classEntity, student, admin);
+var scenario = TestDataSeeder.CreateScenario(db, "scenario-id", "Scenario Title");
+var assignment = TestDataSeeder.CreateAssignment(db, classEntity, scenario, admin);
+var submission = TestDataSeeder.CreateSubmission(db, assignment, student);
+```
+
+#### ApiTestFixture
+WebApplicationFactory fixture for integration tests.
+
+```csharp
+public class MyTests : IClassFixture<ApiTestFixture>
+{
+    private readonly HttpClient _client;
+    
+    public MyTests(ApiTestFixture fixture)
+    {
+        _client = fixture.CreateClient();
+    }
+}
+```
+
+### Writing New Tests
+
+1. **Add unit test:**
+   ```csharp
+   // In PracticeBeforeThePatient.Tests/Unit/
+   public class MyServiceTests
+   {
+       [Fact]
+       public void MyMethod_DoesExpectedThing()
+       {
+           // Arrange
+           using var db = TestDbContextFactory.CreateInMemoryContext();
+           
+           // Act
+           var result = /* ... */;
+           
+           // Assert
+           Assert.Equal(expected, result);
+       }
+   }
+   ```
+
+2. **Add integration test:**
+   ```csharp
+   // In PracticeBeforeThePatient.Tests/Integration/
+   public class MyControllerTests : IClassFixture<ApiTestFixture>
+   {
+       private readonly HttpClient _client;
+       
+       public MyControllerTests(ApiTestFixture fixture)
+       {
+           _client = fixture.CreateClient();
+       }
+       
+       [Fact]
+       public async Task Endpoint_ReturnsExpectedResult()
+       {
+           var response = await _client.GetAsync("/api/my-endpoint");
+           Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+       }
+   }
+   ```
+
+### Test Coverage Summary
+
+| Area | Unit Tests | Integration Tests |
+|------|------------|-------------------|
+| Access Control | ✅ DevAccessStore | ✅ AccessController |
+| Scenarios | ✅ Validation | ✅ ScenariosController |
+| Classes | ✅ Relationships | ✅ ClassManagement |
+| Grading | ✅ Entity States | ✅ GradingTests |
+| Users | ✅ Roles | ✅ Permissions |
+
+### Future Testing Improvements
+
+1. **UI Tests** — Add Playwright or bUnit for Blazor component testing
+2. **Performance Tests** — Load testing for concurrent users
+3. **Code Coverage** — Add coverage reporting with Coverlet
 
 ---
 
