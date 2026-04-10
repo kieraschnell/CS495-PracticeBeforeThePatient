@@ -1,0 +1,52 @@
+name: practice-before-the-patient
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-practicebeforethepatient}
+      POSTGRES_USER: ${POSTGRES_USER:-practicebeforethepatient}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build:
+      context: .
+      dockerfile: PracticeBeforeThePatient.Api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${API_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-practicebeforethepatient};Username=${POSTGRES_USER:-practicebeforethepatient};Password=${POSTGRES_PASSWORD:-change-me}
+    ports:
+      - "${API_PORT:-5186}:8080"
+
+  web:
+    build:
+      context: .
+      dockerfile: PracticeBeforeThePatient.Web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${WEB_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: http://+:8080
+      ApiBaseUrl: http://api:8080/
+    ports:
+      - "${WEB_PORT:-5009}:8080"
+
+volumes:
+  postgres-data:

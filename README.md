@@ -1,99 +1,93 @@
 # Practice Before The Patient
 
-An interactive medical training simulation platform built with .NET 9. Instructors create branching clinical scenarios and assign them to student cohorts; students work through the decision trees to practice diagnostic and treatment reasoning before encountering real patients.
-
----
-
-## Table of Contents
-
-- [Architecture](#architecture)
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-  - [Visual Studio (recommended)](#visual-studio-recommended)
-  - [Command Line](#command-line)
-- [Accessing the Application](#accessing-the-application)
-- [API Documentation](#api-documentation)
-- [Project Structure](#project-structure)
-- [Configuration](#configuration)
-- [Database Schema](#database-schema)
-- [Troubleshooting](#troubleshooting)
-- [License](#license)
-
----
+An interactive medical training simulation platform built with .NET 9. Instructors create branching clinical scenarios and assign them to student cohorts; students work through decision trees to practice clinical reasoning before encountering real patients.
 
 ## Architecture
 
 | Layer | Project | Description |
 |-------|---------|-------------|
-| **Frontend** | `PracticeBeforeThePatient.Web` | Blazor Server application — simulation UI and scenario editor |
-| **Backend** | `PracticeBeforeThePatient.Api` | ASP.NET Core Web API — scenarios, assignments, class rosters, and access control |
-| **Shared** | `PracticeBeforeThePatient.Core` | Domain models shared across projects (`Scenario`, `Node`, `Choice`, `ClassRoster`) |
+| Frontend | `PracticeBeforeThePatient.Web` | Blazor Server UI |
+| Backend | `PracticeBeforeThePatient.Api` | ASP.NET Core Web API |
+| Shared | `PracticeBeforeThePatient.Core` | Shared domain models |
+| Database | PostgreSQL | EF Core persistence, migrations, and seeded starter data |
 
-Data is persisted with **Entity Framework Core** and **SQLite**.
-
----
+The supported runtime path in this repository is Docker Compose.
 
 ## Prerequisites
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) (v17.12+) with the **ASP.NET and web development** workload — *or* the [.NET CLI](https://learn.microsoft.com/dotnet/core/tools/)
+- Docker Desktop or Docker Engine
+- Docker Compose
 
----
+## Quick Start
 
-## Getting Started
-
-### Visual Studio (recommended)
-
-1. Open `CS495-PracticeBeforeThePatient.sln` in Visual Studio 2022.
-2. Right-click the **Solution** in Solution Explorer → **Configure Startup Projects…**
-3. Select **Multiple startup projects** and set both **PracticeBeforeThePatient.Api** and **PracticeBeforeThePatient.Web** to **Start**.
-4. Ensure both projects are using the **https** launch profile.
-5. Press **F5** to build and run with the debugger attached.
-
-### Command Line
+Run the full stack:
 
 ```bash
-# Clone the repository
-git clone https://github.com/kieraschnell/CS495-PracticeBeforeThePatient.git
-cd CS495-PracticeBeforeThePatient
-
-# Start the API (terminal 1)
-dotnet run --project PracticeBeforeThePatient.Api --launch-profile https
-
-# Start the Web app (terminal 2)
-dotnet run --project PracticeBeforeThePatient.Web --launch-profile https
+docker compose up --build
 ```
 
----
+Default endpoints:
 
-## Accessing the Application
+- Web UI: `http://localhost:5009`
+- API: `http://localhost:5186`
+- PostgreSQL: `localhost:5432`
 
-| Service | HTTP | HTTPS |
-|---------|------|-------|
-| **Web UI** | <http://localhost:5009> | <https://localhost:7124> |
-| **API** | <http://localhost:5186> | <https://localhost:7144> |
-| **Swagger UI** | — | <https://localhost:7144/swagger> |
+Default database settings come from `compose.yaml`:
 
-> Swagger UI is available only when the API is running in the **Development** environment.
+- Database: `practicebeforethepatient`
+- Username: `practicebeforethepatient`
+- Password: `change-me`
 
----
+These defaults are intended for local demos and development. If needed, Docker Compose environment variables can still be overridden at runtime.
 
-## API Documentation
+## Swagger
 
-The API exposes interactive documentation via **Swagger / OpenAPI**.
+Swagger is enabled only when the API runs in `Development`.
 
-| Endpoint | Description |
-|----------|-------------|
-| `GET /api/access` | Retrieve the current user's access level and allowed scenarios |
-| `POST /api/access/dev-user` | Set the active dev user (development only) |
-| `POST /api/access/theme` | Set the UI theme for the current user |
-| `GET /api/scenarios/{scenarioId}` | Fetch a scenario by ID |
-| `POST /api/assignments/submit-scenario` | Submit a completed scenario assignment |
-| `GET /api/classes` | List class rosters (admin) |
+Example:
 
-For the full, up-to-date endpoint list, visit the [Swagger UI](#accessing-the-application) while the API is running.
+```powershell
+$env:API_ENVIRONMENT = "Development"
+docker compose up --build
+```
 
----
+Then open:
+
+- `http://localhost:5186/swagger`
+
+## Database Behavior
+
+- The API applies EF Core migrations on startup.
+- The API seeds starter scenarios and demo users into an empty database.
+- PostgreSQL data is stored in the Docker volume `postgres-data`.
+
+To reset local data completely:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+## API Notes
+
+- The web app is Blazor Server and calls the API from the server side.
+- The browser is not calling the API directly across origins.
+- CORS is not required for the supported deployment path and is not configured.
+
+## Configuration
+
+The Docker Compose file includes defaults for:
+
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_PORT`
+- `API_PORT`
+- `WEB_PORT`
+- `API_ENVIRONMENT`
+- `WEB_ENVIRONMENT`
+
+If a demo environment needs different values, set those environment variables before starting Docker Compose.
 
 ## Database Schema
 
@@ -179,88 +173,40 @@ erDiagram
     ASSIGNMENTS ||--o{ SUBMISSIONS : "receives"
 ```
 
----
-
 ## Project Structure
 
-```
+```text
 CS495-PracticeBeforeThePatient/
-├── PracticeBeforeThePatient.Api/        # ASP.NET Core Web API
-│   ├── Controllers/                     # API endpoints
-│   │   ├── AccessController.cs          #   /api/access — user access & themes
-│   │   ├── AdminUsersController.cs      #   /api/admin/users — user management
-│   │   ├── AssignmentsController.cs     #   /api/assignments — scenario submissions
-│   │   ├── ClassManagementController.cs #   /api/classes — roster CRUD
-│   │   └── ScenariosController.cs       #   /api/scenarios — scenario retrieval & editing
-│   ├── Data/
-│   │   ├── AppDbContext.cs              # EF Core DbContext (SQLite)
-│   │   └── Entities/                    # Database entity classes
-│   ├── Services/
-│   │   ├── DevAccessStore.cs            # Dev-mode user switching
-│   │   └── EmailValidator.cs
-│   └── Program.cs
-├── PracticeBeforeThePatient.Web/        # Blazor Server frontend
-│   ├── Components/Pages/
-│   │   ├── Simulation.razor.cs          # Student simulation runner
-│   │   └── ScenarioEditor.razor.cs      # Instructor scenario editor
-│   ├── Services/
-│   │   └── ApiClient.cs                 # Typed HTTP client for the API
-│   └── Program.cs
-├── PracticeBeforeThePatient.Core/       # Shared domain models
-│   └── Models/
-│       ├── Scenario.cs
-│       ├── Node.cs
-│       ├── Choice.cs
-│       └── ClassRoster.cs
-├── .github/workflows/deploy.yml         # CI/CD — auto-deploy on push to main
-├── .gitignore
-└── README.md
+|-- PracticeBeforeThePatient.Api/
+|-- PracticeBeforeThePatient.Web/
+|-- PracticeBeforeThePatient.Core/
+|-- PracticeBeforeThePatient.Tests/
+|-- compose.yaml
+|-- .dockerignore
+`-- README.md
 ```
 
----
+## Deployment Status
 
-## Configuration
-
-Configuration is managed through `appsettings.{Environment}.json` files:
-
-| Setting | Project | Dev Value | Prod Value | Description |
-|---------|---------|-----------|------------|-------------|
-| `ASPNETCORE_ENVIRONMENT` | Both | `Development` | `Production` | Runtime environment |
-| `ApiBaseUrl` | Web | `http://localhost:5186/` | `http://localhost:5100/` | Base URL the Blazor app uses to reach the API |
-
-### Local Development Ports
-
-| Service | HTTP | HTTPS |
-|---------|------|-------|
-| **API** | `localhost:5186` | `localhost:7144` |
-| **Web** | `localhost:5009` | `localhost:7124` |
-
-### Production Deployment
-
-The application is deployed to a GCP Compute Engine VM with:
-- **Caddy** reverse proxy (auto-HTTPS via Let's Encrypt)
-- **systemd** services for both API and Web
-- **GitHub Actions** CI/CD (auto-deploy on push to `main`)
-
----
+- Docker-based deployment assets are committed.
+- No GitHub Actions deployment workflow is committed.
+- No hosted infrastructure credentials are committed.
 
 ## Troubleshooting
 
-### API Connection Issues
-- Ensure both projects are running (multi-project startup or two terminals).
-- Verify `ApiBaseUrl` in `appsettings.Development.json` matches the API's launch profile port.
+### The site loads but no data appears
 
-### Port Already in Use
-- Identify conflicting processes on ports **5009**, **5186**, **7124**, or **7144**.
-- Stop any other `dotnet` processes: `dotnet build-server shutdown`
+- Check the API logs first.
+- If startup failed during database migration or seeding:
 
-### Database Issues
-- The SQLite database (`app.db`) is created automatically on first run via EF Core migrations.
-- To reset the database, delete `PracticeBeforeThePatient.Api/Data/app.db` and restart the API.
+```bash
+docker compose down
+docker compose up --build
+```
 
----
+### You want a clean local database
 
-## License
-
-This project is developed as part of **CS 495** coursework. See the repository for any applicable license terms.
-
+```bash
+docker compose down -v
+docker compose up --build
+```

@@ -17,6 +17,7 @@ obj/
 
 # Logs
 *.log
+.env
 
 # SQLite database files
 *.db
@@ -28,7 +29,12 @@ publish/
 
 # Dotnet tools
 .dotnet/
+.dotnet-cli-home/
+.docker-config/
 /.vs
 
 # Local Docker overrides
 docker-compose.override.mac.local.yml
+
+# Test artifacts
+PracticeBeforeThePatient.Tests/TestResults/*.trx

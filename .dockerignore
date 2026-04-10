@@ -1,0 +1,8 @@
+.git
+.github
+.vs
+**/bin
+**/obj
+.dotnet-cli-home
+restore-api.log
+build.log

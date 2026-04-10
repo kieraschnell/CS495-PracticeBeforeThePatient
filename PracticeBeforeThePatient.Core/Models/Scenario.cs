@@ -1,5 +1,3 @@
-﻿using Microsoft.VisualBasic;
-
 namespace PracticeBeforeThePatient.Core.Models;
 
 public class Scenario
@@ -9,9 +7,5 @@ public class Scenario
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
     public Node Root { get; set; } = new();
-
-    public DateTime CreatedAt { get; set; } = DateAndTime.Now;
-
-
-
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
