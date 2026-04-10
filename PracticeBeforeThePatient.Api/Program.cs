@@ -23,6 +23,8 @@ if (!builder.Environment.IsEnvironment("Testing"))
 }
 
 builder.Services.AddSingleton<DevAccessStore>();
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<LlmService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

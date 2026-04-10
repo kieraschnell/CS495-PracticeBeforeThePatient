@@ -18,11 +18,13 @@ public class ScenariosController : ControllerBase
 
     private readonly AppDbContext _db;
     private readonly DevAccessStore _access;
+    private readonly LlmService _llm;
 
-    public ScenariosController(AppDbContext db, DevAccessStore access)
+    public ScenariosController(AppDbContext db, DevAccessStore access, LlmService llm)
     {
         _db = db;
         _access = access;
+        _llm = llm;
     }
 
     [HttpGet("{scenarioId}")]
@@ -161,6 +163,68 @@ public class ScenariosController : ControllerBase
         return Ok(new { message = "Scenario saved successfully" });
     }
 
+    [HttpPost("generate")]
+    public async Task<ActionResult<Scenario>> GenerateScenario([FromBody] GenerateScenarioRequest request, CancellationToken ct)
+    {
+        if (!await _access.IsTeacherAsync())
+            return Forbid();
+
+        if (string.IsNullOrWhiteSpace(request.Topic))
+            return BadRequest(Problem(title: "Topic is required.", detail: "Provide a non-empty topic for scenario generation."));
+
+        var maxDepth = request.MaxDepth is > 0 and <= 5 ? request.MaxDepth.Value : 2;
+
+        Scenario? scenario;
+        try
+        {
+            scenario = await _llm.GenerateScenarioAsync(request.Topic, maxDepth, ct);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return StatusCode(503, Problem(title: "LLM not configured.", detail: ex.Message));
+        }
+        catch (HttpRequestException ex)
+        {
+            return StatusCode(502, Problem(title: "LLM request failed.", detail: ex.Message));
+        }
+
+        if (scenario is null)
+            return StatusCode(502, Problem(title: "Invalid LLM response.", detail: "LLM returned an empty or unparseable scenario."));
+
+        var scenarioId = string.IsNullOrWhiteSpace(request.ScenarioId)
+            ? BuildScenarioId(request.Topic)
+            : request.ScenarioId.Trim();
+
+        if (!ScenarioIdPattern.IsMatch(scenarioId))
+            return BadRequest(Problem(title: "Invalid scenario id.", detail: "Scenario id may only include letters, numbers, underscore, and hyphen."));
+
+        scenario.Id = scenarioId;
+        scenario.CreatedBy = await _access.GetCurrentEmailAsync();
+        scenario.CreatedAt = DateTime.UtcNow;
+
+        var entity = await _db.Scenarios.FirstOrDefaultAsync(s => s.Id == scenarioId, ct);
+        if (entity is null)
+        {
+            _db.Scenarios.Add(ToEntity(scenarioId, scenario));
+        }
+        else
+        {
+            entity.Title = scenario.Title ?? scenarioId;
+            entity.Description = scenario.Description ?? "";
+            entity.NodesJson = JsonSerializer.Serialize(scenario.Root ?? new Node(), JsonOptions);
+        }
+
+        await _db.SaveChangesAsync(ct);
+        return Ok(scenario);
+    }
+
+    private static string BuildScenarioId(string topic)
+    {
+        var slug = Regex.Replace(topic.ToLowerInvariant(), @"[^a-z0-9]+", "-").Trim('-');
+        var truncated = slug.Length > 40 ? slug[..40].TrimEnd('-') : slug;
+        return $"{truncated}-{DateTime.UtcNow:yyyyMMddHHmmss}";
+    }
+
     private async Task<bool> CanCurrentUserAccessScenarioAsync(string scenarioId)
     {
         if (await _access.IsTeacherAsync())
@@ -218,4 +282,11 @@ public class ScenariosController : ControllerBase
             CreatedAtUtc = model.CreatedAt == default ? DateTime.UtcNow : model.CreatedAt
         };
     }
+}
+
+public class GenerateScenarioRequest
+{
+    public string Topic { get; set; } = "";
+    public string? ScenarioId { get; set; }
+    public int? MaxDepth { get; set; }
 }
