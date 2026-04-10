@@ -49,6 +49,11 @@ API_PORT=5186
 WEB_PORT=5009
 API_ENVIRONMENT=Production
 WEB_ENVIRONMENT=Production
+
+# LLM — required for AI scenario generation
+LLM_PROVIDER=gemini
+LLM_API_KEY=your-api-key-here
+LLM_MODEL=gemini-2.5-flash
 ```
 
 ### 3. Start the stack
@@ -90,6 +95,9 @@ All configuration is passed to the containers as environment variables. The tabl
 | `WEB_PORT` | `web` | `5009` | Host port mapped to the web UI |
 | `API_ENVIRONMENT` | `api` | `Production` | ASP.NET Core environment (`Development` enables Swagger) |
 | `WEB_ENVIRONMENT` | `web` | `Production` | ASP.NET Core environment for the frontend |
+| `LLM_PROVIDER` | `api` | `gemini` | LLM provider for scenario generation |
+| `LLM_API_KEY` | `api` | *(none)* | API key for the LLM provider (required for generation) |
+| `LLM_MODEL` | `api` | `gemini-2.5-flash` | Model name passed to the LLM provider |
 
 The API's database connection string is assembled inside `compose.yaml` from the Postgres variables above. The web frontend is told where to find the API via the internal Docker network (`http://api:8080/`); browsers do not call the API directly.
 
@@ -122,7 +130,13 @@ Everything the application needs is either built from source or pulled from publ
 | `mcr.microsoft.com/dotnet/aspnet:9.0` (runtime) | Microsoft Container Registry | Free |
 | NuGet packages (`Npgsql`, `EFCore`, `Swashbuckle`) | nuget.org | Free, open source |
 
-No API keys, no accounts, and no network access are required after the initial image pull.
+No accounts or network access are required after the initial image pull, except for an LLM API key if AI scenario generation is used.
+
+| Resource | Source | Cost |
+|----------|--------|------|
+| Google Gemini API | Google AI Studio | Free tier available |
+
+The LLM integration is optional — the application functions fully without it. Scenarios can still be created manually via the PUT endpoint. If `LLM_API_KEY` is not set, the generate endpoint returns a 503 error.
 
 ---
 

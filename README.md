@@ -10,6 +10,7 @@ An interactive medical training simulation platform built with .NET 9. Instructo
 | Backend | `PracticeBeforeThePatient.Api` | ASP.NET Core Web API |
 | Shared | `PracticeBeforeThePatient.Core` | Shared domain models |
 | Database | PostgreSQL | EF Core persistence, migrations, and seeded starter data |
+| AI | LLM Service | Scenario generation via configurable LLM provider (currently Gemini) |
 
 The supported runtime path in this repository is Docker Compose.
 
@@ -39,6 +40,29 @@ Default database settings come from `compose.yaml`:
 - Password: `change-me`
 
 These defaults are intended for local demos and development. If needed, Docker Compose environment variables can still be overridden at runtime.
+
+## AI Scenario Generation
+
+Teachers can generate branching clinical scenarios via an LLM. The API calls a configurable LLM provider (currently Google Gemini) and stores the generated scenario in the database.
+
+To enable scenario generation, add LLM credentials to your `.env` file (see [Configuration](#configuration)):
+
+```
+LLM_PROVIDER=gemini
+LLM_API_KEY=your-api-key
+LLM_MODEL=gemini-2.5-flash
+```
+
+Generate a scenario via the API:
+
+```bash
+curl -X POST http://localhost:5186/api/scenarios/generate \
+  -H "Content-Type: application/json" \
+  -d '{"topic": "ankle sprain assessment", "maxDepth": 3}'
+```
+
+- `topic` (required): the clinical subject for the scenario
+- `maxDepth` (optional, 1–5, default 2): maximum levels of decision branching. Branches can terminate earlier with outcomes, so not all paths reach the maximum depth.
 
 ## Swagger
 
@@ -86,6 +110,9 @@ The Docker Compose file includes defaults for:
 - `WEB_PORT`
 - `API_ENVIRONMENT`
 - `WEB_ENVIRONMENT`
+- `LLM_PROVIDER` (default: `gemini`)
+- `LLM_API_KEY` (required for scenario generation)
+- `LLM_MODEL` (default: `gemini-2.5-flash`)
 
 If a demo environment needs different values, set those environment variables before starting Docker Compose.
 
