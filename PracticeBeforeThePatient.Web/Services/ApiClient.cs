@@ -1,6 +1,8 @@
 ﻿using PracticeBeforeThePatient.Core.Models;
 using System.Net.Http.Json;
 
+using Microsoft.AspNetCore.Mvc;
+
 namespace PracticeBeforeThePatient.Web.Services;
 
 public class ApiClient
@@ -149,6 +151,13 @@ public class ApiClient
         public int UpdatedAssignments { get; set; }
     }
 
+    public sealed class GenerateScenarioRequest
+    {
+        public string Topic { get; set; } = "";
+        public string? ScenarioId { get; set; }
+        public int? MaxDepth { get; set; }
+    }
+
     public async Task<SubmitScenarioResponse?> SubmitScenarioAsync(string scenarioId, string submissionText)
     {
         try
@@ -169,6 +178,65 @@ public class ApiClient
         catch
         {
             return null;
+        }
+    }
+
+    public async Task<(Scenario? Scenario, string? ErrorMessage)> GenerateScenarioAsync(string topic, string? scenarioId, int? maxDepth)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/scenarios/generate", new GenerateScenarioRequest
+            {
+                Topic = topic ?? "",
+                ScenarioId = string.IsNullOrWhiteSpace(scenarioId) ? null : scenarioId.Trim(),
+                MaxDepth = maxDepth
+            });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string? errorMessage = null;
+
+                try
+                {
+                    var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+                    errorMessage = problem?.Detail ?? problem?.Title;
+                }
+                catch
+                {
+                    // Fall back to the raw response body.
+                }
+
+                if (string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    try
+                    {
+                        errorMessage = (await response.Content.ReadAsStringAsync()).Trim();
+                    }
+                    catch
+                    {
+                        // Ignore body parsing issues.
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    errorMessage = $"Scenario generation failed with status code {(int)response.StatusCode}.";
+                }
+
+                return (null, errorMessage);
+            }
+
+            var scenario = await response.Content.ReadFromJsonAsync<Scenario>();
+            if (scenario is null)
+            {
+                return (null, "The API returned an empty scenario.");
+            }
+
+            return (scenario, null);
+        }
+        catch
+        {
+            return (null, "Could not reach the scenario generation service.");
         }
     }
 }

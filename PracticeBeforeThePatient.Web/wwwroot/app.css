@@ -501,6 +501,123 @@ code {
   border-color: rgba(0, 0, 0, 0.22);
 }
 
+.generatorCard {
+  padding: 24px;
+  margin-bottom: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(158, 27, 50, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(158, 27, 50, 0.06), rgba(255, 255, 255, 0.94) 38%);
+  border: 1px solid rgba(158, 27, 50, 0.18);
+}
+
+.generatorTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.generatorBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(158, 27, 50, 0.12);
+  color: var(--brand);
+  border: 1px solid rgba(158, 27, 50, 0.2);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.generatorTitle {
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.generatorSubtitle {
+  color: rgba(0, 0, 0, 0.72);
+  line-height: 1.5;
+  max-width: 42rem;
+}
+
+.generatorMeta {
+  min-width: 190px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(158, 27, 50, 0.18);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 12px 28px rgba(158, 27, 50, 0.08);
+}
+
+.generatorMetaLabel {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.55);
+  margin-bottom: 6px;
+}
+
+.generatorMetaValue {
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.generatorGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.generatorField {
+  min-width: 0;
+}
+
+.generatorFieldWide {
+  grid-column: 1 / -1;
+}
+
+.generatorTextarea {
+  min-height: 110px;
+}
+
+.generatorFieldHint {
+  margin-top: 8px;
+  color: rgba(0, 0, 0, 0.62);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.generatorActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.generatorActionBtn {
+  min-width: 170px;
+}
+
+.generatorHint {
+  color: rgba(0, 0, 0, 0.66);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  max-width: 34rem;
+}
+
+.generatorStatus {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
 .adminUserList {
   display: grid;
   gap: 12px;
@@ -1559,6 +1676,14 @@ html[data-theme="dark"] .submissionModePage {
   .gradingMetaGrid {
     grid-template-columns: 1fr;
   }
+
+  .generatorGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .generatorTop {
+    flex-direction: column;
+  }
 }
 
 
@@ -1781,6 +1906,26 @@ html[data-theme="dark"] .scenarioInlineSelect {
   background: #202734;
   color: var(--text);
   border-color: var(--border-strong);
+}
+
+html[data-theme="dark"] .generatorCard {
+  background:
+    radial-gradient(circle at top right, rgba(212, 58, 86, 0.24), transparent 36%),
+    linear-gradient(180deg, rgba(212, 58, 86, 0.18), rgba(26, 31, 39, 0.96) 42%);
+  border-color: rgba(212, 58, 86, 0.3);
+}
+
+html[data-theme="dark"] .generatorSubtitle,
+html[data-theme="dark"] .generatorFieldHint,
+html[data-theme="dark"] .generatorHint,
+html[data-theme="dark"] .generatorMetaLabel {
+  color: var(--muted);
+}
+
+html[data-theme="dark"] .generatorMeta {
+  background: rgba(26, 31, 39, 0.82);
+  border-color: rgba(212, 58, 86, 0.26);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
 }
 
 html[data-theme="dark"] .editorInput::placeholder,

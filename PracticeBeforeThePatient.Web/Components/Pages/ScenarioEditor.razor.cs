@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Components;
 using PracticeBeforeThePatient.Core.Models;
 using PracticeBeforeThePatient.Web.Services;
+using System.Text.RegularExpressions;
 
 namespace PracticeBeforeThePatient.Web.Components.Pages;
 
 public partial class ScenarioEditor : ComponentBase
 {
+    private static readonly Regex ScenarioIdPattern = new("^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
+
     [Inject] private ApiClient ApiClient { get; set; } = default!;
 
     protected bool _isLoadingAccess = true;
@@ -13,14 +16,20 @@ public partial class ScenarioEditor : ComponentBase
     protected bool _isLoading = true;
     protected bool _isLoadingScenario;
     protected bool _isSaving;
+    protected bool _isGenerating;
     protected string? _errorMessage;
     protected string? _saveMessage;
     protected bool _saveSuccess;
     private int _saveMessageVersion;
+    protected string? _generationMessage;
+    protected string _generationMessageKind = "info";
 
     protected Scenario? _scenario;
     protected List<string> AvailableScenarioIds { get; set; } = new();
     protected string SelectedScenarioId { get; set; } = "";
+    protected string GenerateTopic { get; set; } = "";
+    protected string GenerateScenarioId { get; set; } = "";
+    protected int GenerateMaxDepth { get; set; } = 2;
     protected NodeSelectionState _nodeSelection = new();
 
     protected override async Task OnInitializedAsync()
@@ -82,6 +91,57 @@ public partial class ScenarioEditor : ComponentBase
         }
 
         _isLoadingScenario = false;
+    }
+
+    protected async Task GenerateScenarioAsync()
+    {
+        if (!_isTeacher || _isGenerating)
+        {
+            return;
+        }
+
+        var topic = (GenerateTopic ?? "").Trim();
+        var scenarioId = (GenerateScenarioId ?? "").Trim();
+
+        if (string.IsNullOrWhiteSpace(topic))
+        {
+            SetGenerationMessage("Enter a topic before generating a scenario.", "error");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(scenarioId) && !ScenarioIdPattern.IsMatch(scenarioId))
+        {
+            SetGenerationMessage("Scenario id may only include letters, numbers, underscores, and hyphens.", "error");
+            return;
+        }
+
+        _isGenerating = true;
+        _generationMessage = "Generating a new branching scenario with Gemini. This can take a few seconds.";
+        _generationMessageKind = "info";
+        _errorMessage = null;
+        StateHasChanged();
+
+        var (scenario, errorMessage) = await ApiClient.GenerateScenarioAsync(topic, scenarioId, GenerateMaxDepth);
+
+        _isGenerating = false;
+
+        if (scenario is null)
+        {
+            SetGenerationMessage(
+                string.IsNullOrWhiteSpace(errorMessage)
+                    ? "Scenario generation failed."
+                    : errorMessage,
+                "error");
+            return;
+        }
+
+        _scenario = scenario;
+        SelectedScenarioId = scenario.Id;
+        GenerateScenarioId = scenario.Id;
+        _nodeSelection.Clear();
+        AddScenarioIdIfMissing(scenario.Id);
+
+        SetGenerationMessage($"Generated and saved '{scenario.Id}'. Review and refine it below.", "success");
     }
 
     private NodeEditor? _rootNodeEditor;
@@ -173,6 +233,40 @@ public partial class ScenarioEditor : ComponentBase
         _saveMessage = message;
         var version = ++_saveMessageVersion;
         _ = ClearSaveMessageLater(version);
+    }
+
+    protected string GetGenerationMessageClass()
+    {
+        return _generationMessageKind switch
+        {
+            "success" => "saveMessage success generatorStatus",
+            "error" => "saveMessage error generatorStatus",
+            _ => "infoMessage generatorStatus"
+        };
+    }
+
+    private void SetGenerationMessage(string message, string kind)
+    {
+        _generationMessage = message;
+        _generationMessageKind = kind;
+    }
+
+    private void AddScenarioIdIfMissing(string scenarioId)
+    {
+        if (string.IsNullOrWhiteSpace(scenarioId))
+        {
+            return;
+        }
+
+        if (AvailableScenarioIds.Contains(scenarioId, StringComparer.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        AvailableScenarioIds.Add(scenarioId);
+        AvailableScenarioIds = AvailableScenarioIds
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private async Task ClearSaveMessageLater(int version)

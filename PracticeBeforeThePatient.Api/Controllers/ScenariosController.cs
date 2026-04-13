@@ -172,7 +172,10 @@ public class ScenariosController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Topic))
             return BadRequest(Problem(title: "Topic is required.", detail: "Provide a non-empty topic for scenario generation."));
 
-        var maxDepth = request.MaxDepth is > 0 and <= 5 ? request.MaxDepth.Value : 2;
+        if (request.MaxDepth.HasValue && (request.MaxDepth.Value < 2 || request.MaxDepth.Value > 5))
+            return BadRequest(Problem(title: "Invalid branch depth.", detail: "Branch depth must be between 2 and 5."));
+
+        var maxDepth = request.MaxDepth ?? 2;
 
         Scenario? scenario;
         try

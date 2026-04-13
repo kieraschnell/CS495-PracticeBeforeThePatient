@@ -23,7 +23,7 @@
     {
         <div class="card">
             <div class="sectionTitle">Not available</div>
-            <div class="narrLine">This page is only available to teachers and admins</div>
+            <div class="narrLine">This page is only available to instructors and admins</div>
         </div>
     }
     else if (_isLoading)
@@ -44,9 +44,9 @@
     {
         <div class="simHeaderRow">
             <div class="simHeaderText">
-                <div class="simBadge">Editor</div>
+                <div class="simBadge">Instructor Tools</div>
                 <div class="simTitle">Scenario Editor</div>
-                <div class="simSubtitle">Edit scenario nodes and save changes</div>
+                <div class="simSubtitle">Generate a scenario with Gemini, then refine the branching flow before assigning it</div>
             </div>
 
             <div class="scenarioBar">
@@ -60,6 +60,77 @@
                         <option value="@id">@id</option>
                     }
                 </select>
+            </div>
+        </div>
+
+        <div class="simGridSingle">
+            <div class="card generatorCard">
+                <div class="generatorTop">
+                    <div>
+                        <div class="generatorBadge">Gemini</div>
+                        <div class="sectionTitle generatorTitle">Generate a new scenario</div>
+                        <div class="generatorSubtitle">
+                            Create a branching clinical case, save it immediately, then edit any node below.
+                        </div>
+                    </div>
+
+                    <div class="generatorMeta">
+                        <div class="generatorMetaLabel">Access</div>
+                        <div class="generatorMetaValue">Instructors and admins only</div>
+                    </div>
+                </div>
+
+                <div class="generatorGrid">
+                    <div class="generatorField generatorFieldWide">
+                        <label class="editorLabel" for="generate-topic">Topic</label>
+                        <textarea id="generate-topic"
+                                  class="editorTextarea generatorTextarea"
+                                  rows="3"
+                                  placeholder="Example: Acute lateral ankle sprain during return-to-play evaluation"
+                                  @bind="GenerateTopic"></textarea>
+                    </div>
+
+                    <div class="generatorField">
+                        <label class="editorLabel" for="generate-scenario-id">Scenario Id</label>
+                        <input id="generate-scenario-id"
+                               type="text"
+                               class="editorInput"
+                               placeholder="Optional custom id"
+                               @bind="GenerateScenarioId" />
+                        <div class="generatorFieldHint">Letters, numbers, dashes, and underscores only.</div>
+                    </div>
+
+                    <div class="generatorField">
+                        <label class="editorLabel" for="generate-max-depth">Branch depth</label>
+                        <select id="generate-max-depth" class="editorInput" @bind="GenerateMaxDepth">
+                            @for (var depth = 2; depth <= 5; depth++)
+                            {
+                                <option value="@depth">@depth @(depth == 1 ? "level" : "levels")</option>
+                            }
+                        </select>
+                        <div class="generatorFieldHint">Use 2 to 5 levels. Higher depth creates a larger decision tree.</div>
+                    </div>
+                </div>
+
+                <div class="generatorActions">
+                    <button class="primaryBtn generatorActionBtn"
+                            type="button"
+                            @onclick="GenerateScenarioAsync"
+                            disabled="@_isGenerating">
+                        @(_isGenerating ? "Generating..." : "Generate Scenario")
+                    </button>
+
+                    <div class="generatorHint">
+                        The generated scenario is saved automatically and loaded into the editor when Gemini returns it.
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(_generationMessage))
+                {
+                    <div class="@GetGenerationMessageClass()" role="status" aria-live="polite">
+                        @_generationMessage
+                    </div>
+                }
             </div>
         </div>
 
@@ -102,6 +173,15 @@
                             <NodeEditor @ref="_rootNodeEditor" Node="_scenario.Root" Path="Root" Level="0" />
                         </CascadingValue>
                     }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="simGridSingle">
+                <div class="card">
+                    <div class="sectionTitle">No scenario selected</div>
+                    <div class="narrLine">Generate a new scenario above or select an existing scenario to edit.</div>
                 </div>
             </div>
         }
