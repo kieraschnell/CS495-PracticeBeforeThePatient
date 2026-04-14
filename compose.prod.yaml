@@ -1,0 +1,13 @@
+services:
+  postgres:
+    # Keep the database on the internal Compose network in production.
+    ports: !reset []
+
+  api:
+    # The web service reaches the API over the internal Compose network.
+    ports: !reset []
+
+  web:
+    # Bind the frontend only on localhost so Nginx can proxy it publicly.
+    ports: !override
+      - "127.0.0.1:${WEB_PORT:-5009}:8080"

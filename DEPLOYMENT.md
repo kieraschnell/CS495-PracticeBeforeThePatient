@@ -10,7 +10,12 @@ Practice Before The Patient runs as three Docker containers managed by Docker Co
 | `api` | Built from source | ASP.NET Core Web API |
 | `web` | Built from source | Blazor Server UI |
 
-All three services are defined in `compose.yaml` at the repository root. No cloud accounts or external services are required.
+The repository includes:
+
+- `compose.yaml` for local development
+- `compose.prod.yaml` for VM/server deployments behind a reverse proxy
+
+No cloud accounts or external services are required.
 
 ---
 
@@ -58,8 +63,16 @@ LLM_MODEL=gemini-2.5-flash
 
 ### 3. Start the stack
 
+For a local demo:
+
 ```bash
 docker compose up --build
+```
+
+For a VM or other public host, use the production override:
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml up --build -d
 ```
 
 Compose will:
@@ -68,6 +81,8 @@ Compose will:
 3. Start PostgreSQL and wait for it to be healthy.
 4. Start the API, which applies EF Core migrations and seeds starter data.
 5. Start the web frontend.
+
+The production override keeps `postgres` and `api` on Docker's internal network and binds the `web` service to `127.0.0.1` so Nginx can proxy it safely.
 
 ### 4. Verify the deployment
 
@@ -78,6 +93,8 @@ Compose will:
 | Swagger (Development only) | `http://localhost:5186/swagger` |
 
 The site should load within ~30 seconds on first run while images pull and the database initializes.
+
+When using `compose.prod.yaml`, only the web UI is published on the host, and it is bound to `127.0.0.1` by default.
 
 ---
 
@@ -150,10 +167,22 @@ docker compose down
 
 Data in the `postgres-data` Docker volume is preserved.
 
+If you started the VM deployment with the production override, stop it the same way:
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml down
+```
+
 ### Rebuild after code changes
 
 ```bash
 docker compose up --build
+```
+
+For the VM deployment:
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml up --build -d
 ```
 
 ### Reset the database (delete all data)
@@ -179,6 +208,14 @@ Then open `http://localhost:5186/swagger`.
 docker compose up --build -d
 docker compose logs -f   # stream logs
 docker compose down      # stop when done
+```
+
+For the VM deployment:
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml up --build -d
+docker compose -f compose.yaml -f compose.prod.yaml logs -f
+docker compose -f compose.yaml -f compose.prod.yaml down
 ```
 
 ---

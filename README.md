@@ -14,6 +14,9 @@ An interactive medical training simulation platform built with .NET 9. Instructo
 
 The supported runtime path in this repository is Docker Compose.
 
+- `compose.yaml` is the local-development default.
+- `compose.prod.yaml` is the production override for VM deployments behind Nginx or another reverse proxy.
+
 ## Prerequisites
 
 - Docker Desktop or Docker Engine
@@ -21,10 +24,16 @@ The supported runtime path in this repository is Docker Compose.
 
 ## Quick Start
 
-Run the full stack:
+Run the full stack locally:
 
 ```bash
 docker compose up --build
+```
+
+For a VM deployment, use the production override:
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml up --build -d
 ```
 
 Default endpoints:
@@ -32,6 +41,8 @@ Default endpoints:
 - Web UI: `http://localhost:5009`
 - API: `http://localhost:5186`
 - PostgreSQL: `localhost:5432`
+
+With `compose.prod.yaml`, only the web service is published on the host, and it is bound to `127.0.0.1` for reverse-proxy use.
 
 Default database settings come from `compose.yaml`:
 
