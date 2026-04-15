@@ -116,7 +116,7 @@ public partial class ScenarioEditor : ComponentBase
         }
 
         _isGenerating = true;
-        _generationMessage = "Generating a new branching scenario with Gemini. This can take a few seconds.";
+        _generationMessage = "Generating a new branching scenario. This can take a few seconds.";
         _generationMessageKind = "info";
         _errorMessage = null;
         StateHasChanged();

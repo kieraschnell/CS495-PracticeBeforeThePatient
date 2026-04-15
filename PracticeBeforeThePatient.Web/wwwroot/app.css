@@ -543,29 +543,6 @@ code {
   max-width: 42rem;
 }
 
-.generatorMeta {
-  min-width: 190px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(158, 27, 50, 0.18);
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 12px 28px rgba(158, 27, 50, 0.08);
-}
-
-.generatorMetaLabel {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.55);
-  margin-bottom: 6px;
-}
-
-.generatorMetaValue {
-  font-weight: 800;
-  color: var(--brand);
-}
-
 .generatorGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1917,15 +1894,8 @@ html[data-theme="dark"] .generatorCard {
 
 html[data-theme="dark"] .generatorSubtitle,
 html[data-theme="dark"] .generatorFieldHint,
-html[data-theme="dark"] .generatorHint,
-html[data-theme="dark"] .generatorMetaLabel {
+html[data-theme="dark"] .generatorHint {
   color: var(--muted);
-}
-
-html[data-theme="dark"] .generatorMeta {
-  background: rgba(26, 31, 39, 0.82);
-  border-color: rgba(212, 58, 86, 0.26);
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
 }
 
 html[data-theme="dark"] .editorInput::placeholder,
