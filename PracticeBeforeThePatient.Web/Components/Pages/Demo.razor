@@ -3,10 +3,11 @@
 @attribute [StreamRendering]
 @using PracticeBeforeThePatient.Web.Services
 @inject ApiClient Api
+@inject AccessState AccessState
 @inject IJSRuntime JS
 @inject NavigationManager Nav
 
-<PageTitle>Demo</PageTitle>
+<PageTitle>Access</PageTitle>
 
 @if (!string.IsNullOrWhiteSpace(StatusMessage))
 {
@@ -17,27 +18,46 @@
 
 <div class="simShell">
     <div class="card demoCard">
-        <div class="sectionTitle">Mock Login (Temporary)</div>
+        <div class="sectionTitle">Temporary Access</div>
         <div class="demoMeta">
-            <div class="demoMetaRow">Current user: @CurrentUserLabel</div>
-            <div class="demoMetaRow">Role: @RoleLabel</div>
+            <div class="demoMetaRow">Current mode: @CurrentModeLabel</div>
+            <div class="demoMetaRow">@CurrentModeSummary</div>
         </div>
 
-        <div class="createRow demoLoginRow">
-            <input class="editorInput"
-                   @bind="EmailInput"
-                   @bind:event="oninput"
-                   @onkeydown="OnEmailInputKeyDown"
-                   placeholder="admin@ua.edu, instructor@ua.edu, student1@ua.edu" />
-            <button class="primaryBtn" @onclick="ApplyUserAsync" disabled="@IsSaving">Apply</button>
-        </div>
+        @if (IsAdmin)
+        {
+            <div class="createRow demoLoginRow">
+                <button class="secondaryBtn" @onclick="LogoutAsync" disabled="@IsSaving">Return to Student Mode</button>
+            </div>
+        }
+        else
+        {
+            <div class="simSubtitle">Use this page to access the admin view and in-progress testing features.</div>
+
+            <div class="createRow demoLoginRow">
+                <input class="editorInput"
+                       @bind="UsernameInput"
+                       @bind:event="oninput"
+                       @onkeydown="OnLoginInputKeyDown"
+                       placeholder="Admin username" />
+                <input class="editorInput"
+                       type="password"
+                       @bind="PasswordInput"
+                       @bind:event="oninput"
+                       @onkeydown="OnLoginInputKeyDown"
+                       placeholder="Admin password" />
+                <button class="primaryBtn" @onclick="LoginAsync" disabled="@IsSaving">Unlock Admin</button>
+            </div>
+        }
     </div>
 </div>
 
 @code {
-    private string EmailInput { get; set; } = "";
-    private string CurrentUserLabel { get; set; } = "(none)";
-    private string RoleLabel { get; set; } = "Student";
+    private string UsernameInput { get; set; } = "";
+    private string PasswordInput { get; set; } = "";
+    private string CurrentModeLabel { get; set; } = "Student Practice";
+    private string CurrentModeSummary { get; set; } = "Students can browse and run scenarios without signing in.";
+    private bool IsAdmin { get; set; }
     private bool IsSaving { get; set; }
     private string StatusMessage { get; set; } = "";
     private string StatusKind { get; set; } = "success";
@@ -62,33 +82,27 @@
         }
     }
 
-    private async Task ApplyUserAsync()
+    private async Task LoginAsync()
     {
         IsSaving = true;
         StatusMessage = "";
 
         try
         {
-            var access = await Api.SetCurrentDevUserAsync(EmailInput);
+            var access = await Api.LoginTemporaryAdminAsync(UsernameInput, PasswordInput);
 
             if (access is null)
             {
-                SetStatus("Could not update mock user.", false);
+                SetStatus("Temporary admin login failed.", false);
                 return;
             }
 
-            CurrentUserLabel = string.IsNullOrWhiteSpace(access.Email) ? "(none)" : access.Email;
-            RoleLabel = FormatRole(access.Role);
-            EmailInput = access.Email ?? "";
-            _themeToApply = NormalizeTheme(access.Theme);
-            if (!string.IsNullOrWhiteSpace(_themeToApply))
-            {
-                await JS.InvokeVoidAsync("pbpTheme.setTheme", _themeToApply);
-            }
-
-            // Reload current page so access-dependent UI updates immediately for the new mock user.
-            Nav.NavigateTo(Nav.Uri, forceLoad: true);
-            return;
+            AccessState.Update(access);
+            ApplyAccess(access);
+            PasswordInput = "";
+            await ApplyThemeAsync(access.Theme);
+            SetStatus("Admin tools unlocked for this browser session.", true);
+            Nav.NavigateTo("/", forceLoad: false);
         }
         finally
         {
@@ -96,31 +110,67 @@
         }
     }
 
-    private async Task OnEmailInputKeyDown(KeyboardEventArgs e)
+    private async Task LogoutAsync()
+    {
+        IsSaving = true;
+        StatusMessage = "";
+
+        try
+        {
+            var access = await Api.LogoutTemporaryAdminAsync();
+            if (access is null)
+            {
+                SetStatus("Could not return to student mode.", false);
+                return;
+            }
+
+            AccessState.Update(access);
+            ApplyAccess(access);
+            await ApplyThemeAsync(access.Theme);
+            SetStatus("Student practice mode restored.", true);
+            Nav.NavigateTo("/", forceLoad: false);
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task OnLoginInputKeyDown(KeyboardEventArgs e)
     {
         if (e.Key == "Enter" && !IsSaving)
         {
-            await ApplyUserAsync();
+            await LoginAsync();
         }
     }
 
     private async Task RefreshAccessAsync()
     {
-        var access = await Api.GetAccessAsync();
-        CurrentUserLabel = string.IsNullOrWhiteSpace(access?.Email) ? "(none)" : access!.Email;
-        RoleLabel = FormatRole(access?.Role);
-        EmailInput = access?.Email ?? "";
-        _themeToApply = NormalizeTheme(access?.Theme);
+        var access = AccessState.CurrentAccess ?? await Api.GetAccessAsync();
+        AccessState.Update(access);
+        ApplyAccess(access);
     }
 
-    private static string FormatRole(string? role)
+    private void ApplyAccess(ApiClient.AccessResponse? access)
     {
-        return role?.Trim().ToLowerInvariant() switch
+        IsAdmin = access?.IsAdmin == true;
+        CurrentModeLabel = IsAdmin ? "Admin Access" : "Student Practice";
+        CurrentModeSummary = IsAdmin
+            ? $"Signed in as {(!string.IsNullOrWhiteSpace(access?.Email) ? access!.Email : "temporary admin")}."
+            : "Admin tools and testing features stay locked until the temporary credential is entered.";
+        _themeToApply = NormalizeTheme(access?.Theme);
+        UsernameInput = access?.IsAdmin == true && !string.IsNullOrWhiteSpace(access.Email)
+            ? access.Email
+            : UsernameInput;
+    }
+
+    private async Task ApplyThemeAsync(string? theme)
+    {
+        _themeToApply = NormalizeTheme(theme);
+        if (!string.IsNullOrWhiteSpace(_themeToApply))
         {
-            "admin" => "Admin",
-            "teacher" => "Teacher",
-            _ => "Student"
-        };
+            await JS.InvokeVoidAsync("pbpTheme.setTheme", _themeToApply);
+        }
     }
 
     private void SetStatus(string message, bool ok)

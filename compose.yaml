@@ -30,6 +30,8 @@ services:
       ASPNETCORE_ENVIRONMENT: ${API_ENVIRONMENT:-Production}
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-practicebeforethepatient};Username=${POSTGRES_USER:-practicebeforethepatient};Password=${POSTGRES_PASSWORD:-change-me}
+      TemporaryAccess__AdminUsername: ${TEMP_ADMIN_USERNAME:-admin}
+      TemporaryAccess__AdminPassword: ${TEMP_ADMIN_PASSWORD:-change-me}
       Llm__Provider: ${LLM_PROVIDER:-gemini}
       Llm__ApiKey: ${LLM_API_KEY}
       Llm__Model: ${LLM_MODEL:-gemini-2.5-flash}

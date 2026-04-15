@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 
 namespace PracticeBeforeThePatient.Web.Services;
 
@@ -10,16 +11,25 @@ public class ApiClient
     public HttpClient Http => _httpClient;
 
     private readonly HttpClient _httpClient;
+    private readonly AccessSession _accessSession;
 
-    public ApiClient(HttpClient httpClient)
+    public ApiClient(HttpClient httpClient, AccessSession accessSession)
     {
         _httpClient = httpClient;
+        _accessSession = accessSession;
+        if (_httpClient.DefaultRequestHeaders.Contains("X-PBP-Access-Session"))
+        {
+            _httpClient.DefaultRequestHeaders.Remove("X-PBP-Access-Session");
+        }
+
+        _httpClient.DefaultRequestHeaders.Add("X-PBP-Access-Session", _accessSession.SessionId);
     }
 
     public sealed class AccessResponse
     {
         public string Email { get; set; } = "";
         public string Role { get; set; } = "student";
+        public bool IsGuest { get; set; } = true;
         public bool IsTeacher { get; set; }
         public bool IsAdmin { get; set; }
         public List<string> AllowedScenarioIds { get; set; } = new();
@@ -45,6 +55,12 @@ public class ApiClient
     public sealed class SetThemeRequest
     {
         public string Theme { get; set; } = "light";
+    }
+
+    public sealed class TemporaryAdminLoginRequest
+    {
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
     }
 
     public async Task<AccessResponse?> GetAccessAsync()
@@ -90,6 +106,53 @@ public class ApiClient
                 Theme = theme ?? "light"
             });
 
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<AccessResponse>();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<AccessResponse?> LoginTemporaryAdminAsync(string username, string password)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/access/temporary-admin/login", new TemporaryAdminLoginRequest
+            {
+                Username = username ?? "",
+                Password = password ?? ""
+            });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<AccessResponse>();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<AccessResponse?> LogoutTemporaryAdminAsync()
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, "api/access/temporary-admin/logout")
+            {
+                Content = new StringContent("")
+            };
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
             {
                 return null;

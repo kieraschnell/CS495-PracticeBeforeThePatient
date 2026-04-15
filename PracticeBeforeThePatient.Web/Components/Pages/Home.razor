@@ -1,6 +1,17 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@using PracticeBeforeThePatient.Web.Services
+@inject IJSRuntime JS
+@inject AccessState AccessState
 
 <PageTitle>Practice Before the Patient</PageTitle>
+
+@if (!string.IsNullOrWhiteSpace(_message))
+{
+    <div @key="_messageVersion" class="saveMessage overlayToast @_messageKind" role="status" aria-live="polite">
+        @_message
+    </div>
+}
 
 <div class="home">
 
@@ -11,12 +22,14 @@
             <h1 class="hero-title">Practice Before the Patient</h1>
 
             <p class="hero-subtitle">
-                Work through clinical scenarios step by step, explain your reasoning, then review feedback at the end.
+                Practice patient scenarios, explain your decisions, and review guided feedback in one place.
             </p>
 
             <div class="hero-actions">
                 <a class="btn-primary" href="simulation">Start Simulation</a>
-                <a class="btn-secondary" href="demo">View Demo</a>
+                <button class="homeThemeToggle" @onclick="ToggleThemeAsync" disabled="@(!_isReady)">
+                    @(_isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode")
+                </button>
             </div>
         </div>
 
@@ -25,14 +38,13 @@
                 <div class="panel-title">What you can do</div>
 
                 <ul class="panel-list">
-                    <li>Choose next steps during a patient encounter</li>
-                    <li>Write your reasoning for each decision</li>
-                    <li>See patient responses as you progress</li>
-                    <li>Review a summary and comparison at the end</li>
+                    <li>Open a scenario and move through the encounter step by step</li>
+                    <li>Record your reasoning before continuing to the next decision</li>
+                    <li>Review patient responses and end-of-scenario feedback</li>
                 </ul>
 
                 <div class="panel-foot">
-                    Instructors can also manage classes and control scenario access.
+                    Student practice is available now. Class-linked saving and additional account features are still being completed.
                 </div>
             </div>
         </div>
@@ -43,32 +55,121 @@
         <div class="feature">
             <div class="feature-top">
                 <div class="feature-icon"></div>
-                <h3>Interactive Scenarios</h3>
+                <h3>Scenario Practice</h3>
             </div>
             <p>
-                Practice decision making in a safe environment with guided prompts and realistic patient responses.
+                Work through guided patient encounters designed to help you slow down and think through each next step.
             </p>
         </div>
 
         <div class="feature">
             <div class="feature-top">
                 <div class="feature-icon"></div>
-                <h3>Reasoning and Feedback</h3>
+                <h3>Reasoning Review</h3>
             </div>
             <p>
-                Explain your choices, then compare your path to recommended steps at the end of the simulation.
+                Write out your reasoning, then compare your decisions with the recommended path at the end.
             </p>
         </div>
 
         <div class="feature">
             <div class="feature-top">
                 <div class="feature-icon"></div>
-                <h3>Class Support</h3>
+                <h3>In Progress</h3>
             </div>
             <p>
-                Scenario access can be assigned by class, so students only see what is relevant for their course.
+                Some classroom and account-connected features are still being refined, but student practice mode is ready to use.
             </p>
         </div>
     </section>
 
 </div>
+
+@code {
+    private bool _isReady;
+    private bool _isDarkMode;
+    private string _message = "";
+    private string _messageKind = "success";
+    private int _messageVersion;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        var theme = NormalizeTheme(await JS.InvokeAsync<string>("pbpTheme.getTheme")) ?? "light";
+        await JS.InvokeVoidAsync("pbpTheme.setTheme", theme);
+        _isDarkMode = string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase);
+        _isReady = true;
+        SyncAccessStateTheme(theme);
+
+        StateHasChanged();
+    }
+
+    private async Task ToggleThemeAsync()
+    {
+        var nextTheme = _isDarkMode ? "light" : "dark";
+        var savedTheme = NormalizeTheme(await JS.InvokeAsync<string>("pbpTheme.setTheme", nextTheme)) ?? "light";
+        _isDarkMode = string.Equals(savedTheme, "dark", StringComparison.OrdinalIgnoreCase);
+        SyncAccessStateTheme(savedTheme);
+        SetMessage("Theme preference saved on this device.", true);
+    }
+
+    private void SyncAccessStateTheme(string theme)
+    {
+        var current = AccessState.CurrentAccess;
+        if (current is null)
+        {
+            return;
+        }
+
+        AccessState.Update(new ApiClient.AccessResponse
+        {
+            Email = current.Email,
+            Role = current.Role,
+            IsGuest = current.IsGuest,
+            IsTeacher = current.IsTeacher,
+            IsAdmin = current.IsAdmin,
+            AllowedScenarioIds = current.AllowedScenarioIds,
+            AllowedScenarioOptions = current.AllowedScenarioOptions,
+            Theme = theme
+        });
+    }
+
+    private static string? NormalizeTheme(string? theme)
+    {
+        if (string.Equals(theme, "dark", StringComparison.OrdinalIgnoreCase))
+        {
+            return "dark";
+        }
+
+        if (string.Equals(theme, "light", StringComparison.OrdinalIgnoreCase))
+        {
+            return "light";
+        }
+
+        return null;
+    }
+
+    private void SetMessage(string text, bool ok)
+    {
+        _message = text;
+        _messageKind = ok ? "success" : "error";
+        var version = ++_messageVersion;
+        _ = ClearMessageLater(version);
+    }
+
+    private async Task ClearMessageLater(int version)
+    {
+        await Task.Delay(3000);
+        if (version != _messageVersion)
+        {
+            return;
+        }
+
+        _message = "";
+        await InvokeAsync(StateHasChanged);
+    }
+}

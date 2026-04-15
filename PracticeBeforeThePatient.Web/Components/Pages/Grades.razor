@@ -29,6 +29,17 @@
     return;
 }
 
+@if (_isGuest)
+{
+    <div class="simShell">
+        <div class="card">
+            <div class="sectionTitle">Not available</div>
+            <div class="narrLine">Grades are only available after a student account is connected. Temporary guest practice mode does not save class submissions.</div>
+        </div>
+    </div>
+    return;
+}
+
 <div class="simShell gradingShell">
     @if (_activeGrade is not null)
     {
@@ -151,6 +162,7 @@
 @code {
     private bool _isLoading = true;
     private bool _isAdmin;
+    private bool _isGuest;
     private string _errorMessage = "";
     private List<StudentGradeDto> _grades = new();
     private StudentGradeDto? _activeGrade;
@@ -162,8 +174,9 @@
         {
             var access = await Api.GetAccessAsync();
             _isAdmin = access?.IsAdmin == true;
+            _isGuest = access?.IsGuest == true;
 
-            if (_isAdmin)
+            if (_isAdmin || _isGuest)
             {
                 return;
             }

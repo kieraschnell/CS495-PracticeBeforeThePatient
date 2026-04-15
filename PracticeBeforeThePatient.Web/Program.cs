@@ -13,6 +13,8 @@ builder.Services.AddHttpClient<ApiClient>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
+builder.Services.AddScoped<AccessSession>();
+builder.Services.AddScoped<AccessState>();
 
 var app = builder.Build();
 

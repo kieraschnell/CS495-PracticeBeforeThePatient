@@ -123,6 +123,25 @@ code {
   flex-wrap: wrap;
 }
 
+.homeThemeToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: white;
+  color: #222;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.homeThemeToggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.1);
+}
+
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -1827,6 +1846,12 @@ html[data-theme="dark"] .feature h3 {
   color: var(--brand);
 }
 
+html[data-theme="dark"] .homeThemeToggle {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border);
+  color: var(--text);
+}
+
 html[data-theme="dark"] .hero-badge {
   color: #ffd7df;
   background: rgba(212, 58, 86, 0.22);
@@ -1963,8 +1988,18 @@ html[data-theme="dark"] .optionCard:hover {
 
 html[data-theme="dark"] .optionCard.selected,
 html[data-theme="dark"] .nodeCard.selected {
-  background: rgba(236, 240, 246, 0.1);
-  border-color: rgba(236, 240, 246, 0.3);
+  background: linear-gradient(135deg, rgba(212, 58, 86, 0.3) 0%, rgba(127, 23, 44, 0.32) 100%);
+  border-color: rgba(255, 215, 223, 0.55);
+  box-shadow: 0 0 0 3px rgba(212, 58, 86, 0.28), 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .optionCard.selected .optionKey {
+  color: #ffd7df;
+}
+
+html[data-theme="dark"] .optionCard.selected .optionText {
+  color: #fff5f7;
+  opacity: 1;
 }
 
 .scenarioAccessGrid {

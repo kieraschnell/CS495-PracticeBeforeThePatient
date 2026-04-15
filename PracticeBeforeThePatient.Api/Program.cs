@@ -5,6 +5,10 @@ using PracticeBeforeThePatient.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<TemporaryAccessOptions>(
+    builder.Configuration.GetSection("TemporaryAccess"));
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

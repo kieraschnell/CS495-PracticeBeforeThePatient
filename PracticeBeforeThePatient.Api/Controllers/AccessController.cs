@@ -22,6 +22,7 @@ public sealed class AccessController : ControllerBase
     {
         public string Email { get; set; } = "";
         public string Role { get; set; } = DevAccessStore.StudentRole;
+        public bool IsGuest { get; set; } = true;
         public bool IsTeacher { get; set; }
         public bool IsAdmin { get; set; }
         public List<string> AllowedScenarioIds { get; set; } = new();
@@ -47,6 +48,12 @@ public sealed class AccessController : ControllerBase
     public sealed class SetThemeRequest
     {
         public string Theme { get; set; } = DevAccessStore.LightTheme;
+    }
+
+    public sealed class TemporaryAdminLoginRequest
+    {
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
     }
 
     [HttpGet]
@@ -87,22 +94,48 @@ public sealed class AccessController : ControllerBase
         return response;
     }
 
+    [HttpPost("temporary-admin/login")]
+    public async Task<ActionResult<AccessResponse>> LoginTemporaryAdmin([FromBody] TemporaryAdminLoginRequest? request)
+    {
+        if (request is null)
+        {
+            return BadRequest("Request body is required.");
+        }
+
+        var ok = await _devAccess.TryLoginAdminAsync(request.Username, request.Password);
+        if (!ok)
+        {
+            return Unauthorized("Invalid temporary admin credentials.");
+        }
+
+        return await BuildAccessResponseAsync();
+    }
+
+    [HttpPost("temporary-admin/logout")]
+    public async Task<ActionResult<AccessResponse>> LogoutTemporaryAdmin()
+    {
+        await _devAccess.LogoutAsync();
+        return await BuildAccessResponseAsync();
+    }
+
     private async Task<AccessResponse> BuildAccessResponseAsync()
     {
         var email = (await _devAccess.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
         var role = await _devAccess.GetCurrentRoleAsync();
+        var isGuest = await _devAccess.IsGuestAsync();
         var isTeacher = await _devAccess.IsTeacherAsync();
         var isAdmin = await _devAccess.IsAdminAsync();
         var theme = await _devAccess.GetThemeForCurrentEmailAsync();
         var nowUtc = DateTime.UtcNow;
+        var allScenarioIds = await GetAllScenarioIdsAsync();
 
         if (isTeacher)
         {
-            var allScenarioIds = await GetAllScenarioIdsAsync();
             return new AccessResponse
             {
                 Email = email,
                 Role = role,
+                IsGuest = false,
                 IsTeacher = true,
                 IsAdmin = isAdmin,
                 AllowedScenarioIds = allScenarioIds,
@@ -127,10 +160,21 @@ public sealed class AccessController : ControllerBase
             {
                 Email = "",
                 Role = DevAccessStore.StudentRole,
+                IsGuest = true,
                 IsTeacher = false,
                 IsAdmin = false,
-                AllowedScenarioIds = new List<string>(),
-                AllowedScenarioOptions = new List<AllowedScenarioOptionDto>(),
+                AllowedScenarioIds = allScenarioIds,
+                AllowedScenarioOptions = allScenarioIds
+                    .Select(id => new AllowedScenarioOptionDto
+                    {
+                        AssignmentId = id,
+                        ScenarioId = id,
+                        Label = id,
+                        AssignedAtUtc = DateTimeOffset.UtcNow,
+                        DueAtUtc = null,
+                        IsSubmitted = false
+                    })
+                    .ToList(),
                 Theme = theme
             };
         }
@@ -142,6 +186,7 @@ public sealed class AccessController : ControllerBase
             {
                 Email = email,
                 Role = role,
+                IsGuest = isGuest,
                 IsTeacher = false,
                 IsAdmin = false,
                 AllowedScenarioIds = new List<string>(),
@@ -161,6 +206,7 @@ public sealed class AccessController : ControllerBase
             {
                 Email = email,
                 Role = role,
+                IsGuest = isGuest,
                 IsTeacher = false,
                 IsAdmin = false,
                 AllowedScenarioIds = new List<string>(),
@@ -169,8 +215,7 @@ public sealed class AccessController : ControllerBase
             };
         }
 
-        var allScenarios = await GetAllScenarioIdsAsync();
-        var allScenariosSet = allScenarios.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var allScenariosSet = allScenarioIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var assignments = await _db.Assignments
             .Where(a => enrolledClassIds.Contains(a.ClassId))
@@ -209,6 +254,7 @@ public sealed class AccessController : ControllerBase
         {
             Email = email,
             Role = role,
+            IsGuest = isGuest,
             IsTeacher = false,
             IsAdmin = false,
             AllowedScenarioIds = filteredScenarioIds,

@@ -36,6 +36,7 @@ public partial class Simulation : ComponentBase
 
     protected List<ComparisonRow> ComparisonRows { get; set; } = new();
     protected string AssignmentSubmissionStatus { get; set; } = "";
+    protected bool IsGuestMode { get; set; }
 
     private readonly List<StudentStepRecord> _studentHistory = new();
     private Choice? _selectedChoice;
@@ -47,6 +48,8 @@ public partial class Simulation : ComponentBase
     protected string CurrentStepTitle => $"Step {_decisionCount + 1}";
     protected string CurrentPrompt => CurrentDecisionNode?.Prompt ?? "";
     protected IReadOnlyList<Choice> CurrentChoices => CurrentDecisionNode?.Choices ?? new List<Choice>();
+    protected string DownloadResponseFileName => BuildDownloadFileName();
+    protected string DownloadResponseHref => $"data:text/plain;charset=utf-8,{Uri.EscapeDataString(BuildSubmissionText())}";
 
     protected bool CanSubmit =>
         !IsComplete &&
@@ -316,6 +319,12 @@ public partial class Simulation : ComponentBase
             return;
         }
 
+        if (IsGuestMode)
+        {
+            AssignmentSubmissionStatus = "Practice mode is active. Saving results to a class record is still in progress and is not available in this build yet.";
+            return;
+        }
+
         var submissionText = BuildSubmissionText();
         var result = await ApiClient.SubmitScenarioAsync(SelectedScenarioId, submissionText);
 
@@ -355,6 +364,22 @@ public partial class Simulation : ComponentBase
         return string.Join(Environment.NewLine, lines);
     }
 
+    private string BuildDownloadFileName()
+    {
+        var rawScenarioId = string.IsNullOrWhiteSpace(SelectedScenarioId) ? "simulation-response" : SelectedScenarioId.Trim();
+        var safeScenarioId = new string(rawScenarioId
+            .Select(ch => char.IsLetterOrDigit(ch) || ch == '-' || ch == '_' ? ch : '-')
+            .ToArray())
+            .Trim('-');
+
+        if (string.IsNullOrWhiteSpace(safeScenarioId))
+        {
+            safeScenarioId = "simulation-response";
+        }
+
+        return $"{safeScenarioId}-{DateTimeOffset.Now:yyyyMMdd-HHmm}.txt";
+    }
+
     protected void OpenScenarioMenu()
     {
         IsScenarioMenuOpen = true;
@@ -369,6 +394,7 @@ public partial class Simulation : ComponentBase
     private void ApplyAccessOptions(ApiClient.AccessResponse access)
     {
         var nowUtc = DateTimeOffset.UtcNow;
+        IsGuestMode = access.IsGuest;
 
         AvailableScenarios = (access.AllowedScenarioOptions ?? new List<ApiClient.AllowedScenarioOption>())
             .Where(x => !string.IsNullOrWhiteSpace(x.AssignmentId) && !string.IsNullOrWhiteSpace(x.ScenarioId))

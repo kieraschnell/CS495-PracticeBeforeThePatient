@@ -41,13 +41,19 @@ public sealed class AssignmentsController : ControllerBase
         var studentEmail = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(studentEmail))
         {
-            return BadRequest("Current user email is not set.");
+            return new SubmitScenarioResponse
+            {
+                UpdatedAssignments = 0
+            };
         }
 
         var student = await _db.Users.FirstOrDefaultAsync(u => u.Email == studentEmail);
         if (student is null)
         {
-            return BadRequest("Current user not found.");
+            return new SubmitScenarioResponse
+            {
+                UpdatedAssignments = 0
+            };
         }
 
         var scenarioId = req.ScenarioId.Trim();

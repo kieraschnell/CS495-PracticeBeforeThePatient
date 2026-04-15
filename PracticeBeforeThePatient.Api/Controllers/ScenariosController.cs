@@ -71,7 +71,7 @@ public class ScenariosController : ControllerBase
         var email = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(email))
         {
-            return Ok(new List<string>());
+            return Ok(allScenarios);
         }
 
         var student = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -238,7 +238,7 @@ public class ScenariosController : ControllerBase
         var email = (await _access.GetCurrentEmailAsync()).Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(email))
         {
-            return false;
+            return await _db.Scenarios.AnyAsync(s => s.Id == scenarioId);
         }
 
         var student = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
