@@ -1,0 +1,35 @@
+name: Deploy to GCP VM
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: pbtp.duckdns.org
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          command_timeout: 30m
+          script: |
+            set -euo pipefail
+
+            cd "$HOME/CS495-PracticeBeforeThePatient"
+
+            git fetch origin main
+            git pull --ff-only origin main
+
+            docker compose -f compose.yaml -f compose.prod.yaml up --build -d
+            docker compose -f compose.yaml -f compose.prod.yaml ps
