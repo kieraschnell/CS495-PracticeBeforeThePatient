@@ -17,6 +17,8 @@ The repository includes:
 
 No cloud accounts or external services are required.
 
+**Status note:** The deployment assets in this repository reflect the current development and demo setup, not the final production direction. Originally, the project plan included an on-premises database approach. After internal OIT discussions, OIT decided Azure is the preferred production direction because the planned university SSO, Docker hosting, and future Azure OpenAI service fit more cleanly in Azure. Their recommendation was to move the stack into Azure, use an Azure app for university SSO, use managed identity for secure access to the database and future Azure OpenAI service, and provision the environment with infrastructure as code such as Bicep.
+
 ---
 
 ## Prerequisites
@@ -132,7 +134,7 @@ On first startup against an empty database, the API seeds the following demo dat
 | Classes | CS 100, CS 101 |
 | Scenarios | JSON files in `PracticeBeforeThePatient.Api/Data/scenarios/` |
 
-**Authentication note:** The application currently uses a development identity store (`DevAccessStore`). There is no real SSO or login page. The active user is selected via the UI's user-switcher. This is intentional for the current project scope.
+**Authentication note:** The application currently uses a temporary development identity store (`DevAccessStore`). There is no real university SSO or production login flow yet. This is acceptable for development and demo use only; future production work should replace it with Azure-based university SSO as recommended by OIT.
 
 ---
 
