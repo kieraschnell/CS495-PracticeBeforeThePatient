@@ -1,0 +1,292 @@
+Feature Usage Documentation
+Purpose:
+  This document explains how to use each completed feature in Practice Before the Patient, what result each feature produces, how features connect to each other, and how external resources are incorporated.
+User Account Types
+  Stored roles:
+    Student
+      Can complete assigned simulations and view grades.
+    Teacher
+      Can create and edit scenarios, manage classes, assign scenarios, and grade submissions.
+    Admin
+      Has teacher access plus admin user management tools.
+  Additional access mode:
+    Guest / dev practice mode
+      Can access the simulation experience for testing, but class-linked grading and saved student submission workflows are limited.
+  Current authentication note:
+    Until OAuth is implemented, the project uses a simplified development access model.
+    There is one admin access/testing flow used to reach admin-only functionality instead of a full production login system.
+    Role switching and temporary admin access are being used as placeholders for real UA-authenticated access.
+  Project links:
+    Web navigation: PracticeBeforeThePatient.Web/Components/Layout/NavMenu.razor
+    Access API: PracticeBeforeThePatient.Api/Controllers/AccessController.cs
+Feature: Home and role-based navigation
+  How to use:
+    Open the web app and use the left navigation menu.
+    The menu changes based on the current access level.
+    Students see Grades.
+    Teachers see Scenario Editor and Class Management.
+    Admins also see Admin Management.
+  Result:
+    Users only see the pages relevant to their role.
+  Links to other functions:
+    Navigation is the entry point to Simulation, Grades, Scenario Editor, Class Management, Assignment Grading, and Admin Management.
+  Project links:
+    PracticeBeforeThePatient.Web/Components/Layout/NavMenu.razor
+    PracticeBeforeThePatient.Api/Controllers/AccessController.cs
+Feature: Simulation runner
+  How to use:
+    Open the Simulation page.
+    Select an available scenario or assignment from the dropdown if more than one is available.
+    Read the patient narration.
+    Choose the next action.
+    Enter reasoning for the choice.
+    Click Submit for that step, then Continue.
+    Repeat until the scenario is complete.
+    At the end, download the response summary if needed.
+  Result:
+    The student progresses through a branching clinical case.
+    The system records the student’s reasoning and final response for the assignment when the simulation is linked to a class assignment.
+    The visit summary compares what the student chose against the recommended path.
+  Links to other functions:
+    Assigned scenarios come from Class Management.
+    Available scenario access comes from the Access API.
+    Completed assigned work can later appear in Assignment Grading for instructors.
+    Submitted work and instructor feedback appear on the Grades page for students.
+  Project links:
+    PracticeBeforeThePatient.Web/Components/Pages/Simulation.razor
+    PracticeBeforeThePatient.Web/Components/Pages/Simulation.razor.cs
+    PracticeBeforeThePatient.Api/Controllers/AssignmentsController.cs
+    PracticeBeforeThePatient.Api/Controllers/ScenariosController.cs
+    PracticeBeforeThePatient.Api/Controllers/AccessController.cs
+Feature: Student grades page
+  How to use:
+    Sign in or switch into a student account.
+    Open the Grades page.
+    Review the list of assignments.
+    If an assignment has not been submitted, use the Go to assignment button to open the Simulation page.
+    If a submission exists, use View response to open the detailed grade view.
+  Result:
+    Students can see assignment status, due dates, numeric grades, feedback, submission timestamps, grading timestamps, and the response that was graded.
+  Links to other functions:
+    Unsubmitted assignments link directly back to Simulation.
+    Grade data comes from class assignments and instructor grading actions.
+    Instructors create the grade entries from Assignment Grading.
+  Example result:
+    Assigned work that has not been submitted shows as Not done and links to the Simulation page.
+    Submitted work without a grade shows as Not graded yet.
+    Graded work shows the numeric score and allows the student to review the graded response.
+  Project links:
+    PracticeBeforeThePatient.Web/Components/Pages/Grades.razor
+    PracticeBeforeThePatient.Api/Controllers/ClassManagementController.cs
+    Endpoint: GET /api/classes/me/grades
+Feature: Scenario editor
+  How to use:
+    Open the Scenario Editor as a teacher or admin.
+    Select an existing scenario from the dropdown, or generate a new one.
+    Edit the title and description.
+    Expand or collapse nodes to review the branching tree.
+    Edit node content, prompts, and choices.
+    Save changes.
+  Result:
+    The scenario definition is updated and stored for future simulation use.
+  Links to other functions:
+    Scenarios created or edited here can be assigned to classes in Class Management.
+    Generated scenarios load directly into the editor and can be refined before use.
+  Project links:
+    PracticeBeforeThePatient.Web/Components/Pages/ScenarioEditor.razor
+    PracticeBeforeThePatient.Web/Components/Pages/ScenarioEditor.razor.cs
+    PracticeBeforeThePatient.Web/Components/Pages/NodeEditor.razor
+    PracticeBeforeThePatient.Api/Controllers/ScenariosController.cs
+    Endpoints: GET /api/scenarios, GET /api/scenarios/{scenarioId}, PUT /api/scenarios/{scenarioId}
+Feature: AI scenario generation
+  How to use:
+    Open Scenario Editor.
+    Enter a topic describing the clinical case to generate.
+    Optionally enter a custom scenario ID.
+    Choose branch depth.
+    Click Generate Scenario.
+    Wait for the generated case to be saved and loaded into the editor.
+    Review and edit the generated scenario before assigning it.
+  Result:
+    The app creates a new branching scenario using Gemini and saves it into the project data store.
+  Links to other functions:
+    The generated scenario becomes available in the Scenario Editor immediately.
+    It can then be assigned to a class through Class Management.
+    It can later be completed by students in Simulation.
+  Project links:
+    PracticeBeforeThePatient.Web/Components/Pages/ScenarioEditor.razor
+    PracticeBeforeThePatient.Api/Controllers/ScenariosController.cs
+    PracticeBeforeThePatient.Api/Services/LlmService.cs
+    Endpoint: POST /api/scenarios/generate
+Feature: Class management
+  How to use:
+    Open Class Management as a teacher or admin.
+    Create a class.
+    Select the class from the dropdown.
+    Add or remove teachers.
+    Add or remove students by email.
+    Add assignments that connect a class to a scenario.
+    Set or edit due dates.
+    Delete assignments or classes if needed.
+    Use the Grade button on an assignment to open instructor grading.
+  Result:
+    The app stores class rosters, teacher assignments, student enrollments, and scenario assignments.
+    Multiple teachers can be attached to the same class.
+  Links to other functions:
+    Students added here receive access to assigned scenarios in Simulation.
+    Assignments created here appear in the Grades page and Assignment Grading workflow.
+    The Grade button links directly to the Assignment Grading page.
+  Example result:
+    A class can have more than one teacher.
+    A student added to a class can see assigned scenarios tied to that class.
+    An assignment created here becomes the source for both student submission tracking and instructor grading.
+  Project links:
+    PracticeBeforeThePatient.Web/Components/Pages/ClassManagement.razor
+    PracticeBeforeThePatient.Api/Controllers/ClassManagementController.cs
+    Endpoints:
+      GET /api/classes
+      POST /api/classes
+      POST /api/classes/{classId}/students
+      DELETE /api/classes/{classId}/students
+      POST /api/classes/{classId}/teachers
+      DELETE /api/classes/{classId}/teachers
+      GET /api/classes/{classId}/assignments
+      POST /api/classes/{classId}/assignments
+      PUT /api/classes/{classId}/assignments/{assignmentId}
+      PUT /api/classes/{classId}/assignments/{assignmentId}/due
+      DELETE /api/classes/{classId}/assignments/{assignmentId}
+Feature: Assignment grading
+  How to use:
+    Open Class Management.
+    Choose a class and assignment.
+    Click Grade.
+    Review which students have submitted work.
+    Open a submitted response if needed.
+    Enter a score from 0 to 100.
+    Enter optional written feedback.
+    Save the grade.
+  Result:
+    The student’s submission receives a grade and optional feedback.
+    The grading result becomes visible on the student Grades page.
+  Links to other functions:
+    Receives assignments and student rosters from Class Management.
+    Reads student submission text produced by the Simulation workflow.
+    Sends final grade results to the student Grades page.
+  Example result:
+    A submitted assignment appears as Submitted for the instructor.
+    After grading, the student can open Grades and see the score, feedback, and graded response.
+  Project links:
+    PracticeBeforeThePatient.Web/Components/Pages/AssignmentGrading.razor
+    PracticeBeforeThePatient.Api/Controllers/ClassManagementController.cs
+    Endpoint: PUT /api/classes/{classId}/assignments/{assignmentId}/grades
+Feature: Admin management
+  How to use:
+    Use the Admin Access / testing flow to enter admin mode.
+    Open Admin Management as an admin user.
+    Review the list of users with elevated access.
+    Add a teacher or admin.
+    Update a user role if needed.
+    Remove elevated access if needed.
+  Result:
+    The application updates which users have teacher or admin privileges.
+    This is currently the single admin-focused page/workflow used until OAuth is implemented.
+  Links to other functions:
+    Access level changes affect which pages appear in navigation.
+    Teachers added here can use Class Management and Scenario Editor.
+  Project links:
+    PracticeBeforeThePatient.Web/Components/Pages/AdminManagement.razor
+    PracticeBeforeThePatient.Api/Controllers/AdminUsersController.cs
+Feature: Settings and dev access switching
+  How to use:
+    Open the Settings page or admin access/testing flow when available.
+    Switch the current dev user or theme for testing.
+    Use temporary admin access for admin-only workflows in development.
+  Result:
+    Developers and testers can simulate different user roles and themes without full production authentication.
+    This is the temporary replacement for the final OAuth-based login flow.
+  Links to other functions:
+    Role switching changes the available navigation items and page access.
+    Theme changes affect the visual presentation across the app.
+  Project links:
+    PracticeBeforeThePatient.Web/Components/Pages/Settings.razor
+    PracticeBeforeThePatient.Web/Components/Pages/Demo.razor
+    PracticeBeforeThePatient.Api/Controllers/AccessController.cs
+    Endpoints:
+      GET /api/access
+      POST /api/access/dev-user
+      POST /api/access/theme
+      POST /api/access/temporary-admin/login
+      POST /api/access/temporary-admin/logout
+Feature: Database-backed persistence
+  How to use:
+    Start the application through Docker Compose or the supported backend setup.
+    Let the API apply migrations on startup.
+    Use the app normally through Scenario Editor, Class Management, Simulation, and Grading.
+  Result:
+    Classes, users, teacher relationships, assignments, submissions, grades, and scenarios are stored in PostgreSQL instead of temporary JSON-only storage.
+  Links to other functions:
+    This is the persistence layer supporting nearly every completed feature.
+    Scenario Editor writes scenarios.
+    Class Management writes classes and assignments.
+    Simulation writes submissions.
+    Assignment Grading writes grades and feedback.
+  Project links:
+    PracticeBeforeThePatient.Api/Data
+    PracticeBeforeThePatient.Api/Data/Migrations
+    PracticeBeforeThePatient.Api/PracticeBeforeThePatient.Api.csproj
+Feature: API documentation and testing
+  How to use:
+    Run the API in Development to access Swagger.
+    Open the Swagger UI to review and test endpoints.
+    Run the test suite with dotnet test.
+  Result:
+    Developers can inspect endpoints, validate request and response behavior, and verify major project workflows through automated tests.
+  Links to other functions:
+    Swagger documents the API used by the web frontend.
+    Tests validate access, scenarios, class management, grading, and entity relationships.
+  Project links:
+    PracticeBeforeThePatient.Tests
+    README.md
+    MAINTENANCE.md
+How completed features connect together
+  Main student workflow:
+    Teacher creates or edits a scenario.
+    Teacher creates a class and assignment.
+    Student receives access to the assigned scenario.
+    Student completes the scenario in Simulation.
+    Instructor grades the submission.
+    Student reviews the grade and feedback on the Grades page.
+  Main instructor workflow:
+    Teacher opens Scenario Editor to create or update scenarios.
+    Teacher opens Class Management to create classes, add students, add teachers, and create assignments.
+    Teacher opens Assignment Grading from a class assignment.
+    Teacher saves grades and feedback.
+  Main admin workflow:
+    User enters the single Admin Access / testing flow.
+    Admin manages elevated user roles from the Admin Management page.
+    Admin can also access teacher tools.
+Authentication and admin-access limitation
+  The current project does not have final OAuth support.
+  Until OAuth is implemented, admin-only access is routed through one admin access/testing path rather than a complete UA login experience.
+  This was done so the project would remain usable for demo, testing, and handoff while OIT-dependent authentication work was still blocked.
+How external resources are incorporated
+  Docker Compose:
+    Used to run the web app, API, and PostgreSQL together in a consistent environment.
+    Main files: compose.yaml and compose.prod.yaml
+  PostgreSQL:
+    Used as the relational database for persisted application data.
+    Integrated through Entity Framework Core and Npgsql.
+  Google Gemini API:
+    Used by the backend LlmService to generate branching scenarios from a topic prompt.
+    Requires environment variables such as LLM_PROVIDER, LLM_API_KEY, and LLM_MODEL.
+  Google Cloud:
+    Used as a deployment target for the demo/hosted version of the project.
+    Supported by deployment configuration and workflow files in the repository.
+  Swagger / Swashbuckle:
+    Used to expose interactive API documentation in Development.
+  NuGet packages and .NET libraries:
+    Used for Entity Framework Core, ASP.NET Core, Swagger, xUnit testing, and PostgreSQL support.
+Relevant root documentation
+  README.md
+  MAINTENANCE.md
+  DEPLOYMENT.md
