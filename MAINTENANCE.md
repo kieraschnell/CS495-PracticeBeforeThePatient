@@ -418,10 +418,25 @@ dotnet ef database update --project PracticeBeforeThePatient.Api --startup-proje
    - Create Blazor component in `Components/Pages/`
    - Add navigation link in `NavMenu.razor`
    - Use `ApiClient` for API calls
+   - Check that UI elements are [WCAG 2.1 AA](https://www.w3.org/TR/WCAG21/) compliant
 
 5. **Test and document**
    - Test all user roles
    - Update this documentation
+
+
+Develpoment of this project was done in [Visual Studio](https://visualstudio.microsoft.com/), which should be noted as distinct 
+from [Visual Studio Code](https://code.visualstudio.com/). When editing the project as a whole, Visual Studio should be used. 
+Individual code files can be edited with different code editors, but Visual Studio should be used when possible for best results. 
+
+To modify the website from the frontend, Admin or Teacher access is required. For more information on what each user role can modify, 
+see [User Roles & Access Control](#user-roles--access-control). 
+
+Major updates should include: secure user authentication, preferably through the University of Alabama system; transitioning database 
+and web hosting to University of Alabama resources; additional media imbedding options for scenarios; student feedback based on scenario
+results.
+
+Tests can be run through the terminal or through Visual Studio. For more information see [Running Tests](#running-tests).
 
 ---
 
